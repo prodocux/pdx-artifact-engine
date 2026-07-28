@@ -9,6 +9,8 @@ checksummed manifests.
 > provider. PDX-5B-1B+ experts are an optional future bundle, not a v0.1.0
 > requirement.
 
+Initial framework authored with Codex; Cursor assisted integration, hardening, and release.
+
 ## Positioning (v0.1.0)
 
 | Claim | Status |
