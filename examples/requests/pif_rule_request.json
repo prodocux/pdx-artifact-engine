@@ -1,0 +1,11 @@
+{
+  "request_id": "example_rule_pif_001",
+  "artifact_type": "regulatory_document_package",
+  "summary": "RulePlanner demo for a model-free regulatory package.",
+  "risk_level": "regulated",
+  "template": "template.docx",
+  "fixtures": {
+    "drafts": "examples/fixtures/pif_demo/drafts.json",
+    "pages": "examples/fixtures/pif_demo/pages.json"
+  }
+}

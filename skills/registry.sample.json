@@ -1,0 +1,113 @@
+{
+  "schema_version": "pdx_skill_registry_v0",
+  "skills": [
+    {
+      "name": "pdx.fixture_stage",
+      "version": "0.1.0",
+      "domain": "runtime",
+      "description": "Copy fixture files into the step output directory for deterministic, model-free workflows.",
+      "entrypoint": "pdx_artifact_engine.executors:fixture_stage_executor",
+      "inputs": ["fixtures"],
+      "outputs": ["staged_files"],
+      "artifacts": ["staged_files"],
+      "failure_codes": [
+        {
+          "code": "FIXTURE_MISSING",
+          "meaning": "A declared fixture path does not exist",
+          "retryable": false
+        }
+      ],
+      "verification_hooks": ["file_exists"]
+    },
+    {
+      "name": "prodocux.pdf_extract",
+      "version": "0.1.0",
+      "domain": "document",
+      "description": "Extract pages, text, and selected evidence images from source PDFs.",
+      "entrypoint": "python -m skills.pdf_extract.pdf_extract",
+      "inputs": ["pdf"],
+      "outputs": ["pages_json", "evidence_images"],
+      "artifacts": ["pages_json", "evidence_images"],
+      "failure_codes": [
+        {
+          "code": "PDF_OPEN_FAILED",
+          "meaning": "Source PDF could not be opened",
+          "retryable": false
+        }
+      ],
+      "verification_hooks": ["page_count", "schema_valid"]
+    },
+    {
+      "name": "prodocux.doc_assemble",
+      "version": "0.1.0",
+      "domain": "document",
+      "description": "Assemble a DOCX artifact from template mappings, drafts, source maps, and evidence specs.",
+      "entrypoint": "python -m skills.doc_assemble.assemble",
+      "inputs": ["template_docx", "drafts_json", "mapping_json"],
+      "outputs": ["docx", "source_map_json", "evidence_index_json"],
+      "artifacts": ["docx", "source_map_json", "evidence_index_json"],
+      "failure_codes": [
+        {
+          "code": "ASSEMBLE_FAILED",
+          "meaning": "Document assembly failed",
+          "retryable": true
+        }
+      ],
+      "verification_hooks": ["valid_docx", "toc_field", "evidence_render"]
+    },
+    {
+      "name": "prodocux.pif_audit",
+      "version": "0.1.0",
+      "domain": "regulatory_document",
+      "description": "Audit a cosmetic PIF document for required sections and review flags.",
+      "entrypoint": "python -m skills.pif_audit.pif_audit",
+      "inputs": ["docx"],
+      "outputs": ["audit_report"],
+      "artifacts": ["audit_report"],
+      "failure_codes": [
+        {
+          "code": "AUDIT_FAILED",
+          "meaning": "PIF audit could not complete",
+          "retryable": true
+        }
+      ],
+      "verification_hooks": ["critical_count", "high_count"]
+    },
+    {
+      "name": "freecad.generate_cad",
+      "version": "0.0.1",
+      "domain": "3d",
+      "description": "Generate parametric CAD models from PDX 3D specs using FreeCAD.",
+      "entrypoint": "python -m pdx_skills.freecad.generate",
+      "inputs": ["pdx_3d_spec_v0"],
+      "outputs": ["fcstd", "step", "stl", "artifact_manifest"],
+      "artifacts": ["fcstd", "step", "stl", "artifact_manifest"],
+      "failure_codes": [
+        {
+          "code": "FREECAD_UNAVAILABLE",
+          "meaning": "FreeCAD runtime is not installed",
+          "retryable": false
+        }
+      ],
+      "verification_hooks": ["export_exists", "bounding_box", "watertight_mesh"]
+    },
+    {
+      "name": "blender.render_scene",
+      "version": "0.0.1",
+      "domain": "3d",
+      "description": "Generate Blender scenes, still renders, and simple animations from PDX 3D specs.",
+      "entrypoint": "python -m pdx_skills.blender.render",
+      "inputs": ["pdx_3d_spec_v0"],
+      "outputs": ["blend", "png", "mp4", "artifact_manifest"],
+      "artifacts": ["blend", "png", "mp4", "artifact_manifest"],
+      "failure_codes": [
+        {
+          "code": "BLENDER_UNAVAILABLE",
+          "meaning": "Blender runtime is not installed",
+          "retryable": false
+        }
+      ],
+      "verification_hooks": ["render_exists", "nonblank_pixels", "object_in_frame"]
+    }
+  ]
+}

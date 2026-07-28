@@ -1,0 +1,25 @@
+{
+  "schema_version": "pdx_model_manifest_v0",
+  "model_id": "pdx-core-1b",
+  "role": "core_router",
+  "display_name": "PDX-Core-1B",
+  "status": "planned",
+  "base_model": "TBD (Qwen/Gemma/SmolLM class)",
+  "parameter_class": "1B-class",
+  "license": "TBD with base-model compatibility",
+  "model_card": "docs/model-cards/pdx-core-1b.md",
+  "ram_mb_estimate": 2048,
+  "artifacts": [
+    {
+      "format": "gguf",
+      "uri": "https://example.invalid/pdx-core-1b/NOT_PUBLISHED_YET",
+      "filename": "pdx-core-1b.Q4_K_M.gguf",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "inference": {
+    "provider": "none",
+    "notes": "Weights are not included in this repository. Publish separately, then point uri/sha256 here."
+  },
+  "notes": "Placeholder manifest for schema and download wiring. Not a released model."
+}

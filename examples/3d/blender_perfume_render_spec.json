@@ -1,0 +1,43 @@
+{
+  "schema_version": "pdx_3d_spec_v0",
+  "artifact_type": "render_scene",
+  "engine": "blender",
+  "units": "cm",
+  "objects": [
+    {
+      "id": "bottle",
+      "type": "rounded_rect_bottle",
+      "parameters": {
+        "width": 5.2,
+        "depth": 2.4,
+        "height": 10.5
+      },
+      "material": "clear_glass"
+    },
+    {
+      "id": "cap",
+      "type": "cylinder_cap",
+      "parameters": {
+        "radius": 1.8,
+        "height": 2.4
+      },
+      "material": "brushed_metal"
+    }
+  ],
+  "constraints": [
+    "product_visible",
+    "label_area_unobstructed",
+    "neutral_background"
+  ],
+  "camera": {
+    "view": "three_quarter",
+    "focal_length_mm": 70
+  },
+  "outputs": ["blend", "png"],
+  "verification": [
+    "render_exists",
+    "nonblank_pixels",
+    "object_in_frame"
+  ]
+}
+

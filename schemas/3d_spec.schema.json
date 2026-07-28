@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/3d_spec.schema.json",
+  "title": "PDX 3D Spec",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "engine", "units", "objects", "outputs", "verification"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "pdx_3d_spec_v0"
+    },
+    "artifact_type": {
+      "type": "string",
+      "enum": ["cad_model", "render_scene", "animation"]
+    },
+    "engine": {
+      "type": "string",
+      "enum": ["freecad", "blender"]
+    },
+    "units": {
+      "type": "string",
+      "enum": ["mm", "cm", "m", "unitless"]
+    },
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "material": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "camera": {
+      "type": "object"
+    },
+    "animation": {
+      "type": "object"
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["step", "stl", "obj", "glb", "png", "mp4", "blend", "fcstd"]
+      }
+    },
+    "verification": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

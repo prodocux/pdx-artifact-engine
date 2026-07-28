@@ -1,0 +1,6 @@
+{
+  "engine": "fixture",
+  "pages": [
+    {"file": "demo.pdf", "page": 1, "text": "Product: Where We Used to Live"}
+  ]
+}

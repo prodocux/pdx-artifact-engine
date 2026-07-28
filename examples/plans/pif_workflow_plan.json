@@ -1,0 +1,63 @@
+{
+  "schema_version": "pdx_plan_v0",
+  "request_id": "example_pif_workflow_001",
+  "intent": {
+    "artifact_type": "regulatory_document_package",
+    "summary": "Create an audit-ready PIF package from source PDFs and a DOCX template.",
+    "risk_level": "regulated"
+  },
+  "steps": [
+    {
+      "id": "extract_pages",
+      "kind": "skill",
+      "name": "prodocux.pdf_extract",
+      "inputs": {
+        "source_pdf": "inputs/source.pdf"
+      },
+      "outputs": ["pages.json"]
+    },
+    {
+      "id": "draft_document_sections",
+      "kind": "expert",
+      "name": "PDX-Doc-1B",
+      "inputs": {
+        "pages": "pages.json",
+        "template_mapping": "template_mapping.json"
+      },
+      "outputs": ["drafts.json", "source_map.json", "review_items.json"]
+    },
+    {
+      "id": "assemble_docx",
+      "kind": "skill",
+      "name": "prodocux.doc_assemble",
+      "inputs": {
+        "drafts": "drafts.json",
+        "source_map": "source_map.json",
+        "template": "template.docx"
+      },
+      "outputs": ["output.docx", "evidence_index.json"]
+    },
+    {
+      "id": "audit_pif",
+      "kind": "skill",
+      "name": "prodocux.pif_audit",
+      "inputs": {
+        "docx": "output.docx"
+      },
+      "outputs": ["pif_audit.json"]
+    }
+  ],
+  "verification": [
+    {
+      "id": "valid_docx",
+      "check": "structure_health.valid_docx",
+      "fail_action": "repair"
+    },
+    {
+      "id": "pif_high_issues",
+      "check": "pif_audit.high_count == 0",
+      "fail_action": "repair"
+    }
+  ]
+}
+

@@ -1,0 +1,42 @@
+{
+  "schema_version": "pdx_plan_v0",
+  "request_id": "example_3d_freecad_001",
+  "intent": {
+    "artifact_type": "cad_model",
+    "summary": "Create a 3D-printable bottle cap model with explicit dimensions.",
+    "risk_level": "medium"
+  },
+  "steps": [
+    {
+      "id": "compile_3d_spec",
+      "kind": "expert",
+      "name": "PDX-3D-1B",
+      "inputs": {
+        "user_request": "Create a 3D-printable bottle cap."
+      },
+      "outputs": ["3d_spec.json"]
+    },
+    {
+      "id": "generate_cad",
+      "kind": "skill",
+      "name": "freecad.generate_cad",
+      "inputs": {
+        "spec": "3d_spec.json"
+      },
+      "outputs": ["model.FCStd", "model.step", "model.stl", "artifact_manifest.json"]
+    }
+  ],
+  "verification": [
+    {
+      "id": "exports_exist",
+      "check": "freecad.export_exists",
+      "fail_action": "repair"
+    },
+    {
+      "id": "printability",
+      "check": "freecad.watertight_mesh",
+      "fail_action": "ask_human"
+    }
+  ]
+}
+

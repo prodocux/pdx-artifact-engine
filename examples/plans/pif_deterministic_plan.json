@@ -1,0 +1,67 @@
+{
+  "schema_version": "pdx_plan_v0",
+  "request_id": "example_pif_deterministic_001",
+  "intent": {
+    "artifact_type": "regulatory_document_package",
+    "summary": "Deterministic model-free PIF workflow using fixtures (no LLM).",
+    "risk_level": "regulated"
+  },
+  "steps": [
+    {
+      "id": "stage_fixtures",
+      "kind": "skill",
+      "name": "pdx.fixture_stage",
+      "inputs": {
+        "fixtures": {
+          "drafts": "examples/fixtures/pif_demo/drafts.json",
+          "pages": "examples/fixtures/pif_demo/pages.json"
+        }
+      },
+      "outputs": ["drafts", "pages"]
+    },
+    {
+      "id": "assemble_docx",
+      "kind": "skill",
+      "name": "prodocux.doc_assemble",
+      "depends_on": ["stage_fixtures"],
+      "inputs": {
+        "drafts": "$stage_fixtures.drafts",
+        "pages": "$stage_fixtures.pages",
+        "template": "template.docx"
+      },
+      "outputs": ["output.docx"]
+    },
+    {
+      "id": "audit_pif",
+      "kind": "skill",
+      "name": "prodocux.pif_audit",
+      "depends_on": ["assemble_docx"],
+      "inputs": {
+        "docx": "$assemble_docx.output.docx"
+      },
+      "outputs": ["pif_audit.json"]
+    }
+  ],
+  "verification": [
+    {
+      "id": "fixtures_staged",
+      "check": "step_completed:stage_fixtures",
+      "fail_action": "stop"
+    },
+    {
+      "id": "assemble_done",
+      "check": "step_completed:assemble_docx",
+      "fail_action": "stop"
+    },
+    {
+      "id": "audit_done",
+      "check": "step_completed:audit_pif",
+      "fail_action": "stop"
+    },
+    {
+      "id": "staged_drafts_on_disk",
+      "check": "file_exists:stage_fixtures/drafts.json",
+      "fail_action": "stop"
+    }
+  ]
+}

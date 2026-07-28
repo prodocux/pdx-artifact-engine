@@ -1,0 +1,31 @@
+{
+  "schema_version": "pdx_3d_spec_v0",
+  "artifact_type": "cad_model",
+  "engine": "freecad",
+  "units": "mm",
+  "objects": [
+    {
+      "id": "cap_body",
+      "type": "cylinder",
+      "parameters": {
+        "outer_radius": 18,
+        "inner_radius": 15,
+        "height": 28,
+        "wall_thickness": 1.5
+      },
+      "material": "plastic"
+    }
+  ],
+  "constraints": [
+    "watertight",
+    "3d_printable",
+    "minimum_wall_thickness_mm >= 1.2"
+  ],
+  "outputs": ["fcstd", "step", "stl"],
+  "verification": [
+    "bounding_box",
+    "export_exists",
+    "watertight_mesh"
+  ]
+}
+
