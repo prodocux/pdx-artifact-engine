@@ -271,7 +271,7 @@ def test_cycle_in_plan_writes_failed_manifests(tmp_path: Path) -> None:
     }
     result = Dispatcher(registry).run(plan, tmp_path)
     assert result["run_manifest"]["status"] == "failed"
-    assert any("Cycle" in err for err in result["run_manifest"]["errors"])
+    assert any("cycle" in err.lower() for err in result["run_manifest"]["errors"])
     _assert_manifests_valid(tmp_path)
 
 

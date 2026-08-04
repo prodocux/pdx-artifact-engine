@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdx-artifact-core"
+version = "0.2.0a1"
+description = "Platform-neutral deterministic workflow contracts and runtime primitives for PDX"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = [
+  "jsonschema>=4.22.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pdx_artifact_core = ["schemas/*.json"]

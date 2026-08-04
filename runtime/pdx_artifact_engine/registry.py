@@ -104,3 +104,7 @@ class SkillRegistry:
 
     def names(self) -> tuple[str, ...]:
         return tuple(sorted(self._skills))
+
+    def extend(self, skills: list[SkillDefinition]) -> "SkillRegistry":
+        """Return a new registry with additional skills (dry-run / adapters)."""
+        return SkillRegistry([*self._skills.values(), *skills])

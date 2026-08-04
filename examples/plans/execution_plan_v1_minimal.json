@@ -1,0 +1,49 @@
+{
+  "schema_version": "pdx_execution_plan_v1",
+  "request_id": "example_exec_plan_minimal_001",
+  "producer": {
+    "type": "manual",
+    "name": "fixture_author"
+  },
+  "intent": {
+    "summary": "Minimal v1 plan with tool + approval"
+  },
+  "steps": [
+    {
+      "id": "stage",
+      "kind": "tool",
+      "tool": "pdx.fixture_stage",
+      "name": "stage fixtures",
+      "inputs": {
+        "fixtures": {
+          "pages": "examples/fixtures/pif_demo/pages.json"
+        }
+      },
+      "outputs": ["pages"],
+      "policies": {
+        "approval_required": false
+      }
+    },
+    {
+      "id": "human_gate",
+      "kind": "approval",
+      "name": "approve staging",
+      "depends_on": ["stage"],
+      "policies": {
+        "approval_required": true
+      }
+    }
+  ],
+  "verification": [
+    {
+      "id": "stage_done",
+      "check": "step_completed:stage",
+      "fail_action": "stop"
+    }
+  ],
+  "policies": {
+    "timeout_seconds": 300,
+    "max_retries": 2,
+    "default_approval_required": false
+  }
+}

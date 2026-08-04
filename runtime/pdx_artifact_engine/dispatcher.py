@@ -3,14 +3,18 @@ from __future__ import annotations
 import re
 import uuid
 from collections.abc import Callable
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
+
+from pdx_artifact_core import translate_plan_v0_to_v1, validate_execution_plan
+from pdx_artifact_core.compat_v0 import CompatError
 
 from .errors import PlanError, RegistryError
 from .executors import DEFAULT_EXECUTORS, mock_executor
 from .manifest import build_manifest, write_manifest
 from .paths import ensure_within_directory
-from .registry import SkillRegistry
+from .registry import SkillDefinition, SkillRegistry
 from .run_manifest import build_run_manifest, write_run_manifest
 
 Executor = Callable[[dict[str, Any], Path], dict[str, Any]]
@@ -123,8 +127,77 @@ def evaluate_check(
     return {
         "check": check,
         "status": "review",
-        "details": "No built-in verifier for this check in v0.1.0; marked review.",
+        "details": "No built-in verifier for this check; marked review.",
     }
+
+
+def normalize_plan_to_v1(
+    plan: dict[str, Any],
+    *,
+    allow_mock: bool = False,
+    planner_name: str = "manual",
+) -> dict[str, Any]:
+    """Return an execution-plan v1 dict. Raises PlanError on hard failures."""
+    version = plan.get("schema_version")
+    if version == "pdx_execution_plan_v1":
+        errs = validate_execution_plan(plan)
+        if errs:
+            raise PlanError("Invalid v1 plan:\n" + "\n".join(f"- {e}" for e in errs))
+        return plan
+
+    if version != "pdx_plan_v0":
+        raise PlanError(f"Unsupported plan schema_version: {version!r}")
+
+    working = deepcopy(plan)
+    for step in working.get("steps") or []:
+        if step.get("kind") != "expert":
+            continue
+        if not allow_mock:
+            raise PlanError(
+                f"legacy expert step '{step.get('id')}' has no Core equivalent; "
+                "resolve in orchestrator or pass --mock for demo-only rewrite to tool"
+            )
+        # Demo-only: rewrite expert → skill so translate yields tool + mock path
+        step["kind"] = "skill"
+        step.setdefault("name", "pdx.mock_expert")
+
+    producer_type = "rules" if planner_name == "rule" else "manual"
+    try:
+        translated = translate_plan_v0_to_v1(
+            working,
+            producer_type=producer_type,
+            producer_name=planner_name,
+        )
+    except CompatError as exc:
+        raise PlanError(str(exc)) from exc
+
+    errs = validate_execution_plan(translated)
+    if errs:
+        raise PlanError(
+            "Translated v0 plan is invalid v1:\n"
+            + "\n".join(f"- {error}" for error in errs)
+        )
+    return translated
+
+
+def _step_display_name(step: dict[str, Any]) -> str:
+    if step.get("name"):
+        return str(step["name"])
+    if step.get("tool"):
+        return str(step["tool"])
+    if step.get("transform"):
+        return str(step["transform"])
+    return str(step.get("id", "step"))
+
+
+def _approval_required(step: dict[str, Any], plan: dict[str, Any]) -> bool:
+    policies = step.get("policies") or {}
+    if "approval_required" in policies:
+        return bool(policies["approval_required"])
+    plan_policies = plan.get("policies") or {}
+    if "default_approval_required" in plan_policies:
+        return bool(plan_policies["default_approval_required"])
+    return step.get("kind") == "approval"
 
 
 class Dispatcher:
@@ -144,6 +217,39 @@ class Dispatcher:
         self.allow_mock = allow_mock
         self.planner_name = planner_name
 
+    def _empty_failure(
+        self,
+        plan: dict[str, Any],
+        output_dir: Path,
+        *,
+        run_id: str,
+        run_status: str,
+        errors: list[str],
+        step_reports: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        verification: list[dict[str, str]] = []
+        intent = plan.get("intent") or {}
+        manifest = build_manifest(
+            artifact_id=str(plan.get("request_id", run_id)),
+            artifact_type=str(intent.get("artifact_type", "unknown")),
+            files=[],
+            provenance=[],
+            verification=verification,
+            relative_to=output_dir,
+        )
+        write_manifest(manifest, output_dir / "artifact_manifest.json")
+        run_manifest = build_run_manifest(
+            run_id=run_id,
+            request_id=str(plan.get("request_id", run_id)),
+            status=run_status,
+            steps=step_reports or [],
+            verification=verification,
+            errors=errors,
+            planner=self.planner_name,
+        )
+        write_run_manifest(run_manifest, output_dir / "run_manifest.json")
+        return {"artifact_manifest": manifest, "run_manifest": run_manifest}
+
     def run(self, plan: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         output_dir.mkdir(parents=True, exist_ok=True)
         run_id = f"run_{uuid.uuid4().hex[:12]}"
@@ -154,38 +260,64 @@ class Dispatcher:
         completed_steps: set[str] = set()
         errors: list[str] = []
         run_status = "completed"
+        original_plan = plan
+
+        # Expert without mock → blocked (preserve v0.1 semantics / D3)
+        if plan.get("schema_version") == "pdx_plan_v0" and not self.allow_mock:
+            for step in plan.get("steps") or []:
+                if step.get("kind") == "expert":
+                    detail = (
+                        f"expert '{step.get('name', step.get('id'))}' requires a "
+                        "planner/provider or --mock; Core has no expert step kind (D3)"
+                    )
+                    return self._empty_failure(
+                        plan,
+                        output_dir,
+                        run_id=run_id,
+                        run_status="blocked",
+                        errors=[detail],
+                        step_reports=[
+                            {
+                                "step_id": step["id"],
+                                "kind": "expert",
+                                "name": step.get("name", step["id"]),
+                                "status": "blocked",
+                                "detail": detail,
+                            }
+                        ],
+                    )
+
+        try:
+            plan = normalize_plan_to_v1(
+                plan,
+                allow_mock=self.allow_mock,
+                planner_name=self.planner_name,
+            )
+        except PlanError as exc:
+            status = "blocked" if "expert" in str(exc).lower() else "failed"
+            return self._empty_failure(
+                original_plan,
+                output_dir,
+                run_id=run_id,
+                run_status=status,
+                errors=[str(exc)],
+            )
 
         try:
             ordered = order_steps(list(plan["steps"]))
         except PlanError as exc:
-            run_status = "failed"
-            errors.append(str(exc))
-            verification: list[dict[str, str]] = []
-            manifest = build_manifest(
-                artifact_id=plan.get("request_id", run_id),
-                artifact_type=plan.get("intent", {}).get("artifact_type", "unknown"),
-                files=[],
-                provenance=[],
-                verification=verification,
-                relative_to=output_dir,
-            )
-            write_manifest(manifest, output_dir / "artifact_manifest.json")
-            run_manifest = build_run_manifest(
+            return self._empty_failure(
+                plan,
+                output_dir,
                 run_id=run_id,
-                request_id=str(plan.get("request_id", run_id)),
-                status=run_status,
-                steps=[],
-                verification=verification,
-                errors=errors,
-                planner=self.planner_name,
+                run_status="failed",
+                errors=[str(exc)],
             )
-            write_run_manifest(run_manifest, output_dir / "run_manifest.json")
-            return {"artifact_manifest": manifest, "run_manifest": run_manifest}
 
         for step in ordered:
             kind = step["kind"]
             step_id = step["id"]
-            name = step["name"]
+            name = _step_display_name(step)
             try:
                 inputs = resolve_inputs(step.get("inputs", {}) or {}, context)
             except PlanError as exc:
@@ -200,15 +332,15 @@ class Dispatcher:
                 })
                 break
 
-            if kind in {"expert", "human_input"}:
-                if self.allow_mock:
+            if kind == "approval":
+                if self.allow_mock or not _approval_required(step, plan):
                     mock_inputs = dict(inputs)
                     mock_inputs["_declared_outputs"] = step.get("outputs", [])
                     result = mock_executor(mock_inputs, output_dir / step_id)
                     files = result.get("files", [])
                     artifact_files.extend((Path(path), name) for path in files)
                     outputs = result.get("outputs") or {
-                        str(path.name): Path(path).as_posix() for path in files
+                        str(Path(path).name): Path(path).as_posix() for path in files
                     }
                     context[step_id] = outputs
                     completed_steps.add(step_id)
@@ -223,7 +355,7 @@ class Dispatcher:
                         "kind": kind,
                         "name": name,
                         "status": "mocked",
-                        "detail": f"{kind} mocked; replace with planner/provider in later versions",
+                        "detail": "approval mocked or not required",
                     })
                     if run_status == "completed":
                         run_status = "completed_with_review"
@@ -231,8 +363,8 @@ class Dispatcher:
 
                 run_status = "blocked"
                 detail = (
-                    f"{kind} '{name}' requires a planner/provider or --mock; "
-                    "v0.1.0 is model-optional and does not run experts by default"
+                    f"approval '{name}' requires human approval or --mock "
+                    "(awaiting_approval)"
                 )
                 errors.append(detail)
                 provenance.append({
@@ -250,23 +382,84 @@ class Dispatcher:
                 })
                 break
 
-            if kind == "verification":
+            if kind == "verify":
+                # Inline verify steps: run listed checks; do not auto-complete step
+                step_checks = []
+                for item in step.get("verification") or []:
+                    step_checks.append(
+                        evaluate_check(
+                            item["check"],
+                            completed_steps=completed_steps,
+                            output_dir=output_dir,
+                        )
+                    )
+                failed = [c for c in step_checks if c["status"] == "fail"]
+                if failed:
+                    run_status = "failed"
+                    for item in failed:
+                        errors.append(f"Verify step {step_id}: {item['check']}")
+                    step_reports.append({
+                        "step_id": step_id,
+                        "kind": kind,
+                        "name": name,
+                        "status": "failed",
+                        "detail": str(failed),
+                    })
+                    break
+                completed_steps.add(step_id)
+                context[step_id] = {"verification": step_checks}
                 step_reports.append({
                     "step_id": step_id,
                     "kind": kind,
                     "name": name,
-                    "status": "skipped",
-                    "detail": "Inline verification steps are reserved; use plan.verification",
+                    "status": "completed",
+                    "detail": "ok",
                 })
                 provenance.append({
                     "step_id": step_id,
                     "tool": name,
                     "inputs": inputs,
-                    "outputs": {"status": "skipped"},
+                    "outputs": {"status": "completed", "verification": step_checks},
                 })
                 continue
 
-            if kind not in {"skill", "fixture"}:
+            if kind == "transform":
+                # No built-in transforms yet — mock or fail
+                transform_id = step.get("transform") or name
+                if self.allow_mock:
+                    mock_inputs = dict(inputs)
+                    mock_inputs["_declared_outputs"] = step.get("outputs", [])
+                    result = mock_executor(mock_inputs, output_dir / step_id)
+                    files = result.get("files", [])
+                    artifact_files.extend((Path(path), transform_id) for path in files)
+                    outputs = result.get("outputs") or {
+                        str(Path(path).name): Path(path).as_posix() for path in files
+                    }
+                    context[step_id] = outputs
+                    completed_steps.add(step_id)
+                    step_reports.append({
+                        "step_id": step_id,
+                        "kind": kind,
+                        "name": transform_id,
+                        "status": "mocked",
+                        "detail": "transform mocked",
+                    })
+                    if run_status == "completed":
+                        run_status = "completed_with_review"
+                    continue
+                detail = f"No transform executor for '{transform_id}'"
+                run_status = "failed"
+                errors.append(detail)
+                step_reports.append({
+                    "step_id": step_id,
+                    "kind": kind,
+                    "name": transform_id,
+                    "status": "failed",
+                    "detail": detail,
+                })
+                break
+
+            if kind != "tool":
                 detail = f"Unsupported step kind '{kind}'"
                 run_status = "failed"
                 errors.append(detail)
@@ -279,29 +472,44 @@ class Dispatcher:
                 })
                 break
 
-            skill_name = name if kind == "skill" else "pdx.fixture_stage"
-            if kind == "fixture":
-                skill_name = "pdx.fixture_stage"
+            tool_name = str(step.get("tool") or name)
+            skill: Any = None
             try:
-                skill = self.registry.get(skill_name)
+                skill = self.registry.get(tool_name)
             except RegistryError as exc:
-                run_status = "failed"
-                detail = str(exc)
-                errors.append(detail)
-                step_reports.append({
-                    "step_id": step_id,
-                    "kind": kind,
-                    "name": skill_name,
-                    "status": "failed",
-                    "detail": detail,
-                })
-                provenance.append({
-                    "step_id": step_id,
-                    "tool": skill_name,
-                    "inputs": inputs,
-                    "outputs": {"status": "failed", "error": detail},
-                })
-                break
+                # Demo-only rewrite of legacy expert → pdx.mock_expert (not in registry)
+                if self.allow_mock and tool_name == "pdx.mock_expert":
+                    skill = SkillDefinition(
+                        name="pdx.mock_expert",
+                        version="0",
+                        domain="compat",
+                        description="Demo-only stand-in for legacy expert steps",
+                        entrypoint="mock",
+                        inputs=(),
+                        outputs=tuple(step.get("outputs") or ()),
+                        artifacts=tuple(step.get("outputs") or ()),
+                        failure_codes=({"code": "MOCK", "meaning": "mock"},),
+                        verification_hooks=(),
+                    )
+                else:
+                    run_status = "failed"
+                    detail = str(exc)
+                    errors.append(detail)
+                    step_reports.append({
+                        "step_id": step_id,
+                        "kind": kind,
+                        "name": tool_name,
+                        "status": "failed",
+                        "detail": detail,
+                    })
+                    provenance.append({
+                        "step_id": step_id,
+                        "tool": tool_name,
+                        "inputs": inputs,
+                        "outputs": {"status": "failed", "error": detail},
+                    })
+                    break
+
             executor = self.executors.get(skill.name)
             mocked = False
             if executor is None and self.allow_mock:
@@ -310,7 +518,7 @@ class Dispatcher:
             if executor is None:
                 detail = (
                     f"No executor registered for skill '{skill.name}'. "
-                    f"Entrypoint metadata is '{skill.entrypoint}' but not auto-run in v0.1.0 "
+                    f"Entrypoint metadata is '{skill.entrypoint}' but not auto-run "
                     "unless you register an executor or pass --mock."
                 )
                 run_status = "failed"
@@ -354,7 +562,6 @@ class Dispatcher:
                     "inputs": inputs,
                     "outputs": {"status": "failed", "error": detail},
                 })
-                # Keep going to verification + manifest write; do not raise.
                 break
 
             files = result.get("files", [])
@@ -390,14 +597,15 @@ class Dispatcher:
                 completed_steps=completed_steps,
                 output_dir=output_dir,
             )
-            for item in plan.get("verification", [])
+            for item in plan.get("verification", []) or []
         ]
 
         if any(item["status"] == "fail" for item in verification):
             if run_status in {"completed", "completed_with_review"}:
-                # honor fail_action=stop as failed; repair/ask_human stays reviewable
                 stopping = False
-                for plan_check, result in zip(plan.get("verification", []), verification):
+                for plan_check, result in zip(
+                    plan.get("verification", []) or [], verification
+                ):
                     if result["status"] == "fail" and plan_check.get("fail_action") == "stop":
                         stopping = True
                         errors.append(f"Verification failed: {result['check']}")
@@ -406,9 +614,10 @@ class Dispatcher:
             if run_status == "completed":
                 run_status = "completed_with_review"
 
+        intent = plan.get("intent") or original_plan.get("intent") or {}
         manifest = build_manifest(
-            artifact_id=plan["request_id"],
-            artifact_type=plan["intent"]["artifact_type"],
+            artifact_id=str(plan.get("request_id") or original_plan.get("request_id")),
+            artifact_type=str(intent.get("artifact_type", "unknown")),
             files=artifact_files,
             provenance=provenance,
             verification=verification,
@@ -417,7 +626,7 @@ class Dispatcher:
         write_manifest(manifest, output_dir / "artifact_manifest.json")
         run_manifest = build_run_manifest(
             run_id=run_id,
-            request_id=plan["request_id"],
+            request_id=str(plan.get("request_id") or original_plan.get("request_id")),
             status=run_status,
             steps=step_reports,
             verification=verification,

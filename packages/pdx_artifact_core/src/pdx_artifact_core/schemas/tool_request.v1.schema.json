@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/tool_request.v1.schema.json",
+  "title": "PDX ToolRequest v1",
+  "type": "object",
+  "required": ["schema_version", "tool", "request_id", "inputs"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "pdx_tool_request_v1"
+    },
+    "tool": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "step_id": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "object"
+    },
+    "policies": {
+      "type": "object",
+      "properties": {
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "trace_id": {
+      "type": "string"
+    },
+    "parent_run_id": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

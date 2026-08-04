@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/tool_result.v1.schema.json",
+  "title": "PDX ToolResult v1",
+  "type": "object",
+  "required": ["schema_version", "status"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "pdx_tool_result_v1"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "completed_with_review",
+        "failed",
+        "blocked",
+        "cancelled",
+        "timed_out",
+        "awaiting_approval"
+      ]
+    },
+    "outputs": {
+      "type": "object"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["uri"],
+        "properties": {
+          "uri": {
+            "type": "string",
+            "description": "Opaque artifact identity (path or gs:// object id); never a signed URL"
+          },
+          "media_type": {
+            "type": "string"
+          },
+          "checksum": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "verification": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "retryable": {
+      "type": "boolean",
+      "default": false
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "tool_provider": {
+      "type": "string"
+    },
+    "tool_version": {
+      "type": "string"
+    },
+    "transport": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
