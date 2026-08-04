@@ -1,5 +1,13 @@
 # Roadmap
 
+## v0.2 contract upgrade (active)
+
+`packages/pdx_artifact_core` ships `pdx_execution_plan_v1`, ToolRequest/Result,
+the run state machine, and a v0→v1 translator. The runtime and adapters remain
+product-neutral; product workflows register their own skills and executors.
+
+---
+
 ## North Star
 
 Build a local artifact engine that can turn intent into deliverable files on
@@ -237,4 +245,3 @@ Paid:
 - Validation reports.
 - On-prem appliance.
 - Support and update channel.
-

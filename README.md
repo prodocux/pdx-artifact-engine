@@ -9,21 +9,26 @@ checksummed manifests.
 > provider. PDX-5B-1B+ experts are an optional future bundle, not a v0.1.0
 > requirement.
 
-Initial framework authored with Codex; Cursor assisted integration, hardening, and release.
+**v0.2.0a1 (in progress):** the repository ships `pdx_artifact_core` (execution
+plan v1 contracts, ToolExecutor protocols, v0→v1 translator, run state machine).
+Legacy Dispatcher compatibility remains available during the v1 migration.
 
-## Positioning (v0.1.0)
+## Positioning
 
 | Claim | Status |
 |---|---|
-| Validate `plan.json` against schema | Available |
-| Load skill registry + dispatch skills | Available |
+| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (core 0.2.0a1)** |
+| v0→v1 plan translator (rejects unresolved `expert`) | **Available (core)** |
+| Run state machine (`awaiting_*` → `running`) | **Available (core)** |
+| Validate `plan.json` against v0 schema | Available |
+| Load skill registry + dispatch skills | Available (v0 kinds) |
 | Deterministic fixture staging | Available |
 | Mock skill execution for CI / demos | Available |
 | Write `artifact_manifest.json` + `run_manifest.json` | Available |
-| `RulePlanner` / `ManualPlanner` | Available |
-| Built-in checks `step_completed:` / `file_exists:` | Available |
-| Real ProDocuX / FreeCAD / Blender subprocess execution | Not in v0.1.0 (register executors) |
-| `LlamaCppPlanner` / GGUF download / hot-swap | Planned v0.2.0+ |
+| `RulePlanner` / `ManualPlanner` | Available (to move out of Core per plan) |
+| ProDocuX HTTP `/v1` adapter | **Available (alpha)** (`adapters/prodocux/`) |
+| Real ProDocuX / FreeCAD / Blender subprocess execution | Register executors |
+| `LlamaCppPlanner` / GGUF download / hot-swap | Planned |
 | Shipped `PDX-Core-1B` weights | **Not included** (separate release) |
 
 Target architecture (not present in v0.1.0): a future 8 GB mode may keep a
@@ -51,6 +56,16 @@ pip install -e ".[dev]"
 ```
 
 Requires Python 3.11+.
+
+The product-neutral ProDocuX HTTP adapter ships in the main distribution. The
+media identity/probe adapter is optional and has its own package:
+
+```bash
+pip install ./adapters/media
+```
+
+See [`docs/RELEASE.md`](docs/RELEASE.md) for package boundaries and release
+verification.
 
 ## Deterministic demo (no LLM)
 
@@ -147,3 +162,9 @@ Apache License 2.0. See [LICENSE](LICENSE).
 2. Convert ProDocuX runs into planner traces.
 3. Train and publish `PDX-Core-1B` out of band; wire `LlamaCppPlanner` (v0.2.0).
 4. Low-RAM hot-swap runtime (M7).
+
+## Acknowledgments
+
+Codex and Cursor contributed implementation support, contract hardening, and
+cross-review during the v0.2 upgrade. Final design and release decisions remain
+with the project maintainers.

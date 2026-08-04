@@ -18,7 +18,7 @@ class Planner(Protocol):
 
 
 class ManualPlanner:
-    """Load a plan that was authored offline (human, Codex, or external tool)."""
+    """Load a plan authored offline by a human or external planning tool."""
 
     name = "manual"
 
