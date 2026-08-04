@@ -32,4 +32,4 @@ pdx_artifact_core = ["schemas/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["runtime", "packages/pdx_artifact_core/src", "adapters/prodocux"]
+pythonpath = ["runtime", "packages/pdx_artifact_core/src", "adapters/prodocux", "adapters/media"]

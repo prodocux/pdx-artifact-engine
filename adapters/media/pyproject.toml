@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdx-adapter-media"
+version = "0.2.0a1"
+description = "Optional product-neutral media identity and ffprobe adapter for PDX"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pdx_adapter_media*"]
