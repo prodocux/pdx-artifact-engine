@@ -24,12 +24,12 @@ pdx-validate = "pdx_artifact_engine.cli.validate:main"
 pdx-run = "pdx_artifact_engine.cli.run:main"
 
 [tool.setuptools.packages.find]
-where = ["runtime", "packages/pdx_artifact_core/src"]
-include = ["pdx_artifact_engine*", "pdx_artifact_core*"]
+where = ["runtime", "packages/pdx_artifact_core/src", "adapters/prodocux"]
+include = ["pdx_artifact_engine*", "pdx_artifact_core*", "pdx_adapter_prodocux*"]
 
 [tool.setuptools.package-data]
 pdx_artifact_core = ["schemas/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["runtime", "packages/pdx_artifact_core/src"]
+pythonpath = ["runtime", "packages/pdx_artifact_core/src", "adapters/prodocux"]

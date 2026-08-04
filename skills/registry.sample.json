@@ -21,18 +21,36 @@
     },
     {
       "name": "prodocux.pdf_extract",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "domain": "document",
-      "description": "Extract pages, text, and selected evidence images from source PDFs.",
-      "entrypoint": "python -m skills.pdf_extract.pdf_extract",
-      "inputs": ["pdf"],
-      "outputs": ["pages_json", "evidence_images"],
-      "artifacts": ["pages_json", "evidence_images"],
+      "description": "Legacy alias for prodocux.pdf_extract_pages (skill façade; not Kernel /v1).",
+      "entrypoint": "pdx_adapter_prodocux:make_pdf_extract_pages_executor",
+      "inputs": ["pdf_b64"],
+      "outputs": ["pages_json"],
+      "artifacts": ["pages_json"],
       "failure_codes": [
         {
           "code": "PDF_OPEN_FAILED",
-          "meaning": "Source PDF could not be opened",
+          "meaning": "Source PDF could not be opened or façade call failed",
           "retryable": false
+        }
+      ],
+      "verification_hooks": ["page_count", "schema_valid"]
+    },
+    {
+      "name": "prodocux.pdf_extract_pages",
+      "version": "0.2.0",
+      "domain": "document",
+      "description": "Skill façade: extract page text to pages.json (HTTP façade or local pypdf/stub).",
+      "entrypoint": "pdx_adapter_prodocux:make_pdf_extract_pages_executor",
+      "inputs": ["pdf_b64"],
+      "outputs": ["pages_json"],
+      "artifacts": ["pages_json"],
+      "failure_codes": [
+        {
+          "code": "PDF_EXTRACT_FAILED",
+          "meaning": "PDF extract façade failed",
+          "retryable": true
         }
       ],
       "verification_hooks": ["page_count", "schema_valid"]
@@ -72,6 +90,24 @@
         }
       ],
       "verification_hooks": ["critical_count", "high_count"]
+    },
+    {
+      "name": "prodocux.validate_structure",
+      "version": "0.2.0",
+      "domain": "document",
+      "description": "Run Kernel L0 structure invariants via HTTP POST /v1/validate-structure.",
+      "entrypoint": "pdx_adapter_prodocux:make_validate_structure_executor",
+      "inputs": ["document_path"],
+      "outputs": ["validate_structure.json"],
+      "artifacts": ["validate_structure.json"],
+      "failure_codes": [
+        {
+          "code": "VALIDATE_STRUCTURE_FAILED",
+          "meaning": "Kernel validate-structure call failed or invariants did not pass",
+          "retryable": true
+        }
+      ],
+      "verification_hooks": ["structure_health"]
     },
     {
       "name": "freecad.generate_cad",
