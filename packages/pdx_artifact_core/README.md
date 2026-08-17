@@ -5,6 +5,8 @@ Platform-neutral contracts and runtime primitives for PDX Artifact Engine.
 - `pdx_execution_plan_v1`, `ToolRequest`, `ToolResult` JSON Schemas
 - `ToolExecutor` / `Verifier` / `StorageAdapter` protocols
 - Run state machine (`awaiting_tool` / `awaiting_approval` return edges)
+- Thread-safe reference `ApprovalLedger` with public snapshot lookups for
+  replay-safe host integrations
 - `pdx_plan_v0` → v1 compatibility translator (rejects unresolved `expert`)
 
 Does **not** import ProDocuX Kernel or call LLMs.

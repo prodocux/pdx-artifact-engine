@@ -9,7 +9,7 @@ checksummed manifests.
 > provider. PDX-5B-1B+ experts are an optional future bundle, not a v0.1.0
 > requirement.
 
-**v0.2.0a1 (in progress):** the repository ships `pdx_artifact_core` (execution
+**v0.2.0a2 (in progress):** the repository ships `pdx_artifact_core` (execution
 plan v1 contracts, ToolExecutor protocols, v0→v1 translator, run state machine).
 Legacy Dispatcher compatibility remains available during the v1 migration.
 
@@ -17,7 +17,7 @@ Legacy Dispatcher compatibility remains available during the v1 migration.
 
 | Claim | Status |
 |---|---|
-| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (core 0.2.0a1)** |
+| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (core 0.2.0a2)** |
 | v0→v1 plan translator (rejects unresolved `expert`) | **Available (core)** |
 | Run state machine (`awaiting_*` → `running`) | **Available (core)** |
 | Validate `plan.json` against v0 schema | Available |

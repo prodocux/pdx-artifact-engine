@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import threading
 import uuid
 from collections.abc import Mapping
 from copy import deepcopy
@@ -73,8 +74,21 @@ class ApprovalLedger:
     """Small in-memory reference ledger; hosts may persist the same contract."""
 
     def __init__(self) -> None:
+        self._lock = threading.Lock()
         self._by_key: dict[str, dict[str, Any]] = {}
         self._by_checkpoint: dict[str, dict[str, Any]] = {}
+
+    def get_by_idempotency_key(self, key: str) -> dict[str, Any] | None:
+        """Return an isolated decision snapshot for an idempotency key."""
+        with self._lock:
+            value = self._by_key.get(key)
+            return deepcopy(value) if value is not None else None
+
+    def get_by_checkpoint_id(self, checkpoint_id: str) -> dict[str, Any] | None:
+        """Return an isolated decision snapshot for a checkpoint."""
+        with self._lock:
+            value = self._by_checkpoint.get(checkpoint_id)
+            return deepcopy(value) if value is not None else None
 
     def record(
         self,
@@ -85,32 +99,33 @@ class ApprovalLedger:
         key = str(decision.get("idempotency_key", ""))
         if not key:
             raise ApprovalError("idempotency_key is required")
-        existing = self._by_key.get(key)
         normalized = dict(decision)
-        if existing is not None:
-            if existing == normalized:
-                return deepcopy(existing)
-            raise ApprovalError("idempotency key was reused with different content")
-        if (
-            checkpoint.get("status") != "pending"
-            or checkpoint["checkpoint_id"] in self._by_checkpoint
-        ):
-            raise ApprovalError("checkpoint was already decided")
-        pairs = (
-            ("checkpoint_id", checkpoint["checkpoint_id"]),
-            ("approval_request_id", request["approval_request_id"]),
-            ("subject_digest", checkpoint["subject_digest"]),
-            ("plan_digest", checkpoint["plan_digest"]),
-            ("evidence_digests", checkpoint["evidence_digests"]),
-        )
-        for field, expected in pairs:
-            if normalized.get(field) != expected:
-                raise ApprovalError(f"approval decision {field} mismatch")
-        if normalized.get("decision") not in {"approved", "rejected"}:
-            raise ApprovalError("decision must be approved or rejected")
-        self._by_key[key] = deepcopy(normalized)
-        self._by_checkpoint[str(checkpoint["checkpoint_id"])] = deepcopy(normalized)
-        return deepcopy(normalized)
+        with self._lock:
+            existing = self._by_key.get(key)
+            if existing is not None:
+                if existing == normalized:
+                    return deepcopy(existing)
+                raise ApprovalError("idempotency key was reused with different content")
+            if (
+                checkpoint.get("status") != "pending"
+                or checkpoint["checkpoint_id"] in self._by_checkpoint
+            ):
+                raise ApprovalError("checkpoint was already decided")
+            pairs = (
+                ("checkpoint_id", checkpoint["checkpoint_id"]),
+                ("approval_request_id", request["approval_request_id"]),
+                ("subject_digest", checkpoint["subject_digest"]),
+                ("plan_digest", checkpoint["plan_digest"]),
+                ("evidence_digests", checkpoint["evidence_digests"]),
+            )
+            for field, expected in pairs:
+                if normalized.get(field) != expected:
+                    raise ApprovalError(f"approval decision {field} mismatch")
+            if normalized.get("decision") not in {"approved", "rejected"}:
+                raise ApprovalError("decision must be approved or rejected")
+            self._by_key[key] = deepcopy(normalized)
+            self._by_checkpoint[str(checkpoint["checkpoint_id"])] = deepcopy(normalized)
+            return deepcopy(normalized)
 
 
 def build_resumed_plan(

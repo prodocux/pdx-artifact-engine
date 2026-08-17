@@ -28,5 +28,11 @@ Before creating a tag:
 7. Keep credentials, model weights, build output, and local decision records
    outside the release tree.
 
+The wheel build, temporary-environment install, and import smoke can be run as:
+
+```powershell
+python scripts/verify_clean_install.py
+```
+
 Release hashes are evidence for one build, not reproducibility claims unless a
 separate reproducible-build process verifies them.

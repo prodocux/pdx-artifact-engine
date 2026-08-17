@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 
 import pytest
@@ -126,3 +127,49 @@ def test_reject_and_cancel_do_not_resume() -> None:
     with pytest.raises(ApprovalError, match="approved"):
         build_resumed_plan(plan, checkpoint, rejected)
     assert cancel_checkpoint(checkpoint)["status"] == "cancelled"
+
+
+def test_ledger_public_lookup_returns_isolated_snapshots() -> None:
+    plan = _plan()
+    checkpoint = create_checkpoint(
+        plan=plan,
+        run_id="run-lookup",
+        subject_digest="a" * 64,
+        completed_step_ids=["already_written"],
+        pending_step_ids=["after_approval"],
+        evidence_digests={},
+    )
+    request = create_approval_request(checkpoint)
+    decision = _decision(checkpoint, request)
+    ledger = ApprovalLedger()
+    ledger.record(checkpoint, request, decision)
+
+    by_key = ledger.get_by_idempotency_key(decision["idempotency_key"])
+    by_checkpoint = ledger.get_by_checkpoint_id(checkpoint["checkpoint_id"])
+    assert by_key == decision
+    assert by_checkpoint == decision
+    by_key["decision"] = "rejected"
+    assert ledger.get_by_idempotency_key(decision["idempotency_key"]) == decision
+
+
+def test_concurrent_identical_replays_are_safe() -> None:
+    plan = _plan()
+    checkpoint = create_checkpoint(
+        plan=plan,
+        run_id="run-concurrent",
+        subject_digest="a" * 64,
+        completed_step_ids=["already_written"],
+        pending_step_ids=["after_approval"],
+        evidence_digests={},
+    )
+    request = create_approval_request(checkpoint)
+    decision = _decision(checkpoint, request)
+    ledger = ApprovalLedger()
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(
+            pool.map(
+                lambda _: ledger.record(checkpoint, request, decision),
+                range(32),
+            )
+        )
+    assert results == [decision] * 32

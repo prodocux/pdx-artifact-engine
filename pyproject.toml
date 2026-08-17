@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pdx-artifact-engine"
-version = "0.2.0a1"
+version = "0.2.0a2"
 description = "Model-optional deterministic artifact orchestration framework for PDX skills"
 readme = "README.md"
 license = "Apache-2.0"
