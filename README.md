@@ -122,6 +122,13 @@ to document the future shape. Without `--mock`, that plan **blocks**. With
 | `schemas/model_manifest.schema.json` | Optional model descriptor (no weights) |
 | `schemas/3d_spec.schema.json` | CAD/scene specs |
 
+The packaged Core additionally publishes execution-plan, verifier-result,
+workflow-checkpoint, approval-request, and approval-decision v1 contracts.
+`ArtifactRuntime` accepts product-owned verifier implementations through an
+injected registry; missing verifiers fail closed unless the host explicitly
+selects review policy. Approval resume validates subject, plan, and evidence
+digests and returns a plan containing only pending steps.
+
 Model weights stay outside git. Describe them with
 `examples/models/*.manifest.json` and `docs/model-cards/`.
 

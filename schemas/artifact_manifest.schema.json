@@ -70,8 +70,16 @@
             "enum": ["pass", "review", "fail", "blocked"]
           },
           "details": {
-            "type": "string"
-          }
+            "type": ["string", "object"]
+          },
+          "verifier_id": {"type": "string"},
+          "version": {"type": "string"},
+          "reason_codes": {"type": "array", "items": {"type": "string"}},
+          "rule_set_id": {"type": "string"},
+          "rule_set_version": {"type": "string"},
+          "rule_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}},
+          "timestamp": {"type": "string", "format": "date-time"}
         },
         "additionalProperties": false
       }

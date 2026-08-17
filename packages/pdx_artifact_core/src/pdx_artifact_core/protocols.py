@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Protocol, runtime_checkable
+from collections.abc import Mapping
+from typing import Any, Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -23,15 +24,14 @@ class Verifier(Protocol):
     """Pluggable verification check."""
 
     @property
-    def check_id(self) -> str:
-        ...
+    def verifier_id(self) -> str: ...
 
     def verify(
         self,
         check: str,
         context: Mapping[str, Any],
     ) -> Mapping[str, Any]:
-        """Return at least {passed: bool, detail?: str}."""
+        """Return a verifier_result_v1-shaped mapping."""
         ...
 
 
@@ -39,8 +39,13 @@ class Verifier(Protocol):
 class StorageAdapter(Protocol):
     """Resolve opaque artifact URIs; never persist signed URLs or secrets."""
 
-    def resolve(self, uri: str) -> Any:
-        ...
+    def resolve(self, uri: str) -> Any: ...
 
-    def exists(self, uri: str) -> bool:
-        ...
+    def exists(self, uri: str) -> bool: ...
+
+
+@runtime_checkable
+class EventSink(Protocol):
+    """Receive bounded product-neutral run events."""
+
+    def emit(self, event: Mapping[str, Any]) -> None: ...

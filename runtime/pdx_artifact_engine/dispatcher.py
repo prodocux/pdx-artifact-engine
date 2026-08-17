@@ -7,7 +7,14 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-from pdx_artifact_core import translate_plan_v0_to_v1, validate_execution_plan
+from pdx_artifact_core import (
+    StorageAdapter,
+    Verifier,
+    translate_plan_v0_to_v1,
+    validate_artifact_storage_identity,
+    validate_execution_plan,
+    validate_verifier_result,
+)
 from pdx_artifact_core.compat_v0 import CompatError
 
 from .errors import PlanError, RegistryError
@@ -59,7 +66,9 @@ def resolve_value(value: Any, context: dict[str, dict[str, Any]]) -> Any:
         if match:
             step_id, key = match.group(1), match.group(2)
             if step_id not in context:
-                raise PlanError(f"Input reference '${step_id}' has no completed outputs")
+                raise PlanError(
+                    f"Input reference '${step_id}' has no completed outputs"
+                )
             outputs = context[step_id]
             if key is None:
                 return outputs
@@ -208,6 +217,9 @@ class Dispatcher:
         *,
         allow_mock: bool = False,
         planner_name: str = "manual",
+        verifiers: dict[str, Verifier] | None = None,
+        missing_verifier_policy: str = "fail",
+        storage: StorageAdapter | None = None,
     ) -> None:
         merged = dict(DEFAULT_EXECUTORS)
         if executors:
@@ -216,6 +228,50 @@ class Dispatcher:
         self.executors = merged
         self.allow_mock = allow_mock
         self.planner_name = planner_name
+        if missing_verifier_policy not in {"fail", "review"}:
+            raise ValueError("missing_verifier_policy must be 'fail' or 'review'")
+        self.verifiers = dict(verifiers or {})
+        self.missing_verifier_policy = missing_verifier_policy
+        self.storage = storage
+
+    def _evaluate_check(
+        self,
+        check: str,
+        *,
+        completed_steps: set[str],
+        output_dir: Path,
+        context: dict[str, Any],
+    ) -> dict[str, Any]:
+        verifier = self.verifiers.get(check)
+        if verifier is None:
+            builtin = evaluate_check(
+                check, completed_steps=completed_steps, output_dir=output_dir
+            )
+            if builtin["status"] != "review" or check.startswith("always_review:"):
+                return builtin
+            return {
+                "check": check,
+                "status": self.missing_verifier_policy,
+                "reason_codes": ["VERIFIER_NOT_REGISTERED"],
+                "details": "No verifier registered for this id.",
+            }
+        result = dict(verifier.verify(check, context))
+        errors = validate_verifier_result(result)
+        if errors:
+            return {
+                "check": check,
+                "status": "fail",
+                "reason_codes": ["INVALID_VERIFIER_RESULT"],
+                "details": "; ".join(errors),
+            }
+        if result["verifier_id"] != check:
+            return {
+                "check": check,
+                "status": "fail",
+                "reason_codes": ["VERIFIER_ID_MISMATCH"],
+                "details": "Verifier result id does not match requested check.",
+            }
+        return {"check": check, **result}
 
     def _empty_failure(
         self,
@@ -258,6 +314,7 @@ class Dispatcher:
         step_reports: list[dict[str, Any]] = []
         context: dict[str, dict[str, Any]] = {}
         completed_steps: set[str] = set()
+        step_verification_results: list[dict[str, Any]] = []
         errors: list[str] = []
         run_status = "completed"
         original_plan = plan
@@ -323,13 +380,15 @@ class Dispatcher:
             except PlanError as exc:
                 run_status = "failed"
                 errors.append(str(exc))
-                step_reports.append({
-                    "step_id": step_id,
-                    "kind": kind,
-                    "name": name,
-                    "status": "failed",
-                    "detail": str(exc),
-                })
+                step_reports.append(
+                    {
+                        "step_id": step_id,
+                        "kind": kind,
+                        "name": name,
+                        "status": "failed",
+                        "detail": str(exc),
+                    }
+                )
                 break
 
             if kind == "approval":
@@ -344,19 +403,23 @@ class Dispatcher:
                     }
                     context[step_id] = outputs
                     completed_steps.add(step_id)
-                    provenance.append({
-                        "step_id": step_id,
-                        "tool": name,
-                        "inputs": inputs,
-                        "outputs": {"status": "mocked", "outputs": outputs},
-                    })
-                    step_reports.append({
-                        "step_id": step_id,
-                        "kind": kind,
-                        "name": name,
-                        "status": "mocked",
-                        "detail": "approval mocked or not required",
-                    })
+                    provenance.append(
+                        {
+                            "step_id": step_id,
+                            "tool": name,
+                            "inputs": inputs,
+                            "outputs": {"status": "mocked", "outputs": outputs},
+                        }
+                    )
+                    step_reports.append(
+                        {
+                            "step_id": step_id,
+                            "kind": kind,
+                            "name": name,
+                            "status": "mocked",
+                            "detail": "approval mocked or not required",
+                        }
+                    )
                     if run_status == "completed":
                         run_status = "completed_with_review"
                     continue
@@ -367,19 +430,23 @@ class Dispatcher:
                     "(awaiting_approval)"
                 )
                 errors.append(detail)
-                provenance.append({
-                    "step_id": step_id,
-                    "tool": name,
-                    "inputs": inputs,
-                    "outputs": {"status": "blocked", "reason": detail},
-                })
-                step_reports.append({
-                    "step_id": step_id,
-                    "kind": kind,
-                    "name": name,
-                    "status": "blocked",
-                    "detail": detail,
-                })
+                provenance.append(
+                    {
+                        "step_id": step_id,
+                        "tool": name,
+                        "inputs": inputs,
+                        "outputs": {"status": "blocked", "reason": detail},
+                    }
+                )
+                step_reports.append(
+                    {
+                        "step_id": step_id,
+                        "kind": kind,
+                        "name": name,
+                        "status": "blocked",
+                        "detail": detail,
+                    }
+                )
                 break
 
             if kind == "verify":
@@ -387,40 +454,53 @@ class Dispatcher:
                 step_checks = []
                 for item in step.get("verification") or []:
                     step_checks.append(
-                        evaluate_check(
+                        self._evaluate_check(
                             item["check"],
                             completed_steps=completed_steps,
                             output_dir=output_dir,
+                            context={"inputs": inputs, "steps": context},
                         )
                     )
                 failed = [c for c in step_checks if c["status"] == "fail"]
+                step_verification_results.extend(step_checks)
                 if failed:
                     run_status = "failed"
                     for item in failed:
                         errors.append(f"Verify step {step_id}: {item['check']}")
-                    step_reports.append({
-                        "step_id": step_id,
-                        "kind": kind,
-                        "name": name,
-                        "status": "failed",
-                        "detail": str(failed),
-                    })
+                    step_reports.append(
+                        {
+                            "step_id": step_id,
+                            "kind": kind,
+                            "name": name,
+                            "status": "failed",
+                            "detail": str(failed),
+                        }
+                    )
                     break
                 completed_steps.add(step_id)
                 context[step_id] = {"verification": step_checks}
-                step_reports.append({
-                    "step_id": step_id,
-                    "kind": kind,
-                    "name": name,
-                    "status": "completed",
-                    "detail": "ok",
-                })
-                provenance.append({
-                    "step_id": step_id,
-                    "tool": name,
-                    "inputs": inputs,
-                    "outputs": {"status": "completed", "verification": step_checks},
-                })
+                step_reports.append(
+                    {
+                        "step_id": step_id,
+                        "kind": kind,
+                        "name": name,
+                        "status": "completed",
+                        "detail": "ok",
+                    }
+                )
+                provenance.append(
+                    {
+                        "step_id": step_id,
+                        "tool": name,
+                        "inputs": inputs,
+                        "outputs": {"status": "completed", "verification": step_checks},
+                    }
+                )
+                if (
+                    any(item["status"] == "review" for item in step_checks)
+                    and run_status == "completed"
+                ):
+                    run_status = "completed_with_review"
                 continue
 
             if kind == "transform":
@@ -437,39 +517,45 @@ class Dispatcher:
                     }
                     context[step_id] = outputs
                     completed_steps.add(step_id)
-                    step_reports.append({
-                        "step_id": step_id,
-                        "kind": kind,
-                        "name": transform_id,
-                        "status": "mocked",
-                        "detail": "transform mocked",
-                    })
+                    step_reports.append(
+                        {
+                            "step_id": step_id,
+                            "kind": kind,
+                            "name": transform_id,
+                            "status": "mocked",
+                            "detail": "transform mocked",
+                        }
+                    )
                     if run_status == "completed":
                         run_status = "completed_with_review"
                     continue
                 detail = f"No transform executor for '{transform_id}'"
                 run_status = "failed"
                 errors.append(detail)
-                step_reports.append({
-                    "step_id": step_id,
-                    "kind": kind,
-                    "name": transform_id,
-                    "status": "failed",
-                    "detail": detail,
-                })
+                step_reports.append(
+                    {
+                        "step_id": step_id,
+                        "kind": kind,
+                        "name": transform_id,
+                        "status": "failed",
+                        "detail": detail,
+                    }
+                )
                 break
 
             if kind != "tool":
                 detail = f"Unsupported step kind '{kind}'"
                 run_status = "failed"
                 errors.append(detail)
-                step_reports.append({
-                    "step_id": step_id,
-                    "kind": kind,
-                    "name": name,
-                    "status": "failed",
-                    "detail": detail,
-                })
+                step_reports.append(
+                    {
+                        "step_id": step_id,
+                        "kind": kind,
+                        "name": name,
+                        "status": "failed",
+                        "detail": detail,
+                    }
+                )
                 break
 
             tool_name = str(step.get("tool") or name)
@@ -495,19 +581,23 @@ class Dispatcher:
                     run_status = "failed"
                     detail = str(exc)
                     errors.append(detail)
-                    step_reports.append({
-                        "step_id": step_id,
-                        "kind": kind,
-                        "name": tool_name,
-                        "status": "failed",
-                        "detail": detail,
-                    })
-                    provenance.append({
-                        "step_id": step_id,
-                        "tool": tool_name,
-                        "inputs": inputs,
-                        "outputs": {"status": "failed", "error": detail},
-                    })
+                    step_reports.append(
+                        {
+                            "step_id": step_id,
+                            "kind": kind,
+                            "name": tool_name,
+                            "status": "failed",
+                            "detail": detail,
+                        }
+                    )
+                    provenance.append(
+                        {
+                            "step_id": step_id,
+                            "tool": tool_name,
+                            "inputs": inputs,
+                            "outputs": {"status": "failed", "error": detail},
+                        }
+                    )
                     break
 
             executor = self.executors.get(skill.name)
@@ -523,19 +613,23 @@ class Dispatcher:
                 )
                 run_status = "failed"
                 errors.append(detail)
-                step_reports.append({
-                    "step_id": step_id,
-                    "kind": kind,
-                    "name": skill.name,
-                    "status": "failed",
-                    "detail": detail,
-                })
-                provenance.append({
-                    "step_id": step_id,
-                    "tool": skill.name,
-                    "inputs": inputs,
-                    "outputs": {"status": "failed", "error": detail},
-                })
+                step_reports.append(
+                    {
+                        "step_id": step_id,
+                        "kind": kind,
+                        "name": skill.name,
+                        "status": "failed",
+                        "detail": detail,
+                    }
+                )
+                provenance.append(
+                    {
+                        "step_id": step_id,
+                        "tool": skill.name,
+                        "inputs": inputs,
+                        "outputs": {"status": "failed", "error": detail},
+                    }
+                )
                 break
 
             try:
@@ -549,19 +643,56 @@ class Dispatcher:
                 run_status = "failed"
                 detail = f"Step {step_id} failed: {exc}"
                 errors.append(detail)
-                step_reports.append({
-                    "step_id": step_id,
-                    "kind": kind,
-                    "name": skill.name,
-                    "status": "failed",
-                    "detail": detail,
-                })
-                provenance.append({
-                    "step_id": step_id,
-                    "tool": skill.name,
-                    "inputs": inputs,
-                    "outputs": {"status": "failed", "error": detail},
-                })
+                step_reports.append(
+                    {
+                        "step_id": step_id,
+                        "kind": kind,
+                        "name": skill.name,
+                        "status": "failed",
+                        "detail": detail,
+                    }
+                )
+                provenance.append(
+                    {
+                        "step_id": step_id,
+                        "tool": skill.name,
+                        "inputs": inputs,
+                        "outputs": {"status": "failed", "error": detail},
+                    }
+                )
+                break
+
+            artifact_refs = result.get("artifacts", [])
+            invalid_ref: str | None = None
+            if not isinstance(artifact_refs, list):
+                invalid_ref = "invalid artifacts collection"
+                artifact_refs = []
+            for ref in artifact_refs:
+                if not isinstance(ref, dict):
+                    invalid_ref = "invalid artifact storage identity"
+                    break
+                identity_errors = validate_artifact_storage_identity(ref)
+                if identity_errors:
+                    invalid_ref = "invalid artifact storage identity"
+                    break
+                uri = ref["uri"]
+                if self.storage is not None and not self.storage.exists(uri):
+                    invalid_ref = (
+                        "artifact identity does not exist in configured storage"
+                    )
+                    break
+            if invalid_ref:
+                run_status = "failed"
+                errors.append(f"Step {step_id}: {invalid_ref}")
+                step_reports.append(
+                    {
+                        "step_id": step_id,
+                        "kind": kind,
+                        "name": skill.name,
+                        "status": "failed",
+                        "detail": invalid_ref,
+                    }
+                )
                 break
 
             files = result.get("files", [])
@@ -571,48 +702,62 @@ class Dispatcher:
                 outputs = {Path(path).name: Path(path).as_posix() for path in files}
             context[step_id] = outputs
             completed_steps.add(step_id)
-            provenance.append({
-                "step_id": step_id,
-                "tool": skill.name,
-                "inputs": inputs,
-                "outputs": (
-                    result.get("result")
-                    if isinstance(result.get("result"), dict)
-                    else {"status": "completed", "outputs": outputs}
-                ),
-            })
-            step_reports.append({
-                "step_id": step_id,
-                "kind": kind,
-                "name": skill.name,
-                "status": "mocked" if mocked else "completed",
-                "detail": "ok",
-            })
+            provenance_outputs = (
+                dict(result["result"])
+                if isinstance(result.get("result"), dict)
+                else {"status": "completed", "outputs": outputs}
+            )
+            if artifact_refs:
+                provenance_outputs["artifacts"] = artifact_refs
+            provenance.append(
+                {
+                    "step_id": step_id,
+                    "tool": skill.name,
+                    "inputs": inputs,
+                    "outputs": provenance_outputs,
+                }
+            )
+            step_reports.append(
+                {
+                    "step_id": step_id,
+                    "kind": kind,
+                    "name": skill.name,
+                    "status": "mocked" if mocked else "completed",
+                    "detail": "ok",
+                }
+            )
             if mocked and run_status == "completed":
                 run_status = "completed_with_review"
 
-        verification = [
-            evaluate_check(
+        plan_verification = [
+            self._evaluate_check(
                 item["check"],
                 completed_steps=completed_steps,
                 output_dir=output_dir,
+                context={"steps": context},
             )
             for item in plan.get("verification", []) or []
         ]
+        verification = step_verification_results + plan_verification
 
         if any(item["status"] == "fail" for item in verification):
             if run_status in {"completed", "completed_with_review"}:
                 stopping = False
                 for plan_check, result in zip(
-                    plan.get("verification", []) or [], verification
+                    plan.get("verification", []) or [], plan_verification
                 ):
-                    if result["status"] == "fail" and plan_check.get("fail_action") == "stop":
+                    if (
+                        result["status"] == "fail"
+                        and plan_check.get("fail_action") == "stop"
+                    ):
                         stopping = True
                         errors.append(f"Verification failed: {result['check']}")
                 run_status = "failed" if stopping else "completed_with_review"
-        elif any(item["status"] == "review" for item in verification):
-            if run_status == "completed":
-                run_status = "completed_with_review"
+        elif (
+            any(item["status"] == "review" for item in verification)
+            and run_status == "completed"
+        ):
+            run_status = "completed_with_review"
 
         intent = plan.get("intent") or original_plan.get("intent") or {}
         manifest = build_manifest(
