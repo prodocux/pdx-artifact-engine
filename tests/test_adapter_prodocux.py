@@ -108,6 +108,32 @@ def test_http_error_surfaces_status() -> None:
     assert excinfo.value.status == 503
 
 
+def test_http_client_calls_frozen_pdf_intake_contract() -> None:
+    observed = {}
+
+    def opener(req: object, timeout: float = 0) -> _FakeResp:
+        observed["url"] = req.full_url
+        observed["payload"] = json.loads(req.data.decode("utf-8"))
+        return _FakeResp(
+            {
+                "status": "ocr_required",
+                "source_sha256": "a" * 64,
+                "page_count": 1,
+                "pages": [{"page_number": 1, "text": "", "ocr_required": True}],
+                "truncation": {"truncated": False, "total_characters": 0},
+            }
+        )
+
+    result = ProDocuXHttpClient("http://example.test/v1", opener=opener).extract_pages(
+        document_b64="JVBERg==",
+        document_filename="sample.pdf",
+        max_pages=10,
+    )
+    assert observed["url"].endswith("/v1/intake/extract-pages")
+    assert observed["payload"]["max_pages"] == 10
+    assert result["status"] == "ocr_required"
+
+
 def test_http_error_does_not_expose_response_body() -> None:
     import urllib.error
 

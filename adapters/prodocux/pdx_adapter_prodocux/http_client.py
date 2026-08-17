@@ -120,6 +120,19 @@ class ProDocuXHttpClient:
             },
         )
 
+    def extract_pages(
+        self, *, document_b64: str, document_filename: str, max_pages: int = 50
+    ) -> dict[str, Any]:
+        """``POST /v1/intake/extract-pages`` (ProDocuX G2 contract)."""
+        return self.post_json(
+            "intake/extract-pages",
+            {
+                "document_b64": document_b64,
+                "document_filename": document_filename,
+                "max_pages": max_pages,
+            },
+        )
+
     def profile_workbook(
         self, *, document_b64: str, document_filename: str
     ) -> dict[str, Any]:
