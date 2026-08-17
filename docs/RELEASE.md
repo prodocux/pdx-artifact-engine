@@ -36,3 +36,19 @@ python scripts/verify_clean_install.py
 
 Release hashes are evidence for one build, not reproducibility claims unless a
 separate reproducible-build process verifies them.
+
+## Release-candidate freeze
+
+PDX Artifact Engine and Core remain `0.2.0a2`; the alpha suffix is intentional
+and no stable-API claim is made. The execution-plan, tool request/result,
+verifier-result, workflow-checkpoint, approval, and artifact-storage schemas
+listed in `compatibility/pdx_prodocux_compatibility_v1.json` are frozen for this
+release candidate.
+
+- Breaking schema or public primitive changes require a new prerelease version.
+- Security and correctness fixes must preserve existing valid documents or
+  explicitly version the affected contract.
+- Product state machines, tenant policy, durable databases, cloud adapters, and
+  product-specific verification rules remain outside PDX Core.
+- Git commit pins remain authoritative until maintainers explicitly create a
+  release tag.

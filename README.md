@@ -67,6 +67,9 @@ pip install ./adapters/media
 See [`docs/RELEASE.md`](docs/RELEASE.md) for package boundaries and release
 verification.
 
+Compatible ProDocuX API/schema versions and frozen schema digests are recorded
+in [`compatibility/pdx_prodocux_compatibility_v1.json`](compatibility/pdx_prodocux_compatibility_v1.json).
+
 ## Deterministic demo (no LLM)
 
 From the repository root:
