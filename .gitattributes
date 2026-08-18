@@ -1,0 +1,3 @@
+# Release compatibility digests are byte-for-byte, so JSON must have the same
+# representation on Windows, Linux, and macOS.
+*.json text eol=lf
