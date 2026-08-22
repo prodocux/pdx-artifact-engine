@@ -1,10 +1,14 @@
 # Roadmap
 
-## v0.2 contract upgrade (active)
+## v0.3 durable execution contract upgrade (active prerelease)
 
 `packages/pdx_artifact_core` ships `pdx_execution_plan_v1`, ToolRequest/Result,
-the run state machine, and a v0→v1 translator. The runtime and adapters remain
-product-neutral; product workflows register their own skills and executors.
+the run state machine, a v0→v1 translator, bounded run snapshots and step
+receipts, checkpoint/decision repository ports, external-operation
+reconciliation, execution context/cancellation, publication receipts, and
+ordered run events. The runtime and adapters remain product-neutral; product
+workflows register their own skills, executors, durable stores, schedulers, and
+provider clients.
 
 ---
 

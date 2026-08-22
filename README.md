@@ -9,17 +9,24 @@ checksummed manifests.
 > provider. PDX-5B-1B+ experts are an optional future bundle, not a v0.1.0
 > requirement.
 
-**v0.2.0a2 (in progress):** the repository ships `pdx_artifact_core` (execution
-plan v1 contracts, ToolExecutor protocols, v0→v1 translator, run state machine).
-Legacy Dispatcher compatibility remains available during the v1 migration.
+**v0.3.0a1 prerelease:** the repository ships `pdx_artifact_core` execution
+contracts plus bounded snapshots, replay-safe resume primitives, repository
+ports, external-operation reconciliation, execution context/cancellation,
+publication receipts, and ordered run events. Legacy Dispatcher compatibility
+and the frozen compatibility v1 surface remain available.
 
 ## Positioning
 
 | Claim | Status |
 |---|---|
-| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (core 0.2.0a2)** |
+| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (core 0.3.0a1)** |
 | v0→v1 plan translator (rejects unresolved `expert`) | **Available (core)** |
 | Run state machine (`awaiting_*` → `running`) | **Available (core)** |
+| Bounded run snapshot + step receipt contracts | **Available (core 0.3.0a1)** |
+| Checkpoint CAS + decision record-once repository ports | **Available (core)** |
+| Replay-safe pending-only snapshot resume | **Available (engine)** |
+| External-operation pending/unknown/reconcile lifecycle | **Available (core)** |
+| Execution context, cooperative cancellation, receipts, ordered events | **Available (core)** |
 | Validate `plan.json` against v0 schema | Available |
 | Load skill registry + dispatch skills | Available (v0 kinds) |
 | Deterministic fixture staging | Available |
@@ -55,6 +62,12 @@ first.
 pip install -e ".[dev]"
 ```
 
+After package publication, install the prerelease with:
+
+```bash
+pip install --pre "pdx-artifact-engine==0.3.0a1"
+```
+
 Requires Python 3.11+.
 
 The product-neutral ProDocuX HTTP adapter ships in the main distribution. The
@@ -67,8 +80,10 @@ pip install ./adapters/media
 See [`docs/RELEASE.md`](docs/RELEASE.md) for package boundaries and release
 verification.
 
-Compatible ProDocuX API/schema versions and frozen schema digests are recorded
-in [`compatibility/pdx_prodocux_compatibility_v1.json`](compatibility/pdx_prodocux_compatibility_v1.json).
+The active coordinated ProDocuX/PDX prerelease surface is recorded in
+[`compatibility/pdx_prodocux_compatibility_v2.json`](compatibility/pdx_prodocux_compatibility_v2.json).
+The immutable v1 manifest remains packaged in the repository as historical
+compatibility evidence.
 
 ## Deterministic demo (no LLM)
 
@@ -126,11 +141,14 @@ to document the future shape. Without `--mock`, that plan **blocks**. With
 | `schemas/3d_spec.schema.json` | CAD/scene specs |
 
 The packaged Core additionally publishes execution-plan, verifier-result,
-workflow-checkpoint, approval-request, and approval-decision v1 contracts.
-`ArtifactRuntime` accepts product-owned verifier implementations through an
-injected registry; missing verifiers fail closed unless the host explicitly
-selects review policy. Approval resume validates subject, plan, and evidence
-digests and returns a plan containing only pending steps.
+workflow-checkpoint, approval, artifact identity, step receipt, run snapshot,
+external operation, execution context, publication receipt, and run event v1
+contracts. `ArtifactRuntime` accepts product-owned verifier implementations
+through an injected registry; missing verifiers fail closed unless the host
+explicitly selects review policy. Serialized snapshot resume validates plan,
+subject, evidence, artifact, and receipt digests and executes only pending
+steps. Provider polling, durable databases, scheduling, and domain policy stay
+outside Core.
 
 Model weights stay outside git. Describe them with
 `examples/models/*.manifest.json` and `docs/model-cards/`.
@@ -176,5 +194,5 @@ Apache License 2.0. See [LICENSE](LICENSE).
 ## Acknowledgments
 
 Codex and Cursor contributed implementation support, contract hardening, and
-cross-review during the v0.2 upgrade. Final design and release decisions remain
+cross-review during the v0.3 prerelease upgrade. Final design and release decisions remain
 with the project maintainers.

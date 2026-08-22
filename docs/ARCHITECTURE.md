@@ -15,6 +15,19 @@ hard dependency.
 This separation keeps the runtime local, low-RAM, auditable, and easier to
 commercialize.
 
+## Durable control plane (`0.3.0a1`)
+
+PDX Core defines product-neutral, bounded contracts for step receipts, run
+snapshots, checkpoint/decision repository ports, external-operation
+reconciliation, execution context, cooperative cancellation, publication
+receipts, and ordered run events. `ArtifactRuntime.resume_snapshot()` validates
+serialized state and artifact bindings before executing pending steps only.
+
+Core intentionally does not implement provider clients, polling/backoff,
+durable databases, schedulers, tenant policy, or distributed exactly-once
+delivery. Hosts supply those mechanisms through adapters and retain ownership
+of domain semantics.
+
 ## Runtime Flow
 
 ```text
