@@ -57,14 +57,28 @@ jobs:
         run: |
           python -m twine check release-dist/*
           python scripts/verify_release_assets.py --tag "$RELEASE_TAG" --dist release-dist --release-json release.json --source release-source
+      - name: Stage engine distributions
+        run: |
+          mkdir pypi-engine
+          cp release-dist/pdx_artifact_engine-* pypi-engine/
       - uses: actions/upload-artifact@v4
         with:
-          name: pypi-distributions-${{ env.RELEASE_TAG }}
-          path: release-dist/
+          name: pypi-engine-${{ env.RELEASE_TAG }}
+          path: pypi-engine/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Stage media distributions
+        run: |
+          mkdir pypi-media
+          cp release-dist/pdx_adapter_media-* pypi-media/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pypi-media-${{ env.RELEASE_TAG }}
+          path: pypi-media/
           if-no-files-found: error
           retention-days: 7
 
-  publish:
+  publish-engine:
     needs: verify
     runs-on: ubuntu-latest
     environment: pypi
@@ -73,7 +87,21 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: pypi-distributions-${{ github.event.release.tag_name || inputs.tag }}
+          name: pypi-engine-${{ github.event.release.tag_name || inputs.tag }}
           path: dist
-      - name: Publish unchanged distributions to PyPI
+      - name: Publish unchanged engine distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-media:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: pypi-media
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pypi-media-${{ github.event.release.tag_name || inputs.tag }}
+          path: dist
+      - name: Publish unchanged media distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

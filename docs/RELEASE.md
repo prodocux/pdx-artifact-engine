@@ -43,18 +43,19 @@ SHA-256 digests, and promotes the unchanged files to PyPI. It does not publish
 `pdx-artifact-core` separately because the main distribution already owns the
 `pdx_artifact_core` import package.
 
-Create pending or existing-project Trusted Publishers with the same identity:
+Create pending or existing-project Trusted Publishers with separate environment
+identities so first-use project creation cannot mint an ambiguous project-scoped
+token:
 
-- PyPI projects: `pdx-artifact-engine` and `pdx-adapter-media`
-- GitHub owner: `prodocux`
-- Repository: `pdx-artifact-engine`
-- Workflow filename: `release.yml`
-- Environment: `pypi`
+- `pdx-artifact-engine`: GitHub owner `prodocux`, repository
+  `pdx-artifact-engine`, workflow `release.yml`, environment `pypi`;
+- `pdx-adapter-media`: GitHub owner `prodocux`, repository
+  `pdx-artifact-engine`, workflow `release.yml`, environment `pypi-media`.
 
-Protect the `pypi` GitHub environment with a required reviewer. No long-lived
-PyPI token belongs in repository secrets. Future GitHub Releases start the
-workflow automatically; an existing coordinated release can be promoted by
-manually running **Publish release assets to PyPI** with its exact tag.
+Protect both GitHub environments with a required reviewer. No long-lived PyPI
+token belongs in repository secrets. Future GitHub Releases start the workflow
+automatically; an existing coordinated release can be promoted by manually
+running **Publish release assets to PyPI** with its exact tag.
 
 The approved coordinated `v0.3.0a1` assets are:
 

@@ -86,11 +86,11 @@ def test_public_distribution_metadata_is_complete() -> None:
     assert root_project["urls"]["Repository"].endswith("/pdx-artifact-engine")
     assert media_project["license-files"] == ["LICENSE"]
     assert media_project["authors"]
-    root_license = (ROOT / "LICENSE").read_bytes()
-    assert (ROOT / "adapters" / "media" / "LICENSE").read_bytes() == root_license
+    root_license = (ROOT / "LICENSE").read_text("utf-8")
+    assert (ROOT / "adapters" / "media" / "LICENSE").read_text("utf-8") == root_license
     assert (
         ROOT / "packages" / "pdx_artifact_core" / "LICENSE"
-    ).read_bytes() == root_license
+    ).read_text("utf-8") == root_license
 
 
 def test_core_is_not_published_as_a_second_overlapping_distribution() -> None:
@@ -98,3 +98,11 @@ def test_core_is_not_published_as_a_second_overlapping_distribution() -> None:
     assert "pdx_artifact_core*" in root_config["tool"]["setuptools"]["packages"]["find"]["include"]
     release_workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text("utf-8")
     assert "pdx_artifact_core-*" not in release_workflow
+
+
+def test_pending_publishers_have_unambiguous_environment_identities() -> None:
+    release_workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text("utf-8")
+    assert "environment: pypi\n" in release_workflow
+    assert "environment: pypi-media\n" in release_workflow
+    assert "name: pypi-engine-" in release_workflow
+    assert "name: pypi-media-" in release_workflow
