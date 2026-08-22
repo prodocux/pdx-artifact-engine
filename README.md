@@ -62,10 +62,10 @@ first.
 pip install -e ".[dev]"
 ```
 
-After package publication, install the prerelease with:
+Install the published GitHub prerelease wheel with:
 
 ```bash
-pip install --pre "pdx-artifact-engine==0.3.0a1"
+pip install "https://github.com/prodocux/pdx-artifact-engine/releases/download/v0.3.0a1/pdx_artifact_engine-0.3.0a1-py3-none-any.whl"
 ```
 
 Requires Python 3.11+.
