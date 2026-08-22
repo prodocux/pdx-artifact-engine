@@ -72,3 +72,29 @@ def test_main_and_media_packages_are_separate() -> None:
     )
     media_include = media_config["tool"]["setuptools"]["packages"]["find"]["include"]
     assert media_include == ["pdx_adapter_media*"]
+
+
+def test_public_distribution_metadata_is_complete() -> None:
+    root_project = tomllib.loads(
+        (ROOT / "pyproject.toml").read_text("utf-8")
+    )["project"]
+    media_project = tomllib.loads(
+        (ROOT / "adapters" / "media" / "pyproject.toml").read_text("utf-8")
+    )["project"]
+    assert root_project["license-files"] == ["LICENSE"]
+    assert root_project["authors"]
+    assert root_project["urls"]["Repository"].endswith("/pdx-artifact-engine")
+    assert media_project["license-files"] == ["LICENSE"]
+    assert media_project["authors"]
+    root_license = (ROOT / "LICENSE").read_bytes()
+    assert (ROOT / "adapters" / "media" / "LICENSE").read_bytes() == root_license
+    assert (
+        ROOT / "packages" / "pdx_artifact_core" / "LICENSE"
+    ).read_bytes() == root_license
+
+
+def test_core_is_not_published_as_a_second_overlapping_distribution() -> None:
+    root_config = tomllib.loads((ROOT / "pyproject.toml").read_text("utf-8"))
+    assert "pdx_artifact_core*" in root_config["tool"]["setuptools"]["packages"]["find"]["include"]
+    release_workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text("utf-8")
+    assert "pdx_artifact_core-*" not in release_workflow

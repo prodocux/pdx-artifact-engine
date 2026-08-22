@@ -8,6 +8,8 @@ version = "0.3.0a1"
 description = "Platform-neutral deterministic workflow contracts and runtime primitives for PDX"
 readme = "README.md"
 license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "ProDocuX contributors" }]
 requires-python = ">=3.11"
 dependencies = [
   "jsonschema>=4.22.0",

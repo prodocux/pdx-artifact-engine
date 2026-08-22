@@ -8,6 +8,14 @@ version = "0.3.0a1"
 description = "Model-optional deterministic artifact orchestration framework for PDX skills"
 readme = "README.md"
 license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "ProDocuX contributors" }]
+keywords = ["artifacts", "orchestration", "verification", "deterministic"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+]
 requires-python = ">=3.11"
 dependencies = [
   "jsonschema>=4.22.0",
@@ -22,6 +30,12 @@ dev = [
 [project.scripts]
 pdx-validate = "pdx_artifact_engine.cli.validate:main"
 pdx-run = "pdx_artifact_engine.cli.run:main"
+
+[project.urls]
+Homepage = "https://github.com/prodocux/pdx-artifact-engine"
+Repository = "https://github.com/prodocux/pdx-artifact-engine"
+Issues = "https://github.com/prodocux/pdx-artifact-engine/issues"
+Releases = "https://github.com/prodocux/pdx-artifact-engine/releases"
 
 [tool.setuptools.packages.find]
 where = ["runtime", "packages/pdx_artifact_core/src", "adapters/prodocux"]

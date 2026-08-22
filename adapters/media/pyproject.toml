@@ -8,7 +8,19 @@ version = "0.2.0a1"
 description = "Optional product-neutral media identity and ffprobe adapter for PDX"
 readme = "README.md"
 license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "ProDocuX contributors" }]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+]
 requires-python = ">=3.11"
+
+[project.urls]
+Homepage = "https://github.com/prodocux/pdx-artifact-engine"
+Repository = "https://github.com/prodocux/pdx-artifact-engine"
+Issues = "https://github.com/prodocux/pdx-artifact-engine/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

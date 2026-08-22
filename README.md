@@ -77,6 +77,12 @@ media identity/probe adapter is optional and has its own package:
 pip install ./adapters/media
 ```
 
+The coordinated GitHub prerelease also publishes its standalone wheel:
+
+```bash
+pip install "https://github.com/prodocux/pdx-artifact-engine/releases/download/v0.3.0a1/pdx_adapter_media-0.2.0a1-py3-none-any.whl"
+```
+
 See [`docs/RELEASE.md`](docs/RELEASE.md) for package boundaries and release
 verification.
 

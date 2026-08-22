@@ -34,6 +34,37 @@ The wheel build, temporary-environment install, and import smoke can be run as:
 python scripts/verify_clean_install.py
 ```
 
+## PyPI trusted publication
+
+GitHub Releases are the publication approval boundary. The
+`.github/workflows/release.yml` workflow downloads the already-approved main
+and media wheel/source archives, verifies their package metadata and GitHub
+SHA-256 digests, and promotes the unchanged files to PyPI. It does not publish
+`pdx-artifact-core` separately because the main distribution already owns the
+`pdx_artifact_core` import package.
+
+Create pending or existing-project Trusted Publishers with the same identity:
+
+- PyPI projects: `pdx-artifact-engine` and `pdx-adapter-media`
+- GitHub owner: `prodocux`
+- Repository: `pdx-artifact-engine`
+- Workflow filename: `release.yml`
+- Environment: `pypi`
+
+Protect the `pypi` GitHub environment with a required reviewer. No long-lived
+PyPI token belongs in repository secrets. Future GitHub Releases start the
+workflow automatically; an existing coordinated release can be promoted by
+manually running **Publish release assets to PyPI** with its exact tag.
+
+The approved coordinated `v0.3.0a1` assets are:
+
+| Asset | SHA-256 |
+|---|---|
+| `pdx_artifact_engine-0.3.0a1-py3-none-any.whl` | `30f42c15c2994b5b0f743fa04ecd6ff28abb7ff5a4fc0d73511b74b76f1eb0c3` |
+| `pdx_artifact_engine-0.3.0a1.tar.gz` | `e7e012d2405a5700c31ec94afe4a11745099166ff976795da5d088f07bca12a8` |
+| `pdx_adapter_media-0.2.0a1-py3-none-any.whl` | `80af3d4426d2986c05ae8b46bb1623c62cabfb7f0606374a16e22490ef73c699` |
+| `pdx_adapter_media-0.2.0a1.tar.gz` | `c632adbea2688793a67eac0fab8b7fa30f094b4c20732c82b065dc8242391e39` |
+
 Release hashes are evidence for one build, not reproducibility claims unless a
 separate reproducible-build process verifies them.
 
