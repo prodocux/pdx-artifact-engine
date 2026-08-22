@@ -1,0 +1,10 @@
+{
+  "schema_version": "pdx_execution_context_v1",
+  "request_id": "request-example-1",
+  "correlation_id": "correlation-example-1",
+  "idempotency_key": "request-example-1:attempt",
+  "attempt": 1,
+  "deadline_at": "2026-08-23T00:00:00Z",
+  "remaining_budget_ms": 30000,
+  "detail": {"priority": "normal"}
+}

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/external_operation.v1.schema.json",
+  "title": "PDX external operation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "operation_id",
+    "provider",
+    "execution_mode",
+    "status",
+    "request_id",
+    "idempotency_key",
+    "request_digest",
+    "input_digest",
+    "submitted_at",
+    "updated_at",
+    "reconcile_required"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_external_operation_v1"},
+    "operation_id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "provider": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_.-]*$"
+    },
+    "execution_mode": {"enum": ["synchronous", "asynchronous"]},
+    "status": {
+      "enum": [
+        "submitted",
+        "pending",
+        "completed",
+        "failed",
+        "timed_out",
+        "cancelled",
+        "unknown_outcome"
+      ]
+    },
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 256},
+    "request_digest": {"$ref": "#/$defs/sha256"},
+    "input_digest": {"$ref": "#/$defs/sha256"},
+    "output_digest": {"$ref": "#/$defs/sha256"},
+    "artifacts": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "https://prodocux.dev/schemas/pdx/artifact_storage_identity.v1.schema.json"
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "retryable"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "message": {"type": "string", "maxLength": 1024},
+        "retryable": {"type": "boolean"}
+      }
+    },
+    "submitted_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "reconcile_required": {"type": "boolean"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "completed"}}},
+      "then": {
+        "required": ["output_digest"],
+        "properties": {"reconcile_required": {"const": false}}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"enum": ["failed", "timed_out", "unknown_outcome"]}
+        }
+      },
+      "then": {"required": ["error"]}
+    },
+    {
+      "if": {"properties": {"status": {"const": "unknown_outcome"}}},
+      "then": {
+        "properties": {
+          "reconcile_required": {"const": true},
+          "error": {"properties": {"retryable": {"const": false}}}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"enum": ["submitted", "pending", "cancelled"]}
+        }
+      },
+      "then": {"properties": {"reconcile_required": {"const": false}}}
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

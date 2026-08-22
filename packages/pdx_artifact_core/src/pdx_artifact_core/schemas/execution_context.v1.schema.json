@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/execution_context.v1.schema.json",
+  "title": "PDX execution context v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "correlation_id",
+    "idempotency_key",
+    "attempt"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_execution_context_v1"},
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "correlation_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 256},
+    "attempt": {"type": "integer", "minimum": 1, "maximum": 1000},
+    "deadline_at": {"type": "string", "format": "date-time"},
+    "remaining_budget_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 604800000
+    },
+    "detail": {
+      "type": "object",
+      "maxProperties": 20,
+      "propertyNames": {"pattern": "^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$"},
+      "additionalProperties": {
+        "type": ["string", "integer", "number", "boolean", "null"]
+      }
+    }
+  }
+}

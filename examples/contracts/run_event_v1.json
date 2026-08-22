@@ -1,0 +1,13 @@
+{
+  "schema_version": "pdx_run_event_v1",
+  "event_id": "event-run-1-0001",
+  "run_id": "run-example-1",
+  "sequence": 1,
+  "occurred_at": "2026-08-22T00:00:00Z",
+  "event_type": "RUN_STARTED",
+  "request_id": "request-example-1",
+  "correlation_id": "correlation-example-1",
+  "idempotency_key": "request-example-1:run",
+  "status": "running",
+  "detail": {"attempt": 1}
+}

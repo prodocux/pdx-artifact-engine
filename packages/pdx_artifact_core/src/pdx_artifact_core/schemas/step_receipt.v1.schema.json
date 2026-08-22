@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/step_receipt.v1.schema.json",
+  "title": "PDX step receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "run_id",
+    "step_id",
+    "status",
+    "attempt",
+    "request_digest",
+    "input_digest",
+    "recorded_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_step_receipt_v1"},
+    "receipt_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "run_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "step_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "status": {
+      "enum": [
+        "completed",
+        "completed_with_review",
+        "failed",
+        "blocked",
+        "cancelled",
+        "timed_out",
+        "unknown_outcome"
+      ]
+    },
+    "attempt": {"type": "integer", "minimum": 1, "maximum": 1000},
+    "request_digest": {"$ref": "#/$defs/sha256"},
+    "input_digest": {"$ref": "#/$defs/sha256"},
+    "output_digest": {"$ref": "#/$defs/sha256"},
+    "artifacts": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "https://prodocux.dev/schemas/pdx/artifact_storage_identity.v1.schema.json"
+      }
+    },
+    "output_bindings": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "artifact"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-zA-Z][a-zA-Z0-9_.-]*$"
+          },
+          "artifact": {
+            "$ref": "https://prodocux.dev/schemas/pdx/artifact_storage_identity.v1.schema.json"
+          }
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "retryable", "reconcile_required"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1, "maxLength": 128},
+        "message": {"type": "string", "maxLength": 1024},
+        "retryable": {"type": "boolean"},
+        "reconcile_required": {"type": "boolean"}
+      }
+    },
+    "recorded_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"enum": ["completed", "completed_with_review"]}}},
+      "then": {"required": ["output_digest"]}
+    },
+    {
+      "if": {"properties": {"status": {"const": "unknown_outcome"}}},
+      "then": {
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "properties": {"reconcile_required": {"const": true}}
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

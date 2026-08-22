@@ -1,0 +1,16 @@
+{
+  "schema_version": "pdx_publication_receipt_v1",
+  "receipt_id": "receipt-example-1",
+  "operation_id": "operation-example-1",
+  "target_id": "target-example-1",
+  "request_id": "request-example-1",
+  "idempotency_key": "request-example-1:publish",
+  "status": "applied",
+  "before_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "expected_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "observed_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "verifier_id": "content.digest",
+  "verifier_version": "1",
+  "detail": {"verified": true},
+  "recorded_at": "2026-08-22T00:00:00Z"
+}

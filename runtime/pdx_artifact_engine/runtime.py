@@ -2,22 +2,62 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import re
 from collections.abc import Callable, Mapping
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
 from pdx_artifact_core import (
     EventSink,
+    SnapshotError,
     StorageAdapter,
     Verifier,
     build_resumed_plan,
     run_event,
+    validate_run_snapshot,
 )
 
-from .dispatcher import Dispatcher
+from .dispatcher import Dispatcher, resolve_value
 from .registry import SkillDefinition, SkillRegistry
 
 Executor = Callable[[dict[str, Any], Path], dict[str, Any]]
+_OUTPUT_REF = re.compile(r"^\$([A-Za-z0-9_\-]+)(?:\.(.+))?$")
+
+
+def _materialize_completed_value(
+    value: Any, context: dict[str, dict[str, Any]]
+) -> Any:
+    if isinstance(value, str):
+        match = _OUTPUT_REF.match(value)
+        if match and match.group(1) in context:
+            return deepcopy(resolve_value(value, context))
+        return value
+    if isinstance(value, list):
+        return [_materialize_completed_value(item, context) for item in value]
+    if isinstance(value, dict):
+        return {
+            key: _materialize_completed_value(item, context)
+            for key, item in value.items()
+        }
+    return value
+
+
+def _resolved_artifact_bytes(value: Any) -> bytes:
+    if isinstance(value, bytes):
+        return value
+    if isinstance(value, bytearray):
+        return bytes(value)
+    if isinstance(value, str):
+        return value.encode("utf-8")
+    try:
+        return json.dumps(
+            value, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+        ).encode("utf-8")
+    except (TypeError, ValueError) as exc:
+        raise SnapshotError("resolved artifact value is not canonically encodable") from exc
 
 
 class ArtifactRuntime:
@@ -43,6 +83,7 @@ class ArtifactRuntime:
         self.allow_mock = allow_mock
         self.planner_name = planner_name
         self.event_sink = event_sink
+        self.storage = storage
         self._dispatcher = Dispatcher(
             registry,
             dict(executors) if executors else None,
@@ -94,6 +135,60 @@ class ArtifactRuntime:
     ) -> dict[str, Any]:
         """Execute only checkpoint-pending steps after an approved decision."""
         resumed = build_resumed_plan(plan, checkpoint, decision)
+        return self._dispatcher.run(resumed, Path(output_dir))
+
+    def resume_snapshot(
+        self,
+        plan: dict[str, Any],
+        snapshot: Mapping[str, Any],
+        decision: Mapping[str, Any],
+        output_dir: str | Path,
+    ) -> dict[str, Any]:
+        """Resume pending steps using durable bindings from a valid snapshot."""
+        errors = validate_run_snapshot(snapshot)
+        if errors:
+            raise SnapshotError("invalid run snapshot:\n" + "\n".join(errors))
+        if snapshot["state"] != "awaiting_approval":
+            raise SnapshotError("only an awaiting_approval snapshot may resume")
+        if snapshot["checkpoint"]["status"] != "pending":
+            raise SnapshotError("only a pending checkpoint may resume")
+        if any(
+            receipt["status"] == "unknown_outcome"
+            or bool((receipt.get("error") or {}).get("reconcile_required"))
+            for receipt in snapshot["step_receipts"]
+        ):
+            raise SnapshotError(
+                "snapshot contains an ambiguous step outcome; reconciliation is required"
+            )
+        resumed = build_resumed_plan(plan, snapshot["checkpoint"], decision)
+
+        context: dict[str, dict[str, Any]] = {}
+        for receipt in snapshot["step_receipts"]:
+            if receipt["status"] not in {"completed", "completed_with_review"}:
+                continue
+            outputs: dict[str, Any] = {}
+            for binding in receipt.get("output_bindings", []):
+                if self.storage is None:
+                    raise SnapshotError(
+                        "snapshot output bindings require a configured storage adapter"
+                    )
+                artifact = binding["artifact"]
+                uri = artifact["uri"]
+                if not self.storage.exists(uri):
+                    raise SnapshotError(f"snapshot artifact is unavailable: {uri}")
+                value = self.storage.resolve(uri)
+                materialized = _resolved_artifact_bytes(value)
+                if len(materialized) != artifact["size_bytes"]:
+                    raise SnapshotError(f"snapshot artifact size mismatch: {uri}")
+                if hashlib.sha256(materialized).hexdigest() != artifact["sha256"]:
+                    raise SnapshotError(f"snapshot artifact digest mismatch: {uri}")
+                outputs[binding["name"]] = value
+            context[receipt["step_id"]] = outputs
+
+        for step in resumed["steps"]:
+            step["inputs"] = _materialize_completed_value(
+                step.get("inputs", {}) or {}, context
+            )
         return self._dispatcher.run(resumed, Path(output_dir))
 
 

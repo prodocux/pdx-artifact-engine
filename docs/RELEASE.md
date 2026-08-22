@@ -39,11 +39,13 @@ separate reproducible-build process verifies them.
 
 ## Release-candidate freeze
 
-PDX Artifact Engine and Core remain `0.2.0a2`; the alpha suffix is intentional
-and no stable-API claim is made. The execution-plan, tool request/result,
-verifier-result, workflow-checkpoint, approval, and artifact-storage schemas
-listed in `compatibility/pdx_prodocux_compatibility_v1.json` are frozen for this
-release candidate.
+PDX Artifact Engine and Core `0.3.0a1` form the coordinated prerelease surface;
+the alpha suffix is intentional and no stable-API claim is made. The earlier
+execution-plan, tool request/result, verifier-result, workflow-checkpoint,
+approval, and artifact-storage schemas listed in
+`compatibility/pdx_prodocux_compatibility_v1.json` remain frozen. The active
+additive surface is recorded in
+`compatibility/pdx_prodocux_compatibility_v2.json`.
 
 - Breaking schema or public primitive changes require a new prerelease version.
 - Security and correctness fixes must preserve existing valid documents or

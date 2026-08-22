@@ -22,7 +22,7 @@ from pdx_artifact_core import (
 
 from .runtime import ArtifactRuntime
 
-__version__ = "0.2.0a2"
+__version__ = "0.3.0a1"
 
 __all__ = [
     "__version__",

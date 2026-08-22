@@ -12,6 +12,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 IMPORTS = ("pdx_artifact_engine", "pdx_artifact_core", "pdx_adapter_prodocux")
+PACKAGED_SCHEMAS = (
+    "execution_plan.v1.schema.json",
+    "step_receipt.v1.schema.json",
+    "run_snapshot.v1.schema.json",
+    "external_operation.v1.schema.json",
+    "execution_context.v1.schema.json",
+    "publication_receipt.v1.schema.json",
+    "run_event.v1.schema.json",
+)
 
 
 def _run(*args: str, cwd: Path) -> None:
@@ -34,10 +43,10 @@ def main() -> int:
         python = env_dir / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
         _run(str(python), "-m", "pip", "install", str(wheel), cwd=work)
         smoke = "; ".join(f"import {name}" for name in IMPORTS)
-        smoke += (
-            "; from importlib.resources import files"
-            "; assert files('pdx_artifact_core.schemas')"
-            ".joinpath('execution_plan.v1.schema.json').is_file()"
+        smoke += "; from importlib.resources import files; schema_root = files('pdx_artifact_core.schemas')"
+        smoke += "".join(
+            f"; assert schema_root.joinpath({name!r}).is_file()"
+            for name in PACKAGED_SCHEMAS
         )
         _run(str(python), "-c", smoke, cwd=work)
         print(f"clean-install PASS: {wheel.name}")

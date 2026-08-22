@@ -1,0 +1,14 @@
+{
+  "schema_version": "pdx_external_operation_v1",
+  "operation_id": "operation-example-1",
+  "provider": "document.processor",
+  "execution_mode": "asynchronous",
+  "status": "pending",
+  "request_id": "request-example-1",
+  "idempotency_key": "request-example-1:extract",
+  "request_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "input_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "submitted_at": "2026-08-22T00:00:00Z",
+  "updated_at": "2026-08-22T00:00:01Z",
+  "reconcile_required": false
+}

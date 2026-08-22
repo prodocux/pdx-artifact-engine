@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/run_event.v1.schema.json",
+  "title": "PDX run event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "run_id",
+    "sequence",
+    "occurred_at",
+    "event_type",
+    "request_id",
+    "correlation_id",
+    "idempotency_key",
+    "status",
+    "detail"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_run_event_v1"},
+    "event_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "run_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "sequence": {"type": "integer", "minimum": 0},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "event_type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "correlation_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 256},
+    "status": {"type": "string", "minLength": 1, "maxLength": 128},
+    "detail": {
+      "type": "object",
+      "maxProperties": 20,
+      "propertyNames": {"pattern": "^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$"},
+      "additionalProperties": {
+        "type": ["string", "integer", "number", "boolean", "null"]
+      }
+    }
+  }
+}

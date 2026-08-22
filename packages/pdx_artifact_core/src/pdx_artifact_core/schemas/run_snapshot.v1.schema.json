@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/run_snapshot.v1.schema.json",
+  "title": "PDX run snapshot v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "snapshot_version",
+    "run_id",
+    "state",
+    "checkpoint",
+    "step_receipts",
+    "created_at",
+    "snapshot_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_run_snapshot_v1"},
+    "snapshot_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "snapshot_version": {"type": "integer", "minimum": 1},
+    "run_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "state": {
+      "enum": [
+        "pending",
+        "running",
+        "awaiting_tool",
+        "awaiting_approval",
+        "completed",
+        "completed_with_review",
+        "failed",
+        "blocked",
+        "cancelled",
+        "timed_out"
+      ]
+    },
+    "checkpoint": {
+      "$ref": "https://prodocux.dev/schemas/pdx/workflow_checkpoint_v1.json"
+    },
+    "plan_identity": {
+      "$ref": "https://prodocux.dev/schemas/pdx/artifact_storage_identity.v1.schema.json"
+    },
+    "subject_identity": {
+      "$ref": "https://prodocux.dev/schemas/pdx/artifact_storage_identity.v1.schema.json"
+    },
+    "step_receipts": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {"$ref": "https://prodocux.dev/schemas/pdx/step_receipt.v1.schema.json"}
+    },
+    "event_sequence": {"type": "integer", "minimum": 0},
+    "created_at": {"type": "string", "format": "date-time"},
+    "snapshot_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 of canonical snapshot content excluding this field."
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": "pdx_step_receipt_v1",
+  "receipt_id": "receipt-stage-1",
+  "run_id": "run-snapshot-example",
+  "step_id": "stage-input",
+  "status": "completed",
+  "attempt": 1,
+  "request_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "input_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "output_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "artifacts": [
+    {
+      "artifact_id": "stage-output",
+      "uri": "artifact://run-snapshot-example/stage/output.json",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "size_bytes": 128,
+      "media_type": "application/json",
+      "created_at": "2026-08-22T00:00:00Z"
+    }
+  ],
+  "output_bindings": [
+    {
+      "name": "result",
+      "artifact": {
+        "artifact_id": "stage-output",
+        "uri": "artifact://run-snapshot-example/stage/output.json",
+        "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "size_bytes": 128,
+        "media_type": "application/json",
+        "created_at": "2026-08-22T00:00:00Z"
+      }
+    }
+  ],
+  "recorded_at": "2026-08-22T00:00:00Z"
+}

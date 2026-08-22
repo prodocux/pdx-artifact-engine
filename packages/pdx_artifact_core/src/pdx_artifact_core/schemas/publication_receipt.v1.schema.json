@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/publication_receipt.v1.schema.json",
+  "title": "PDX publication receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "operation_id",
+    "target_id",
+    "request_id",
+    "idempotency_key",
+    "status",
+    "expected_digest",
+    "verifier_id",
+    "verifier_version",
+    "recorded_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_publication_receipt_v1"},
+    "receipt_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "operation_id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "target_id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 256},
+    "status": {"enum": ["applied", "no_op", "conflict", "failed"]},
+    "before_digest": {"$ref": "#/$defs/sha256"},
+    "expected_digest": {"$ref": "#/$defs/sha256"},
+    "observed_digest": {"$ref": "#/$defs/sha256"},
+    "verifier_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "verifier_version": {"type": "string", "minLength": 1, "maxLength": 64},
+    "artifacts": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "https://prodocux.dev/schemas/pdx/artifact_storage_identity.v1.schema.json"
+      }
+    },
+    "detail": {
+      "type": "object",
+      "maxProperties": 20,
+      "propertyNames": {"pattern": "^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$"},
+      "additionalProperties": {
+        "type": ["string", "integer", "number", "boolean", "null"]
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "retryable"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "message": {"type": "string", "maxLength": 1024},
+        "retryable": {"type": "boolean"}
+      }
+    },
+    "recorded_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"status": {"enum": ["applied", "no_op", "conflict"]}}
+      },
+      "then": {"required": ["observed_digest"]}
+    },
+    {
+      "if": {"properties": {"status": {"const": "failed"}}},
+      "then": {"required": ["error"]}
+    },
+    {
+      "if": {"properties": {"status": {"const": "applied"}}},
+      "then": {
+        "properties": {
+          "observed_digest": {"$ref": "#/$defs/sha256"}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}
