@@ -62,11 +62,13 @@ first.
 pip install -e ".[dev]"
 ```
 
-Install the published GitHub prerelease wheel with:
+Install the published PyPI prerelease with:
 
 ```bash
-pip install "https://github.com/prodocux/pdx-artifact-engine/releases/download/v0.3.0a1/pdx_artifact_engine-0.3.0a1-py3-none-any.whl"
+pip install "pdx-artifact-engine==0.3.0a1"
 ```
+
+See the [`pdx-artifact-engine` PyPI project](https://pypi.org/project/pdx-artifact-engine/0.3.0a1/).
 
 Requires Python 3.11+.
 
@@ -77,11 +79,13 @@ media identity/probe adapter is optional and has its own package:
 pip install ./adapters/media
 ```
 
-The coordinated GitHub prerelease also publishes its standalone wheel:
+Install its coordinated standalone PyPI package with:
 
 ```bash
-pip install "https://github.com/prodocux/pdx-artifact-engine/releases/download/v0.3.0a1/pdx_adapter_media-0.2.0a1-py3-none-any.whl"
+pip install "pdx-adapter-media==0.2.0a1"
 ```
+
+See the [`pdx-adapter-media` PyPI project](https://pypi.org/project/pdx-adapter-media/0.2.0a1/).
 
 See [`docs/RELEASE.md`](docs/RELEASE.md) for package boundaries and release
 verification.

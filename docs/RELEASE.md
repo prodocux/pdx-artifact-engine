@@ -57,6 +57,19 @@ token belongs in repository secrets. Future GitHub Releases start the workflow
 automatically; an existing coordinated release can be promoted by manually
 running **Publish release assets to PyPI** with its exact tag.
 
+The coordinated packages are published at
+<https://pypi.org/project/pdx-artifact-engine/0.3.0a1/> and
+<https://pypi.org/project/pdx-adapter-media/0.2.0a1/>. All four PyPI file hashes
+match the approved GitHub Release `v0.3.0a1` assets. PyPI records the
+`prodocux/pdx-artifact-engine` and `release.yml` Trusted Publisher identity on
+every file, with environment `pypi` for the main distribution and `pypi-media`
+for the media distribution.
+
+```powershell
+python -m pip install "pdx-artifact-engine==0.3.0a1"
+python -m pip install "pdx-adapter-media==0.2.0a1"
+```
+
 The approved coordinated `v0.3.0a1` assets are:
 
 | Asset | SHA-256 |
