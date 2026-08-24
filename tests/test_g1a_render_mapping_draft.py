@@ -22,9 +22,9 @@ def test_g1a_render_mapping_fixtures_are_frozen_and_kernel_envelope_is_artifact_
     assert provenance["synthetic"] is True
     assert provenance["source_commit"] == PDX_COMMIT_A
 
-    request = _load("tool_request.render_artifact.draft.json")
-    result = _load("tool_result.render_artifact.draft.json")
-    receipt = _load("step_receipt.render_artifact.draft.json")
+    request = _load("tool_request.render_artifact.json")
+    result = _load("tool_result.render_artifact.json")
+    receipt = _load("step_receipt.render_artifact.json")
 
     assert validate_tool_request(request) == []
     assert validate_tool_result(result) == []
@@ -34,7 +34,11 @@ def test_g1a_render_mapping_fixtures_are_frozen_and_kernel_envelope_is_artifact_
     dumped = json.dumps(kernel)
     assert "gs://" not in dumped
     assert "X-Goog-Signature" not in dumped
-    assert kernel["template"]["artifact"]["uri"].startswith("artifact://")
-    assert result["status"] == "failed"
-    assert result["error"]["code"] == "RENDERER_NOT_AVAILABLE"
-    assert receipt["status"] == "failed"
+    assert "template" not in kernel
+    assert kernel["output"]["delivery_mode"] == "artifact"
+    assert result["status"] == "completed"
+    assert result["tool_version"] == "0.3.0rc1"
+    assert result["artifacts"][0]["uri"].startswith("artifact://")
+    assert result["artifacts"][0]["uri"] != "artifact://prodocux.render_artifact/render_result.json"
+    assert receipt["status"] == "completed"
+    assert receipt["output_digest"] == result["artifacts"][0]["checksum"].split(":", 1)[1]

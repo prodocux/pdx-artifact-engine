@@ -1,0 +1,20 @@
+{
+  "schema_version": "pdx_tool_result_v1",
+  "status": "completed",
+  "outputs": {
+    "render_result.json": "render_result.json"
+  },
+  "artifacts": [
+    {
+      "uri": "artifact://render/summary.docx",
+      "media_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "checksum": "sha256:6be950ee87a7cabb561b81bf45b18ba0c798ceafe286a5346e34c02fb7dd0d19",
+      "artifact_id": "summary-docx",
+      "size_bytes": 36612
+    }
+  ],
+  "retryable": false,
+  "tool_provider": "prodocux",
+  "tool_version": "0.3.0rc1",
+  "transport": "http"
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": "pdx_step_receipt_v1",
+  "receipt_id": "g1a-receipt-render-artifact",
+  "run_id": "g1a-run-synthetic",
+  "step_id": "render-artifact",
+  "status": "completed",
+  "attempt": 1,
+  "request_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "input_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "output_digest": "6be950ee87a7cabb561b81bf45b18ba0c798ceafe286a5346e34c02fb7dd0d19",
+  "artifacts": [
+    {
+      "artifact_id": "summary-docx",
+      "uri": "artifact://render/summary.docx",
+      "sha256": "6be950ee87a7cabb561b81bf45b18ba0c798ceafe286a5346e34c02fb7dd0d19",
+      "size_bytes": 36612,
+      "media_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "created_at": "2026-08-24T00:00:00Z"
+    }
+  ],
+  "recorded_at": "2026-08-24T00:00:00Z"
+}

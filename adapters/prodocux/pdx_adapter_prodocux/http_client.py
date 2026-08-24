@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import socket
 import urllib.error
 import urllib.request
@@ -148,6 +149,38 @@ class ProDocuXHttpClient:
     def render_artifact(self, payload: dict[str, Any]) -> dict[str, Any]:
         """``POST /v1/render/artifact``."""
         return self.post_json("render/artifact", payload)
+
+    def get_artifact_bytes(self, artifact_id: str) -> bytes:
+        """``GET /v1/render/artifacts/{artifact_id}``."""
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,126}", artifact_id):
+            raise ValueError("artifact_id is not a safe identifier")
+        req = urllib.request.Request(
+            self._url(f"render/artifacts/{artifact_id}"),
+            headers={"Accept": "*/*"},
+            method="GET",
+        )
+        open_fn = self._opener or urllib.request.urlopen
+        try:
+            with open_fn(req, timeout=self.timeout_s) as resp:
+                raw = resp.read()
+                status = getattr(resp, "status", None) or resp.getcode()
+        except urllib.error.HTTPError as exc:
+            raise ProDocuXHttpError(
+                f"Kernel HTTP {exc.code} on render/artifacts",
+                status=exc.code,
+            ) from exc
+        except urllib.error.URLError as exc:
+            raise ProDocuXHttpError("Kernel unreachable on render/artifacts") from exc
+        except (TimeoutError, socket.timeout) as exc:
+            raise ProDocuXHttpError("Kernel timeout on render/artifacts") from exc
+        if status and int(status) >= 400:
+            raise ProDocuXHttpError(
+                f"Kernel HTTP {status} on render/artifacts",
+                status=int(status),
+            )
+        if not isinstance(raw, (bytes, bytearray)):
+            raise ProDocuXHttpError("Kernel artifact body must be bytes")
+        return bytes(raw)
 
     def profile_workbook(
         self, *, document_b64: str, document_filename: str

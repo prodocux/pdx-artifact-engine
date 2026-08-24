@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import io
 import json
 from pathlib import Path
@@ -429,7 +430,7 @@ def test_render_artifact_executor_writes_inline_file_and_rejects_gs(tmp_path: Pa
         "target_format": "csv",
         "validation": {"passed": True, "reasons": []},
         "media_type": "text/csv",
-        "output_sha256": "f" * 64,
+        "output_sha256": hashlib.sha256(b"id,label\n1,alpha\n").hexdigest(),
         "content_b64": base64.b64encode(b"id,label\n1,alpha\n").decode("ascii"),
     }
 
@@ -463,3 +464,156 @@ def test_render_artifact_executor_writes_inline_file_and_rejects_gs(tmp_path: Pa
             },
             tmp_path / "render-bad",
         )
+
+
+def test_render_artifact_executor_rejects_output_digest_mismatch(tmp_path: Path) -> None:
+    payload = {
+        "schema_version": "prodocux_render_result_v1",
+        "status": "completed",
+        "kernel_version": "0.1-test",
+        "renderer_id": "prodocux.blocks.csv",
+        "renderer_version": "0.1-test",
+        "target_format": "csv",
+        "validation": {"passed": True, "reasons": []},
+        "media_type": "text/csv",
+        "output_sha256": "0" * 64,
+        "content_b64": base64.b64encode(b"id,label\n1,alpha\n").decode("ascii"),
+    }
+
+    def opener(req: object, timeout: float = 0) -> _FakeResp:
+        return _FakeResp(payload)
+
+    executor = RenderArtifactExecutor(
+        ProDocuXHttpClient("http://example.test/v1", opener=opener)
+    )
+    kernel_request = {
+        "schema_version": "prodocux_render_request_v1",
+        "request_id": "t-mismatch",
+        "target_format": "csv",
+        "content": {
+            "schema_version": "prodocux_content_blocks_v1",
+            "blocks": [{"id": "s1", "type": "sheet", "name": "Sheet", "table": {"rows": [["id"]]}}],
+        },
+        "output": {"output_name": "out.csv", "delivery_mode": "inline"},
+    }
+    with pytest.raises(ValueError, match="output_sha256"):
+        executor({"kernel_request": kernel_request}, tmp_path / "render-mismatch")
+
+
+class _FakeBytesResp:
+    def __init__(self, raw: bytes, status: int = 200) -> None:
+        self._raw = raw
+        self.status = status
+
+    def read(self) -> bytes:
+        return self._raw
+
+    def getcode(self) -> int:
+        return self.status
+
+    def __enter__(self) -> "_FakeBytesResp":
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        return None
+
+
+def test_render_artifact_executor_retrieves_kernel_identity(tmp_path: Path) -> None:
+    raw = b"PK\x03\x04synthetic-docx"
+    digest = hashlib.sha256(raw).hexdigest()
+    payload = {
+        "schema_version": "prodocux_render_result_v1",
+        "status": "completed",
+        "kernel_version": "0.3.0rc1",
+        "renderer_id": "prodocux.blocks.docx",
+        "renderer_version": "0.3.0rc1",
+        "target_format": "docx",
+        "validation": {"passed": True, "reasons": []},
+        "media_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "output_sha256": digest,
+        "artifact": {
+            "schema_version": "prodocux_opaque_artifact_v1",
+            "artifact_id": "out-docx",
+            "uri": "artifact://render/out.docx",
+            "sha256": digest,
+            "size_bytes": len(raw),
+            "media_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        },
+    }
+
+    def opener(req: object, timeout: float = 0) -> object:
+        url = getattr(req, "full_url")
+        if url.endswith("/v1/render/artifact"):
+            return _FakeResp(payload)
+        if url.endswith("/v1/render/artifacts/out-docx"):
+            return _FakeBytesResp(raw)
+        raise AssertionError(url)
+
+    executor = RenderArtifactExecutor(
+        ProDocuXHttpClient("http://example.test/v1", opener=opener)
+    )
+    kernel_request = {
+        "schema_version": "prodocux_render_request_v1",
+        "request_id": "t-artifact",
+        "target_format": "docx",
+        "content": {
+            "schema_version": "prodocux_content_blocks_v1",
+            "blocks": [{"id": "h1", "type": "heading", "level": 1, "text": "T"}],
+        },
+        "output": {"output_name": "out.docx", "delivery_mode": "artifact"},
+    }
+    mapped = executor.execute(
+        {"tool": "prodocux.render_artifact", "inputs": {"kernel_request": kernel_request}},
+        {"output_dir": str(tmp_path / "render-artifact")},
+    )
+    assert mapped["status"] == "completed"
+    assert mapped["artifacts"][0]["uri"] == "artifact://render/out.docx"
+    assert mapped["artifacts"][0]["checksum"] == f"sha256:{digest}"
+    written = tmp_path / "render-artifact" / "out.docx"
+    assert written.read_bytes() == raw
+    assert hashlib.sha256(written.read_bytes()).hexdigest() == digest
+
+
+def test_render_artifact_executor_rejects_retrieved_digest_mismatch(tmp_path: Path) -> None:
+    declared = "0" * 64
+    payload = {
+        "schema_version": "prodocux_render_result_v1",
+        "status": "completed",
+        "kernel_version": "0.1-test",
+        "renderer_id": "prodocux.blocks.docx",
+        "renderer_version": "0.1-test",
+        "target_format": "docx",
+        "validation": {"passed": True, "reasons": []},
+        "media_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "output_sha256": declared,
+        "artifact": {
+            "schema_version": "prodocux_opaque_artifact_v1",
+            "artifact_id": "out-docx",
+            "uri": "artifact://render/out.docx",
+            "sha256": declared,
+            "size_bytes": 4,
+            "media_type": "application/octet-stream",
+        },
+    }
+
+    def opener(req: object, timeout: float = 0) -> object:
+        url = getattr(req, "full_url")
+        if url.endswith("/v1/render/artifact"):
+            return _FakeResp(payload)
+        return _FakeBytesResp(b"real")
+
+    executor = RenderArtifactExecutor(
+        ProDocuXHttpClient("http://example.test/v1", opener=opener)
+    )
+    kernel_request = {
+        "schema_version": "prodocux_render_request_v1",
+        "request_id": "t-artifact-mismatch",
+        "target_format": "docx",
+        "content": {
+            "schema_version": "prodocux_content_blocks_v1",
+            "blocks": [{"id": "h1", "type": "heading", "level": 1, "text": "T"}],
+        },
+        "output": {"output_name": "out.docx", "delivery_mode": "artifact"},
+    }
+    with pytest.raises(ValueError, match="output_sha256"):
+        executor({"kernel_request": kernel_request}, tmp_path / "render-get-mismatch")

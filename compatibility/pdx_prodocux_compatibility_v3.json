@@ -15,6 +15,7 @@
     },
     "additive_operations": [
       "GET /v1/render/capabilities",
+      "GET /v1/render/artifacts/{artifact_id}",
       "POST /v1/content-blocks/validate",
       "POST /v1/render/artifact",
       "POST /v1/intake/extract-blocks"
@@ -42,16 +43,16 @@
     "synthetic": true,
     "prodocux_fixtures": {
       "examples/contracts/g1a/content_blocks.minimal.json": "13c689d348afc11a16b5876f57a2529db0de7ddfbcaced9612ac6364233018a4",
-      "examples/contracts/g1a/render_request.artifact.docx.json": "5d3be9012aac39c53ba94da38a367779c5ac1f9ad52daa4a38a7aa48a910bd9b",
+      "examples/contracts/g1a/render_request.artifact.docx.json": "9ae9d043aaf94aad0065b75954c09df95f28dae2d877f7c1f99036f5d02bd14f",
       "examples/contracts/g1a/render_request.inline.csv.json": "ce96d45208093988bfbe91ca17e31efa8ef86c8bd92e31dbced9eca36fbda33c",
       "examples/contracts/g1a/render_request.reject.gs.json": "5cafb8a7b97ae2e846e5f6957019230689583c476695b5f4cfbeb4a4f40a8fa4",
       "examples/contracts/g1a/render_request.reject.signed_url.json": "a45ab190566f4003d5adf744831c437c5c17000aef41b1cc34340b4f94771803",
-      "examples/contracts/g1a/render_result.renderer_not_available.json": "0323eb5cbe94469704dd08d1e33672f7b2459e4349ad6245159bdffd1e2ad5d5"
+      "examples/contracts/g1a/render_result.artifact.docx.json": "fe9d09eee6c52c9d26e0af97f9df705f14929f80c8ee1ec66ebb7ff54183afff"
     },
     "pdx_fixtures": {
-      "adapters/prodocux/fixtures/g1a/step_receipt.render_artifact.draft.json": "aa5550b834706fa932d4a9978ce5c1792606a8b7fbe1694739b2cea20668925d",
-      "adapters/prodocux/fixtures/g1a/tool_request.render_artifact.draft.json": "d490228bca74ab4b31c2300deada1db4887fe8a525bc6d5d2bbd4dbcb60639a5",
-      "adapters/prodocux/fixtures/g1a/tool_result.render_artifact.draft.json": "5ee33f964e08b1a1a95bcf956438e8b5460c61b7d60efd9e2c335be8afdf881e"
+      "adapters/prodocux/fixtures/g1a/step_receipt.render_artifact.json": "ee3193e75474989b054022a3414980f190c867dad3731275311829c8a59e75af",
+      "adapters/prodocux/fixtures/g1a/tool_request.render_artifact.json": "142eceb876e6951085c3ab02b2a9f8fa61dd2d660125386323a99eb35b6ff202",
+      "adapters/prodocux/fixtures/g1a/tool_result.render_artifact.json": "9ea43f0efb5a5f2352ffbe129b215ceca8d9144c4cfe7e4622b19b33dc4654bb"
     }
   },
   "integration": {

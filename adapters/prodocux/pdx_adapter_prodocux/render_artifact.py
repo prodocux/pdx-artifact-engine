@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -44,26 +45,44 @@ class RenderArtifactExecutor:
             dict(request.get("inputs") or {}),
             Path((context or {}).get("output_dir") or "."),
         )
-        artifacts = [
+        artifacts: list[dict[str, Any]] = []
+        kernel_artifact = result["result"].get("artifact")
+        if isinstance(kernel_artifact, dict) and str(kernel_artifact.get("uri", "")).startswith("artifact://"):
+            artifacts.append(
+                {
+                    "name": str(kernel_artifact.get("artifact_id") or "render-output"),
+                    "uri": str(kernel_artifact["uri"]),
+                    "media_type": str(kernel_artifact.get("media_type") or "application/octet-stream"),
+                    "checksum": f"sha256:{kernel_artifact['sha256']}" if kernel_artifact.get("sha256") else None,
+                    "artifact_id": kernel_artifact.get("artifact_id"),
+                    "size_bytes": kernel_artifact.get("size_bytes"),
+                }
+            )
+        else:
+            rendered = result["outputs"].get("rendered_file")
+            if rendered:
+                artifacts.append(
+                    {
+                        "name": Path(str(rendered)).name,
+                        "uri": f"artifact://{TOOL_ID}/{Path(str(rendered)).name}",
+                        "media_type": result["result"].get("media_type") or "application/octet-stream",
+                        "checksum": f"sha256:{result['result']['output_sha256']}"
+                        if result["result"].get("output_sha256")
+                        else None,
+                    }
+                )
+        artifacts.append(
             {
                 "name": "render_result.json",
                 "uri": f"artifact://{TOOL_ID}/render_result.json",
                 "media_type": "application/json",
             }
-        ]
-        rendered = result["outputs"].get("rendered_file")
-        if rendered:
-            artifacts.append(
-                {
-                    "name": Path(str(rendered)).name,
-                    "uri": f"artifact://{TOOL_ID}/{Path(str(rendered)).name}",
-                    "media_type": result["result"].get("media_type") or "application/octet-stream",
-                }
-            )
+        )
+        artifacts = [{key: value for key, value in item.items() if value is not None} for item in artifacts]
         return {
             "schema_version": "pdx_tool_result_v1",
             "tool": TOOL_ID,
-            "status": "ok" if result["result"].get("status") == "completed" else "failed",
+            "status": "completed" if result["result"].get("status") == "completed" else "failed",
             "outputs": result["outputs"],
             "artifacts": artifacts,
             "detail": result["result"],
@@ -87,14 +106,42 @@ class RenderArtifactExecutor:
             encoding="utf-8",
         )
         outputs: dict[str, Any] = {"render_result.json": report.as_posix(), "result": response}
+        declared = response.get("output_sha256")
         inline = response.get("content_b64")
+        artifact = response.get("artifact")
         if inline:
             name = str((kernel_request.get("output") or {}).get("output_name") or "rendered.bin")
             if "/" in name or "\\" in name or ".." in name:
                 raise ValueError("output_name must be a plain basename")
+            raw = base64.b64decode(inline, validate=True)
+            actual = hashlib.sha256(raw).hexdigest()
+            if not isinstance(declared, str) or actual != declared:
+                raise ValueError("output_sha256 does not match decoded bytes")
             rendered = output_dir / name
-            rendered.write_bytes(base64.b64decode(inline, validate=True))
+            rendered.write_bytes(raw)
             outputs["rendered_file"] = rendered.as_posix()
+        elif isinstance(artifact, dict):
+            uri = str(artifact.get("uri") or "")
+            if not uri.startswith("artifact://"):
+                raise ValueError("artifact identity URI must be artifact://")
+            art_digest = artifact.get("sha256")
+            if declared and art_digest and declared != art_digest:
+                raise ValueError("output_sha256 does not match artifact identity")
+            artifact_id = str(artifact.get("artifact_id") or "")
+            if not artifact_id:
+                raise ValueError("artifact identity is missing artifact_id")
+            raw = self.client.get_artifact_bytes(artifact_id)
+            actual = hashlib.sha256(raw).hexdigest()
+            expected = declared or art_digest
+            if not isinstance(expected, str) or actual != expected:
+                raise ValueError("output_sha256 does not match retrieved artifact bytes")
+            name = str((kernel_request.get("output") or {}).get("output_name") or "rendered.bin")
+            if "/" in name or "\\" in name or ".." in name:
+                raise ValueError("output_name must be a plain basename")
+            rendered = output_dir / name
+            rendered.write_bytes(raw)
+            outputs["rendered_file"] = rendered.as_posix()
+            outputs["artifact"] = dict(artifact)
         return {
             "result": {
                 "status": response.get("status"),
@@ -102,6 +149,7 @@ class RenderArtifactExecutor:
                 "kernel_version": response.get("kernel_version"),
                 "output_sha256": response.get("output_sha256"),
                 "media_type": response.get("media_type"),
+                "artifact": dict(artifact) if isinstance(artifact, dict) else None,
             },
             "files": [report],
             "outputs": outputs,

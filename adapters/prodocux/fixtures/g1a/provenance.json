@@ -1,8 +1,8 @@
 {
-  "fixture_id": "g1a-pdx-render-mapping-draft",
+  "fixture_id": "g1a-pdx-render-mapping",
   "status": "frozen",
   "synthetic": true,
   "upstream_repo": "prodocux/pdx-artifact-engine",
   "source_commit": "cccc9a192d1f773d5bf6b8becbe16e41e3164dd2",
-  "notes": "Frozen to A6 Commit A. Kernel envelope stays on artifact://. gs:// belongs to PDX identity, never the Kernel payload. Filename *.draft.json is retained from the A0 set."
+  "notes": "Frozen successful mapping. Kernel envelope stays on artifact://. gs:// belongs to PDX identity, never the Kernel payload. Template is not sent; hosts map Template Packs to content blocks."
 }
