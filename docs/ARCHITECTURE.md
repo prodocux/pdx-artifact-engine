@@ -15,7 +15,7 @@ hard dependency.
 This separation keeps the runtime local, low-RAM, auditable, and easier to
 commercialize.
 
-## Durable control plane (`0.3.0a1`)
+## Durable control plane (current `0.3.0a2`; introduced in `0.3.0a1`)
 
 PDX Core defines product-neutral, bounded contracts for step receipts, run
 snapshots, checkpoint/decision repository ports, external-operation

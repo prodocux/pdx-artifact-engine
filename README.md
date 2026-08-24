@@ -19,10 +19,10 @@ and the frozen compatibility v1 surface remain available.
 
 | Claim | Status |
 |---|---|
-| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (core 0.3.0a1)** |
+| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (core 0.3.0a2; introduced in 0.3.0a1)** |
 | v0→v1 plan translator (rejects unresolved `expert`) | **Available (core)** |
 | Run state machine (`awaiting_*` → `running`) | **Available (core)** |
-| Bounded run snapshot + step receipt contracts | **Available (core 0.3.0a1)** |
+| Bounded run snapshot + step receipt contracts | **Available (core 0.3.0a2; introduced in 0.3.0a1)** |
 | Checkpoint CAS + decision record-once repository ports | **Available (core)** |
 | Replay-safe pending-only snapshot resume | **Available (engine)** |
 | External-operation pending/unknown/reconcile lifecycle | **Available (core)** |
@@ -34,6 +34,7 @@ and the frozen compatibility v1 surface remain available.
 | Write `artifact_manifest.json` + `run_manifest.json` | Available |
 | `RulePlanner` / `ManualPlanner` | Available (to move out of Core per plan) |
 | ProDocuX HTTP `/v1` adapter | **Available (alpha)** (`adapters/prodocux/`) |
+| ProDocuX deterministic block extraction/render tools | **Available (alpha)** (`prodocux.extract_content_blocks`, `prodocux.render_artifact`) |
 | Real ProDocuX / FreeCAD / Blender subprocess execution | Register executors |
 | `LlamaCppPlanner` / GGUF download / hot-swap | Planned |
 | Shipped `PDX-Core-1B` weights | **Not included** (separate release) |
@@ -62,7 +63,7 @@ first.
 pip install -e ".[dev]"
 ```
 
-Install the A6 ProDocuX extract/render adapter prerelease from PyPI:
+Install the ProDocuX deterministic extract/render adapter prerelease from PyPI:
 
 ```bash
 pip install "pdx-artifact-engine==0.3.0a2"
@@ -75,8 +76,9 @@ and
 
 The older published wheel
 [`pdx-artifact-engine` PyPI `0.3.0a1`](https://pypi.org/project/pdx-artifact-engine/0.3.0a1/)
-predates A6 and must not be overwritten. Frozen compatibility v3 still pins
-Commit A `37e89752560b22dc8724d470dce96187f19e3f98`.
+predates the additive extract/render freeze and must not be overwritten. Frozen
+compatibility v3 still pins implementation commit
+`37e89752560b22dc8724d470dce96187f19e3f98`.
 
 Requires Python 3.11+.
 
@@ -102,6 +104,9 @@ The active coordinated ProDocuX/PDX prerelease surface is recorded in
 [`compatibility/pdx_prodocux_compatibility_v2.json`](compatibility/pdx_prodocux_compatibility_v2.json).
 Additive extract/render pins are recorded in
 [`compatibility/pdx_prodocux_compatibility_v3.json`](compatibility/pdx_prodocux_compatibility_v3.json).
+G1A in that manifest is the frozen synthetic render-conformance fixture set.
+Current tags, package versions, assets, and publication state are recorded in
+[`compatibility/pdx_prodocux_release_v1.json`](compatibility/pdx_prodocux_release_v1.json).
 The immutable v1 manifest remains packaged in the repository as historical
 compatibility evidence.
 
@@ -140,12 +145,12 @@ to document the future shape. Without `--mock`, that plan **blocks**. With
 
 ## Planner providers
 
-| Provider | v0.1.0 |
+| Provider | Current prerelease status |
 |---|---|
 | `ManualPlanner` (`--plan`) | Yes |
 | `RulePlanner` (`--rule-request`) | Yes |
 | `ExternalPlanner` | Stub (raises) |
-| `LlamaCppPlanner` | Stub (raises; reserved for v0.2.0+) |
+| `LlamaCppPlanner` | Stub (raises; planned, not implemented in `0.3.0a2`) |
 | Future `PDXCorePlanner` | Not started |
 
 ## Schemas
@@ -177,6 +182,8 @@ Model weights stay outside git. Describe them with
 
 ```text
 docs/                 Architecture, roadmap, model cards
+packages/             Packaged Core source and schemas
+adapters/             Product-neutral optional integration packages
 schemas/              JSON contracts
 examples/             Plans, fixtures, rule requests, model manifests
 notebooks/kaggle/     Training plans (no weights)
@@ -186,7 +193,7 @@ evals/                Eval notes
 tests/                pytest
 ```
 
-## v0.1.0 release criteria
+## Historical v0.1.0 release criteria
 
 - [x] Apache-2.0 license
 - [x] Unified skill + registry contract
@@ -206,9 +213,13 @@ Apache License 2.0. See [LICENSE](LICENSE).
 
 ## Near-term roadmap
 
-1. Register real ProDocuX skill executors (M1).
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the M0-M8 milestone definitions.
+
+1. Integrate the available ProDocuX HTTP adapter tools into product-owned skill
+   registries and executors (M1).
 2. Convert ProDocuX runs into planner traces.
-3. Train and publish `PDX-Core-1B` out of band; wire `LlamaCppPlanner` (v0.2.0).
+3. Train and publish `PDX-Core-1B` out of band; wire `LlamaCppPlanner` in a
+   future version.
 4. Low-RAM hot-swap runtime (M7).
 
 ## Acknowledgments

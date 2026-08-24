@@ -1,0 +1,46 @@
+{
+  "schema_version": "pdx_prodocux_release_v1",
+  "status": "published",
+  "published_at": "2026-08-24",
+  "compatibility": {
+    "manifest": "pdx_prodocux_compatibility_v3.json",
+    "sha256": "9591ab363472db78efb64265e3050fa4626be43783f848d0888e732898486d2b",
+    "publication_gate_interpretation": "The frozen v3 publication_gate records the pre-release review state and is historical evidence, not the current publication status."
+  },
+  "prodocux": {
+    "distribution": "prodocux",
+    "version": "0.3.0rc2",
+    "tag": "v0.3.0rc2",
+    "release_commit": "ca165e98f3aef1c0449ebc0f5bc47ea4ebe1f5b0",
+    "github_release": "https://github.com/prodocux/prodocux/releases/tag/v0.3.0rc2",
+    "pypi_release": "https://pypi.org/project/prodocux/0.3.0rc2/",
+    "workflow_run": "https://github.com/prodocux/prodocux/actions/runs/32692317376",
+    "files": {
+      "prodocux-0.3.0rc2-py3-none-any.whl": "76fe43d1f1a316502af63dd8490ee47a8562b425ea5544fa3b5d81848fd1cf35",
+      "prodocux-0.3.0rc2.tar.gz": "d3dedfba33af6bc58bf66cdc1d7d98bb2fa9e46b498b045c6573f9a5e57d987e"
+    }
+  },
+  "pdx_artifact_engine": {
+    "distribution": "pdx-artifact-engine",
+    "version": "0.3.0a2",
+    "tag": "v0.3.0a2",
+    "release_commit": "eba0d21ba665720a88546132f4779b4da6eb3beb",
+    "github_release": "https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a2",
+    "pypi_release": "https://pypi.org/project/pdx-artifact-engine/0.3.0a2/",
+    "workflow_run": "https://github.com/prodocux/pdx-artifact-engine/actions/runs/32692340885",
+    "files": {
+      "pdx_artifact_engine-0.3.0a2-py3-none-any.whl": "e4484a41e3e5622c18e391bfcbe546b41e2ff2b5a2bf947bad1d00e8a8194023",
+      "pdx_artifact_engine-0.3.0a2.tar.gz": "46f8e5b7ba776a156e2d1d57fbeb2a8daea9ae5c6c883dd15361ab432ae2c093"
+    }
+  },
+  "pdx_adapter_media": {
+    "distribution": "pdx-adapter-media",
+    "version": "0.2.0a2",
+    "pypi_release": "https://pypi.org/project/pdx-adapter-media/0.2.0a2/",
+    "files": {
+      "pdx_adapter_media-0.2.0a2-py3-none-any.whl": "df25388589ac855ef193b14d64b6d013ce18798f3aec9fe68d787c4e031ea762",
+      "pdx_adapter_media-0.2.0a2.tar.gz": "44f315f80a1006388cc12578792a4377c9e96600ad34cc241cf1ac3777d37316"
+    }
+  }
+}
+

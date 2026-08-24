@@ -57,7 +57,8 @@ token belongs in repository secrets. Future GitHub Releases start the workflow
 automatically; an existing coordinated release can be promoted by manually
 running **Publish release assets to PyPI** with its exact tag.
 
-The A6-containing coordinated packages are:
+The coordinated packages containing the additive ProDocuX deterministic
+extract/render adapter are:
 
 ```powershell
 python -m pip install "pdx-artifact-engine==0.3.0a2"
@@ -108,21 +109,24 @@ separate reproducible-build process verifies them.
 ## Release-candidate freeze
 
 PDX Artifact Engine and Core `0.3.0a2` form the coordinated prerelease that
-distributes the A6 ProDocuX extract/render adapter. The alpha suffix is
+distributes the additive ProDocuX deterministic extract/render adapter. The
+alpha suffix is
 intentional and no stable-API claim is made. The earlier execution-plan, tool
 request/result, verifier-result, workflow-checkpoint, approval, and
 artifact-storage schemas listed in
 `compatibility/pdx_prodocux_compatibility_v1.json` remain frozen. The frozen
 v2 surface still records `0.3.0a1`; that is the contract pin, not the live
-package version. Additive ProDocuX extract/render pins and G1A mapping fixture
-digests are recorded in
-`compatibility/pdx_prodocux_compatibility_v3.json`. v1, v2, and v3 bytes are
-immutable.
+package version. Additive ProDocuX extract/render pins and G1A synthetic
+render-conformance mapping fixture digests are recorded in
+`compatibility/pdx_prodocux_compatibility_v3.json`. Current release tags,
+versions, assets, and publication state are recorded separately in
+`compatibility/pdx_prodocux_release_v1.json`. v1, v2, and v3 bytes are
+immutable; the v3 `publication_gate` is historical pre-release evidence.
 
 The already-published PyPI artifacts for `0.3.0a1` (GitHub Release
-`v0.3.0a1`) predate the A6 ProDocuX extract/render adapter freeze. Those
+`v0.3.0a1`) predate the additive ProDocuX extract/render adapter freeze. Those
 files must not be rebuilt or re-uploaded. Live adapter tools remain pinned by
-compatibility v3 at PDX Commit A
+compatibility v3 at PDX implementation commit
 `37e89752560b22dc8724d470dce96187f19e3f98`. `0.3.0a2` is the PyPI
 distribution of that surface. Do not bump to `0.4.0` for this additive `/v1`
 work.
