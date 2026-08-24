@@ -95,6 +95,19 @@ extract/render pins and G1A mapping fixture digests are recorded in
 `compatibility/pdx_prodocux_compatibility_v3.json`. v1 and v2 bytes are
 immutable.
 
+The already-published PyPI artifacts for `0.3.0a1` (GitHub Release
+`v0.3.0a1`) predate the A6 ProDocuX extract/render adapter freeze. Those
+files must not be rebuilt or re-uploaded. Live adapter tools are pinned by
+compatibility v3 at PDX Commit A
+`cccc9a192d1f773d5bf6b8becbe16e41e3164dd2`. Hosts that need that surface
+must install from git (Commit B includes the v3 manifest) until maintainers
+approve a later prerelease such as `0.3.0a2`. Do not bump to `0.4.0` for
+this additive `/v1` work.
+
+```powershell
+python -m pip install "pdx-artifact-engine @ git+https://github.com/prodocux/pdx-artifact-engine.git@cd8a34590aa68f8eb45ce6544ecf83757c111d86"
+```
+
 - Breaking schema or public primitive changes require a new prerelease version.
 - Security and correctness fixes must preserve existing valid documents or
   explicitly version the affected contract.

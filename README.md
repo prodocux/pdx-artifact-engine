@@ -62,13 +62,17 @@ first.
 pip install -e ".[dev]"
 ```
 
-Install the published PyPI prerelease with:
+The published PyPI prerelease `0.3.0a1` does **not** include the A6
+ProDocuX extract/render adapter tools. Until a later prerelease is
+approved, pin git Commit B:
 
 ```bash
-pip install "pdx-artifact-engine==0.3.0a1"
+pip install "pdx-artifact-engine @ git+https://github.com/prodocux/pdx-artifact-engine.git@cd8a34590aa68f8eb45ce6544ecf83757c111d86"
 ```
 
-See the [`pdx-artifact-engine` PyPI project](https://pypi.org/project/pdx-artifact-engine/0.3.0a1/).
+The older approved wheel remains at
+[`pdx-artifact-engine` PyPI `0.3.0a1`](https://pypi.org/project/pdx-artifact-engine/0.3.0a1/)
+and must not be overwritten.
 
 Requires Python 3.11+.
 
