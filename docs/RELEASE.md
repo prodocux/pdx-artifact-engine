@@ -69,6 +69,25 @@ existing dual-publish workflow can attach new files. It must not re-upload
 already-published `0.2.0a1`. Asset SHA-256 digests for `v0.3.0a2` are recorded
 on the GitHub Release and must match the files promoted to PyPI.
 
+The coordinated release is published at
+<https://pypi.org/project/pdx-artifact-engine/0.3.0a2/> and
+<https://pypi.org/project/pdx-adapter-media/0.2.0a2/> from GitHub Release
+<https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a2>.
+Workflow run `32692340885` promoted all four approved files unchanged. PyPI
+records one matching-digest attestation per file for repository
+`prodocux/pdx-artifact-engine` and workflow `release.yml`, using environment
+`pypi` for Engine and `pypi-media` for Media.
+
+| Asset | SHA-256 |
+|---|---|
+| `pdx_artifact_engine-0.3.0a2-py3-none-any.whl` | `e4484a41e3e5622c18e391bfcbe546b41e2ff2b5a2bf947bad1d00e8a8194023` |
+| `pdx_artifact_engine-0.3.0a2.tar.gz` | `46f8e5b7ba776a156e2d1d57fbeb2a8daea9ae5c6c883dd15361ab432ae2c093` |
+| `pdx_adapter_media-0.2.0a2-py3-none-any.whl` | `df25388589ac855ef193b14d64b6d013ce18798f3aec9fe68d787c4e031ea762` |
+| `pdx_adapter_media-0.2.0a2.tar.gz` | `44f315f80a1006388cc12578792a4377c9e96600ad34cc241cf1ac3777d37316` |
+
+Clean PyPI installation/import checks passed for both distributions, including
+the Engine `pdx-validate` CLI smoke.
+
 The older coordinated packages remain at
 <https://pypi.org/project/pdx-artifact-engine/0.3.0a1/> and
 <https://pypi.org/project/pdx-adapter-media/0.2.0a1/>. Those four PyPI file

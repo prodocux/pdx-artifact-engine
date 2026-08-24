@@ -68,6 +68,11 @@ Install the A6 ProDocuX extract/render adapter prerelease from PyPI:
 pip install "pdx-artifact-engine==0.3.0a2"
 ```
 
+See the
+[`pdx-artifact-engine` PyPI `0.3.0a2` release](https://pypi.org/project/pdx-artifact-engine/0.3.0a2/)
+and
+[GitHub prerelease](https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a2).
+
 The older published wheel
 [`pdx-artifact-engine` PyPI `0.3.0a1`](https://pypi.org/project/pdx-artifact-engine/0.3.0a1/)
 predates A6 and must not be overwritten. Frozen compatibility v3 still pins
