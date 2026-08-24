@@ -3,6 +3,6 @@
   "status": "frozen",
   "synthetic": true,
   "upstream_repo": "prodocux/pdx-artifact-engine",
-  "source_commit": "cccc9a192d1f773d5bf6b8becbe16e41e3164dd2",
+  "source_commit": "814f37467bca4c7550e2c807341644e862d6afe2",
   "notes": "Frozen successful mapping. Kernel envelope stays on artifact://. gs:// belongs to PDX identity, never the Kernel payload. Template is not sent; hosts map Template Packs to content blocks."
 }

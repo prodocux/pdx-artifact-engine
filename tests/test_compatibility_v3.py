@@ -12,7 +12,7 @@ SIBLING = (
     ROOT.parent / 'prodocux' / 'compatibility' / 'pdx_prodocux_compatibility_v3.json'
 )
 FROZEN_V3_MANIFEST_SHA256 = (
-    '904935c8eae2d3c8d068f2addecc5a866996fc1cbd9de8b9fde3a500dcac40e7'
+    '923e8c9ee862ef16c3ccfcb77db329b7b5e5e664498d6498f8a6b371a2ced8e2'
 )
 FROZEN_V2_MANIFEST_SHA256 = (
     'c301aba7442b150b8186ce3b7cd8da99e9470ad0592c13f7f2818d38fd5f378e'
@@ -20,8 +20,8 @@ FROZEN_V2_MANIFEST_SHA256 = (
 FROZEN_V1_MANIFEST_SHA256 = (
     '0b860fc0a5693a96083de1560ff030398e762c9f0c9dc4c0975eceb1d6ca1303'
 )
-PRODOCUX_COMMIT_A = 'fa35cb05b9c4926ecd3b56dc705a1ecacc55ac30'
-PDX_COMMIT_A = 'cccc9a192d1f773d5bf6b8becbe16e41e3164dd2'
+PRODOCUX_COMMIT_A = '9b159bdaadf0f6846da444048708c8489e7e7018'
+PDX_COMMIT_A = '814f37467bca4c7550e2c807341644e862d6afe2'
 _COMMIT_SHA = re.compile(r'^[0-9a-f]{40}$')
 
 

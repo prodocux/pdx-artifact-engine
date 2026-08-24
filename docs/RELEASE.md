@@ -99,7 +99,7 @@ The already-published PyPI artifacts for `0.3.0a1` (GitHub Release
 `v0.3.0a1`) predate the A6 ProDocuX extract/render adapter freeze. Those
 files must not be rebuilt or re-uploaded. Live adapter tools are pinned by
 compatibility v3 at PDX Commit A
-`cccc9a192d1f773d5bf6b8becbe16e41e3164dd2`. Hosts that need that surface
+`814f37467bca4c7550e2c807341644e862d6afe2`. Hosts that need that surface
 must install from git (Commit B includes the v3 manifest) until maintainers
 approve a later prerelease such as `0.3.0a2`. Do not bump to `0.4.0` for
 this additive `/v1` work.

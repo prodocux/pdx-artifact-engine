@@ -11,7 +11,7 @@
     "api_version": "v1",
     "pin": {
       "repo": "prodocux/prodocux",
-      "commit": "fa35cb05b9c4926ecd3b56dc705a1ecacc55ac30"
+      "commit": "9b159bdaadf0f6846da444048708c8489e7e7018"
     },
     "additive_operations": [
       "GET /v1/render/capabilities",
@@ -31,7 +31,7 @@
     "distribution": "pdx-artifact-engine",
     "pin": {
       "repo": "prodocux/pdx-artifact-engine",
-      "commit": "cccc9a192d1f773d5bf6b8becbe16e41e3164dd2"
+      "commit": "814f37467bca4c7550e2c807341644e862d6afe2"
     },
     "additive_tools": [
       "prodocux.extract_content_blocks",
