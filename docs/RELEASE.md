@@ -57,18 +57,22 @@ token belongs in repository secrets. Future GitHub Releases start the workflow
 automatically; an existing coordinated release can be promoted by manually
 running **Publish release assets to PyPI** with its exact tag.
 
-The coordinated packages are published at
-<https://pypi.org/project/pdx-artifact-engine/0.3.0a1/> and
-<https://pypi.org/project/pdx-adapter-media/0.2.0a1/>. All four PyPI file hashes
-match the approved GitHub Release `v0.3.0a1` assets. PyPI records the
-`prodocux/pdx-artifact-engine` and `release.yml` Trusted Publisher identity on
-every file, with environment `pypi` for the main distribution and `pypi-media`
-for the media distribution.
+The A6-containing coordinated packages are:
 
 ```powershell
-python -m pip install "pdx-artifact-engine==0.3.0a1"
-python -m pip install "pdx-adapter-media==0.2.0a1"
+python -m pip install "pdx-artifact-engine==0.3.0a2"
+python -m pip install "pdx-adapter-media==0.2.0a2"
 ```
+
+`0.2.0a2` for `pdx-adapter-media` is a packaging-only coordinated bump so the
+existing dual-publish workflow can attach new files. It must not re-upload
+already-published `0.2.0a1`. Asset SHA-256 digests for `v0.3.0a2` are recorded
+on the GitHub Release and must match the files promoted to PyPI.
+
+The older coordinated packages remain at
+<https://pypi.org/project/pdx-artifact-engine/0.3.0a1/> and
+<https://pypi.org/project/pdx-adapter-media/0.2.0a1/>. Those four PyPI file
+hashes match GitHub Release `v0.3.0a1` and must not be rebuilt.
 
 The approved coordinated `v0.3.0a1` assets are:
 
@@ -84,29 +88,25 @@ separate reproducible-build process verifies them.
 
 ## Release-candidate freeze
 
-PDX Artifact Engine and Core `0.3.0a1` form the coordinated prerelease surface;
-the alpha suffix is intentional and no stable-API claim is made. The earlier
-execution-plan, tool request/result, verifier-result, workflow-checkpoint,
-approval, and artifact-storage schemas listed in
-`compatibility/pdx_prodocux_compatibility_v1.json` remain frozen. The active
-additive 0.3.0a1 surface is recorded in
-`compatibility/pdx_prodocux_compatibility_v2.json`. Additive ProDocuX
-extract/render pins and G1A mapping fixture digests are recorded in
-`compatibility/pdx_prodocux_compatibility_v3.json`. v1 and v2 bytes are
+PDX Artifact Engine and Core `0.3.0a2` form the coordinated prerelease that
+distributes the A6 ProDocuX extract/render adapter. The alpha suffix is
+intentional and no stable-API claim is made. The earlier execution-plan, tool
+request/result, verifier-result, workflow-checkpoint, approval, and
+artifact-storage schemas listed in
+`compatibility/pdx_prodocux_compatibility_v1.json` remain frozen. The frozen
+v2 surface still records `0.3.0a1`; that is the contract pin, not the live
+package version. Additive ProDocuX extract/render pins and G1A mapping fixture
+digests are recorded in
+`compatibility/pdx_prodocux_compatibility_v3.json`. v1, v2, and v3 bytes are
 immutable.
 
 The already-published PyPI artifacts for `0.3.0a1` (GitHub Release
 `v0.3.0a1`) predate the A6 ProDocuX extract/render adapter freeze. Those
-files must not be rebuilt or re-uploaded. Live adapter tools are pinned by
+files must not be rebuilt or re-uploaded. Live adapter tools remain pinned by
 compatibility v3 at PDX Commit A
-`37e89752560b22dc8724d470dce96187f19e3f98`. Hosts that need that surface
-must install from git (Commit B includes the v3 manifest) until maintainers
-approve a later prerelease such as `0.3.0a2`. Do not bump to `0.4.0` for
-this additive `/v1` work.
-
-```powershell
-python -m pip install "pdx-artifact-engine @ git+https://github.com/prodocux/pdx-artifact-engine.git@cd8a34590aa68f8eb45ce6544ecf83757c111d86"
-```
+`37e89752560b22dc8724d470dce96187f19e3f98`. `0.3.0a2` is the PyPI
+distribution of that surface. Do not bump to `0.4.0` for this additive `/v1`
+work.
 
 - Breaking schema or public primitive changes require a new prerelease version.
 - Security and correctness fixes must preserve existing valid documents or

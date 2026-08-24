@@ -9,7 +9,7 @@ checksummed manifests.
 > provider. PDX-5B-1B+ experts are an optional future bundle, not a v0.1.0
 > requirement.
 
-**v0.3.0a1 prerelease:** the repository ships `pdx_artifact_core` execution
+**v0.3.0a2 prerelease:** the repository ships `pdx_artifact_core` execution
 contracts plus bounded snapshots, replay-safe resume primitives, repository
 ports, external-operation reconciliation, execution context/cancellation,
 publication receipts, and ordered run events. Legacy Dispatcher compatibility
@@ -62,17 +62,16 @@ first.
 pip install -e ".[dev]"
 ```
 
-The published PyPI prerelease `0.3.0a1` does **not** include the A6
-ProDocuX extract/render adapter tools. Until a later prerelease is
-approved, pin git Commit B:
+Install the A6 ProDocuX extract/render adapter prerelease from PyPI:
 
 ```bash
-pip install "pdx-artifact-engine @ git+https://github.com/prodocux/pdx-artifact-engine.git@cd8a34590aa68f8eb45ce6544ecf83757c111d86"
+pip install "pdx-artifact-engine==0.3.0a2"
 ```
 
-The older approved wheel remains at
+The older published wheel
 [`pdx-artifact-engine` PyPI `0.3.0a1`](https://pypi.org/project/pdx-artifact-engine/0.3.0a1/)
-and must not be overwritten.
+predates A6 and must not be overwritten. Frozen compatibility v3 still pins
+Commit A `37e89752560b22dc8724d470dce96187f19e3f98`.
 
 Requires Python 3.11+.
 
@@ -86,10 +85,10 @@ pip install ./adapters/media
 Install its coordinated standalone PyPI package with:
 
 ```bash
-pip install "pdx-adapter-media==0.2.0a1"
+pip install "pdx-adapter-media==0.2.0a2"
 ```
 
-See the [`pdx-adapter-media` PyPI project](https://pypi.org/project/pdx-adapter-media/0.2.0a1/).
+See the [`pdx-adapter-media` PyPI project](https://pypi.org/project/pdx-adapter-media/0.2.0a2/).
 
 See [`docs/RELEASE.md`](docs/RELEASE.md) for package boundaries and release
 verification.

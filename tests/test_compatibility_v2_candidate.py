@@ -78,12 +78,12 @@ def test_release_candidate_versions_are_coherent() -> None:
             encoding="utf-8"
         )
     )
-    manifest_version = _manifest()["pdx_artifact_core"]["version"]
-    versions = {
+    frozen_surface_version = _manifest()["pdx_artifact_core"]["version"]
+    package_versions = {
         engine_metadata["project"]["version"],
         core_metadata["project"]["version"],
         pdx_artifact_engine.__version__,
         pdx_artifact_core.__version__,
-        manifest_version,
     }
-    assert versions == {"0.3.0a1"}
+    assert frozen_surface_version == "0.3.0a1"
+    assert package_versions == {"0.3.0a2"}
