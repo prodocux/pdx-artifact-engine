@@ -12,7 +12,7 @@ SIBLING = (
     ROOT.parent / 'prodocux' / 'compatibility' / 'pdx_prodocux_compatibility_v3.json'
 )
 FROZEN_V3_MANIFEST_SHA256 = (
-    '923e8c9ee862ef16c3ccfcb77db329b7b5e5e664498d6498f8a6b371a2ced8e2'
+    '3c0338f9d0e90fd1f2daeb5150cc26b5802e4890b34fb7f2ea936d0b42ee3e63'
 )
 FROZEN_V2_MANIFEST_SHA256 = (
     'c301aba7442b150b8186ce3b7cd8da99e9470ad0592c13f7f2818d38fd5f378e'

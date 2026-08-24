@@ -24,6 +24,36 @@ def _reject_storage_urls(payload: Mapping[str, Any]) -> None:
         raise ValueError("kernel_request must not include path or output URI fields")
 
 
+def _has_inline_bytes(value: object) -> bool:
+    return isinstance(value, str) and value != ""
+
+
+def _has_artifact_identity(value: object) -> bool:
+    return isinstance(value, dict)
+
+
+def _require_completed_delivery_envelope(
+    kernel_request: Mapping[str, Any],
+    response: Mapping[str, Any],
+) -> None:
+    if response.get("status") != "completed":
+        return
+    mode = str((kernel_request.get("output") or {}).get("delivery_mode") or "")
+    has_inline = _has_inline_bytes(response.get("content_b64"))
+    has_artifact = _has_artifact_identity(response.get("artifact"))
+    if has_inline and has_artifact:
+        raise ValueError("completed result must not include both content_b64 and artifact")
+    if mode == "inline":
+        if not has_inline or has_artifact:
+            raise ValueError("inline delivery requires content_b64 and no artifact")
+        return
+    if mode == "artifact":
+        if not has_artifact or has_inline:
+            raise ValueError("artifact delivery requires artifact identity and no content_b64")
+        return
+    raise ValueError("delivery_mode must be inline or artifact")
+
+
 class RenderArtifactExecutor:
     def __init__(self, client: ProDocuXHttpClient | None = None) -> None:
         self.client = client or ProDocuXHttpClient(
@@ -99,6 +129,7 @@ class RenderArtifactExecutor:
             assert_safe_uri(str(uri), label="uri")
         _reject_storage_urls(kernel_request)
         response = self.client.render_artifact(kernel_request)
+        _require_completed_delivery_envelope(kernel_request, response)
         output_dir.mkdir(parents=True, exist_ok=True)
         report = output_dir / "render_result.json"
         report.write_text(

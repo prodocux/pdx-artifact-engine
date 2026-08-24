@@ -617,3 +617,115 @@ def test_render_artifact_executor_rejects_retrieved_digest_mismatch(tmp_path: Pa
     }
     with pytest.raises(ValueError, match="output_sha256"):
         executor({"kernel_request": kernel_request}, tmp_path / "render-get-mismatch")
+
+
+def test_render_artifact_executor_rejects_completed_without_payload(tmp_path: Path) -> None:
+    payload = {
+        "schema_version": "prodocux_render_result_v1",
+        "status": "completed",
+        "kernel_version": "0.1-test",
+        "renderer_id": "prodocux.blocks.csv",
+        "renderer_version": "0.1-test",
+        "target_format": "csv",
+        "validation": {"passed": True, "reasons": []},
+        "media_type": "text/csv",
+        "output_sha256": hashlib.sha256(b"id,label\n1,alpha\n").hexdigest(),
+    }
+
+    def opener(req: object, timeout: float = 0) -> _FakeResp:
+        return _FakeResp(payload)
+
+    executor = RenderArtifactExecutor(
+        ProDocuXHttpClient("http://example.test/v1", opener=opener)
+    )
+    kernel_request = {
+        "schema_version": "prodocux_render_request_v1",
+        "request_id": "t-empty",
+        "target_format": "csv",
+        "content": {
+            "schema_version": "prodocux_content_blocks_v1",
+            "blocks": [{"id": "s1", "type": "sheet", "name": "Sheet", "table": {"rows": [["id"]]}}],
+        },
+        "output": {"output_name": "out.csv", "delivery_mode": "inline"},
+    }
+    with pytest.raises(ValueError, match="content_b64"):
+        executor({"kernel_request": kernel_request}, tmp_path / "render-empty")
+
+
+def test_render_artifact_executor_rejects_both_delivery_envelopes(tmp_path: Path) -> None:
+    raw = b"id,label\n1,alpha\n"
+    digest = hashlib.sha256(raw).hexdigest()
+    payload = {
+        "schema_version": "prodocux_render_result_v1",
+        "status": "completed",
+        "kernel_version": "0.1-test",
+        "renderer_id": "prodocux.blocks.csv",
+        "renderer_version": "0.1-test",
+        "target_format": "csv",
+        "validation": {"passed": True, "reasons": []},
+        "media_type": "text/csv",
+        "output_sha256": digest,
+        "content_b64": base64.b64encode(raw).decode("ascii"),
+        "artifact": {
+            "schema_version": "prodocux_opaque_artifact_v1",
+            "artifact_id": "out-csv",
+            "uri": "artifact://render/out.csv",
+            "sha256": digest,
+            "size_bytes": len(raw),
+            "media_type": "text/csv",
+        },
+    }
+
+    def opener(req: object, timeout: float = 0) -> _FakeResp:
+        return _FakeResp(payload)
+
+    executor = RenderArtifactExecutor(
+        ProDocuXHttpClient("http://example.test/v1", opener=opener)
+    )
+    kernel_request = {
+        "schema_version": "prodocux_render_request_v1",
+        "request_id": "t-both",
+        "target_format": "csv",
+        "content": {
+            "schema_version": "prodocux_content_blocks_v1",
+            "blocks": [{"id": "s1", "type": "sheet", "name": "Sheet", "table": {"rows": [["id"]]}}],
+        },
+        "output": {"output_name": "out.csv", "delivery_mode": "inline"},
+    }
+    with pytest.raises(ValueError, match="both content_b64 and artifact"):
+        executor({"kernel_request": kernel_request}, tmp_path / "render-both")
+
+
+def test_render_artifact_executor_rejects_inline_bytes_for_artifact_mode(tmp_path: Path) -> None:
+    raw = b"id,label\n1,alpha\n"
+    payload = {
+        "schema_version": "prodocux_render_result_v1",
+        "status": "completed",
+        "kernel_version": "0.1-test",
+        "renderer_id": "prodocux.blocks.csv",
+        "renderer_version": "0.1-test",
+        "target_format": "csv",
+        "validation": {"passed": True, "reasons": []},
+        "media_type": "text/csv",
+        "output_sha256": hashlib.sha256(raw).hexdigest(),
+        "content_b64": base64.b64encode(raw).decode("ascii"),
+    }
+
+    def opener(req: object, timeout: float = 0) -> _FakeResp:
+        return _FakeResp(payload)
+
+    executor = RenderArtifactExecutor(
+        ProDocuXHttpClient("http://example.test/v1", opener=opener)
+    )
+    kernel_request = {
+        "schema_version": "prodocux_render_request_v1",
+        "request_id": "t-mode",
+        "target_format": "csv",
+        "content": {
+            "schema_version": "prodocux_content_blocks_v1",
+            "blocks": [{"id": "s1", "type": "sheet", "name": "Sheet", "table": {"rows": [["id"]]}}],
+        },
+        "output": {"output_name": "out.csv", "delivery_mode": "artifact"},
+    }
+    with pytest.raises(ValueError, match="artifact identity"):
+        executor({"kernel_request": kernel_request}, tmp_path / "render-mode")
