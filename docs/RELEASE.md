@@ -89,8 +89,11 @@ the alpha suffix is intentional and no stable-API claim is made. The earlier
 execution-plan, tool request/result, verifier-result, workflow-checkpoint,
 approval, and artifact-storage schemas listed in
 `compatibility/pdx_prodocux_compatibility_v1.json` remain frozen. The active
-additive surface is recorded in
-`compatibility/pdx_prodocux_compatibility_v2.json`.
+additive 0.3.0a1 surface is recorded in
+`compatibility/pdx_prodocux_compatibility_v2.json`. Additive ProDocuX
+extract/render pins and G1A mapping fixture digests are recorded in
+`compatibility/pdx_prodocux_compatibility_v3.json`. v1 and v2 bytes are
+immutable.
 
 - Breaking schema or public primitive changes require a new prerelease version.
 - Security and correctness fixes must preserve existing valid documents or

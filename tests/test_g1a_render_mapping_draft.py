@@ -13,11 +13,14 @@ def _load(name: str) -> dict:
     return json.loads((G1A / name).read_text(encoding="utf-8"))
 
 
-def test_g1a_render_mapping_fixtures_are_draft_and_kernel_envelope_is_artifact_only() -> None:
+PDX_COMMIT_A = "cccc9a192d1f773d5bf6b8becbe16e41e3164dd2"
+
+
+def test_g1a_render_mapping_fixtures_are_frozen_and_kernel_envelope_is_artifact_only() -> None:
     provenance = _load("provenance.json")
-    assert provenance["status"] == "draft"
+    assert provenance["status"] == "frozen"
     assert provenance["synthetic"] is True
-    assert provenance["source_commit"] is None
+    assert provenance["source_commit"] == PDX_COMMIT_A
 
     request = _load("tool_request.render_artifact.draft.json")
     result = _load("tool_result.render_artifact.draft.json")

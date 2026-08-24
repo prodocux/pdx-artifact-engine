@@ -92,6 +92,8 @@ verification.
 
 The active coordinated ProDocuX/PDX prerelease surface is recorded in
 [`compatibility/pdx_prodocux_compatibility_v2.json`](compatibility/pdx_prodocux_compatibility_v2.json).
+Additive extract/render pins are recorded in
+[`compatibility/pdx_prodocux_compatibility_v3.json`](compatibility/pdx_prodocux_compatibility_v3.json).
 The immutable v1 manifest remains packaged in the repository as historical
 compatibility evidence.
 
