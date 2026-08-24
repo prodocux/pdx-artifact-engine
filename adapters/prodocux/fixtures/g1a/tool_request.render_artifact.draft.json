@@ -1,0 +1,37 @@
+{
+  "schema_version": "pdx_tool_request_v1",
+  "tool": "prodocux.render_artifact",
+  "request_id": "g1a-pdx-render-docx",
+  "inputs": {
+    "kernel_request": {
+      "schema_version": "prodocux_render_request_v1",
+      "request_id": "g1a-render-docx-artifact",
+      "target_format": "docx",
+      "content": {
+        "schema_version": "prodocux_content_blocks_v1",
+        "blocks": [
+          {
+            "id": "title",
+            "type": "heading",
+            "level": 1,
+            "text": "Synthetic document"
+          }
+        ]
+      },
+      "template": {
+        "artifact": {
+          "schema_version": "prodocux_opaque_artifact_v1",
+          "artifact_id": "tpl-synthetic-docx",
+          "uri": "artifact://g1a/templates/summary.docx",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size_bytes": 0,
+          "media_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        }
+      },
+      "output": {
+        "output_name": "summary.docx",
+        "delivery_mode": "artifact"
+      }
+    }
+  }
+}

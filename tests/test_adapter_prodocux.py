@@ -18,6 +18,8 @@ from pdx_adapter_prodocux import (
     WorkbookProfileExecutor,
     DocumentProfileExecutor,
     PresentationProfileExecutor,
+    ExtractContentBlocksExecutor,
+    RenderArtifactExecutor,
 )
 from pdx_adapter_prodocux.pdf_extract_pages import resolve_pdf_bytes
 from pdx_adapter_prodocux.validate_structure import resolve_document_path_for_kernel
@@ -387,3 +389,77 @@ def test_presentation_profile_calls_kernel_and_writes_artifact(tmp_path: Path) -
     assert result["result"]["slide_count"] == 1
     assert result["outputs"]["profile"]["interpretation"] == "none"
     assert (tmp_path / "presentation-out" / "presentation_profile.json").is_file()
+
+
+def test_extract_content_blocks_calls_kernel_and_writes_artifact(tmp_path: Path) -> None:
+    payload = {
+        "kernel_version": "0.1-test",
+        "format": "csv",
+        "source_sha256": "e" * 64,
+        "truncated": False,
+        "content": {
+            "schema_version": "prodocux_content_blocks_v1",
+            "blocks": [{"id": "s1", "type": "sheet", "name": "Sheet", "table": {"rows": [["a"]]}}],
+        },
+        "text_items": [{"id": "s1.r1", "type": "sheet_row", "text": "a", "source_locator": "sheet:Sheet/r1"}],
+    }
+
+    def opener(req: object, timeout: float = 0) -> _FakeResp:
+        assert getattr(req, "full_url").endswith("/v1/intake/extract-blocks")
+        return _FakeResp(payload)
+
+    source = tmp_path / "rows.csv"
+    source.write_text("a\n", encoding="utf-8")
+    executor = ExtractContentBlocksExecutor(
+        ProDocuXHttpClient("http://example.test/v1", opener=opener)
+    )
+    result = executor({"document_path": str(source)}, tmp_path / "blocks-out")
+    assert result["result"]["format"] == "csv"
+    assert result["outputs"]["content"]["schema_version"] == "prodocux_content_blocks_v1"
+    assert (tmp_path / "blocks-out" / "content_blocks.json").is_file()
+
+
+def test_render_artifact_executor_writes_inline_file_and_rejects_gs(tmp_path: Path) -> None:
+    payload = {
+        "schema_version": "prodocux_render_result_v1",
+        "status": "completed",
+        "kernel_version": "0.1-test",
+        "renderer_id": "prodocux.blocks.csv",
+        "renderer_version": "0.1-test",
+        "target_format": "csv",
+        "validation": {"passed": True, "reasons": []},
+        "media_type": "text/csv",
+        "output_sha256": "f" * 64,
+        "content_b64": base64.b64encode(b"id,label\n1,alpha\n").decode("ascii"),
+    }
+
+    def opener(req: object, timeout: float = 0) -> _FakeResp:
+        assert getattr(req, "full_url").endswith("/v1/render/artifact")
+        return _FakeResp(payload)
+
+    executor = RenderArtifactExecutor(
+        ProDocuXHttpClient("http://example.test/v1", opener=opener)
+    )
+    kernel_request = {
+        "schema_version": "prodocux_render_request_v1",
+        "request_id": "t1",
+        "target_format": "csv",
+        "content": {
+            "schema_version": "prodocux_content_blocks_v1",
+            "blocks": [{"id": "s1", "type": "sheet", "name": "Sheet", "table": {"rows": [["id"]]}}],
+        },
+        "output": {"output_name": "out.csv", "delivery_mode": "inline"},
+    }
+    result = executor({"kernel_request": kernel_request}, tmp_path / "render-out")
+    assert result["result"]["status"] == "completed"
+    assert (tmp_path / "render-out" / "out.csv").read_bytes().startswith(b"id,label")
+    with pytest.raises(ValueError, match="storage URLs"):
+        executor(
+            {
+                "kernel_request": {
+                    **kernel_request,
+                    "template": {"artifact": {"uri": "gs://bucket/obj"}},
+                }
+            },
+            tmp_path / "render-bad",
+        )

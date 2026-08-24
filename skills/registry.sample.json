@@ -110,6 +110,42 @@
       "verification_hooks": ["structure_health"]
     },
     {
+      "name": "prodocux.extract_content_blocks",
+      "version": "0.1.0",
+      "domain": "document",
+      "description": "Extract product-neutral content blocks from PDF/CSV/DOCX/XLSX/PPTX via Kernel POST /v1/intake/extract-blocks.",
+      "entrypoint": "pdx_adapter_prodocux:make_extract_content_blocks_executor",
+      "inputs": ["document_path"],
+      "outputs": ["content_blocks.json"],
+      "artifacts": ["content_blocks.json"],
+      "failure_codes": [
+        {
+          "code": "EXTRACT_BLOCKS_FAILED",
+          "meaning": "Kernel extract-blocks call failed or the document could not be parsed",
+          "retryable": true
+        }
+      ],
+      "verification_hooks": ["schema_valid"]
+    },
+    {
+      "name": "prodocux.render_artifact",
+      "version": "0.1.0",
+      "domain": "document",
+      "description": "Render content blocks to a 5-format binary via Kernel POST /v1/render/artifact.",
+      "entrypoint": "pdx_adapter_prodocux:make_render_artifact_executor",
+      "inputs": ["kernel_request"],
+      "outputs": ["render_result.json"],
+      "artifacts": ["render_result.json"],
+      "failure_codes": [
+        {
+          "code": "RENDER_ARTIFACT_FAILED",
+          "meaning": "Kernel render-artifact call failed",
+          "retryable": true
+        }
+      ],
+      "verification_hooks": ["magic_valid"]
+    },
+    {
       "name": "freecad.generate_cad",
       "version": "0.0.1",
       "domain": "3d",

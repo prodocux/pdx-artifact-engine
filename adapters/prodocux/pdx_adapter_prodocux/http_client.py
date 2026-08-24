@@ -133,6 +133,22 @@ class ProDocuXHttpClient:
             },
         )
 
+    def extract_content_blocks(
+        self, *, document_b64: str, document_filename: str
+    ) -> dict[str, Any]:
+        """``POST /v1/intake/extract-blocks``."""
+        return self.post_json(
+            "intake/extract-blocks",
+            {
+                "document_b64": document_b64,
+                "document_filename": document_filename,
+            },
+        )
+
+    def render_artifact(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """``POST /v1/render/artifact``."""
+        return self.post_json("render/artifact", payload)
+
     def profile_workbook(
         self, *, document_b64: str, document_filename: str
     ) -> dict[str, Any]:

@@ -21,6 +21,11 @@ from .presentation_profile import (
     PresentationProfileExecutor,
     make_presentation_profile_executor,
 )
+from .extract_content_blocks import (
+    ExtractContentBlocksExecutor,
+    make_extract_content_blocks_executor,
+)
+from .render_artifact import RenderArtifactExecutor, make_render_artifact_executor
 
 __all__ = [
     "ProDocuXHttpClient",
@@ -39,4 +44,8 @@ __all__ = [
     "make_document_profile_executor",
     "PresentationProfileExecutor",
     "make_presentation_profile_executor",
+    "ExtractContentBlocksExecutor",
+    "make_extract_content_blocks_executor",
+    "RenderArtifactExecutor",
+    "make_render_artifact_executor",
 ]
