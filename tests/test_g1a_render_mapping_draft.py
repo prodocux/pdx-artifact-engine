@@ -13,7 +13,7 @@ def _load(name: str) -> dict:
     return json.loads((G1A / name).read_text(encoding="utf-8"))
 
 
-PDX_COMMIT_A = "814f37467bca4c7550e2c807341644e862d6afe2"
+PDX_COMMIT_A = "37e89752560b22dc8724d470dce96187f19e3f98"
 
 
 def test_g1a_render_mapping_fixtures_are_frozen_and_kernel_envelope_is_artifact_only() -> None:
