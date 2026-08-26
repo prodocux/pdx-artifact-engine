@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/phase0/pdx_internal_job_create_v1.schema.json",
+  "title": "PDX private job create v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "job_id",
+    "operation",
+    "subject",
+    "input_digest",
+    "operation_digest",
+    "idempotency_key",
+    "correlation_id",
+    "request_id",
+    "deadline_at",
+    "kernel_contract",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_job_create_v1"},
+    "job_id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9_.-]+$"},
+    "operation": {
+      "enum": [
+        "intake_document",
+        "render_artifact",
+        "validate_structure",
+        "compare_normalized_profiles",
+        "verify_evidence"
+      ]
+    },
+    "subject": {"$ref": "#/$defs/subject"},
+    "input_digest": {"$ref": "#/$defs/sha256"},
+    "operation_digest": {"$ref": "#/$defs/sha256"},
+    "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 256},
+    "correlation_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "deadline_at": {"type": "string", "format": "date-time"},
+    "kernel_contract": {"const": "v1"},
+    "payload": {"$ref": "#/$defs/payload"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binding_id", "revision"],
+      "properties": {
+        "binding_id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9_.-]+$"},
+        "revision": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9_.-]+$"}
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "media_type",
+        "filename",
+        "content_b64",
+        "decoded_size_bytes"
+      ],
+      "properties": {
+        "encoding": {"const": "base64"},
+        "media_type": {
+          "enum": [
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "text/csv",
+            "application/json",
+            "image/jpeg",
+            "image/png"
+          ]
+        },
+        "filename": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 180,
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
+        "content_b64": {"type": "string", "minLength": 4, "maxLength": 44739244},
+        "decoded_size_bytes": {"type": "integer", "minimum": 1, "maximum": 33554432}
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "pdx_internal_job_status_v1",
+  "job_id": "job-example-1",
+  "operation": "intake_document",
+  "state": "pending",
+  "input_digest": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
+  "operation_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "idempotency_key": "job-example-1:intake_document",
+  "correlation_id": "correlation-example-1",
+  "request_id": "request-example-1",
+  "kernel_contract": "v1",
+  "content_b64": "YQ=="
+}

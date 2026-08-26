@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/phase0/pdx_internal_job_status_v1.schema.json",
+  "title": "PDX private job status v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "job_id",
+    "operation",
+    "state",
+    "input_digest",
+    "operation_digest",
+    "idempotency_key",
+    "correlation_id",
+    "request_id",
+    "kernel_contract"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_job_status_v1"},
+    "job_id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9_.-]+$"},
+    "run_id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9_.-]+$"},
+    "operation": {
+      "enum": [
+        "intake_document",
+        "render_artifact",
+        "validate_structure",
+        "compare_normalized_profiles",
+        "verify_evidence"
+      ]
+    },
+    "state": {
+      "enum": [
+        "pending",
+        "running",
+        "awaiting_tool",
+        "awaiting_approval",
+        "completed",
+        "completed_with_review",
+        "failed",
+        "blocked",
+        "cancelled",
+        "timed_out"
+      ]
+    },
+    "input_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "operation_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 256},
+    "correlation_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "kernel_contract": {"const": "v1"},
+    "staging": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "handle",
+        "sha256",
+        "size_bytes",
+        "media_type",
+        "expires_at"
+      ],
+      "properties": {
+        "schema_version": {"const": "pdx_staging_handle_v1"},
+        "handle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^stg_[A-Za-z0-9_-]+$"
+        },
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "size_bytes": {"type": "integer", "minimum": 1, "maximum": 33554432},
+        "media_type": {"type": "string", "minLength": 1, "maxLength": 128},
+        "expires_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "ok",
+        "code",
+        "message",
+        "retryable",
+        "request_id",
+        "correlation_id"
+      ],
+      "properties": {
+        "schema_version": {"const": "pdx_internal_error_v1"},
+        "ok": {"const": false},
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "message": {"type": "string", "minLength": 1, "maxLength": 1024},
+        "retryable": {"type": "boolean"},
+        "request_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "correlation_id": {"type": "string", "minLength": 1, "maxLength": 128}
+      }
+    }
+  }
+}

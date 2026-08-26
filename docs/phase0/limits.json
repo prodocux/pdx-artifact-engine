@@ -1,0 +1,43 @@
+{
+  "schema_version": "pdx_phase0_limits_v1",
+  "max_decoded_bytes": 33554432,
+  "max_encoded_bytes": 44739244,
+  "staging_ttl_seconds_default": 3600,
+  "staging_ttl_seconds_max": 86400,
+  "staging_dir_mode": "0700",
+  "staging_root": "/var/lib/pdx-engine/staging",
+  "request_body_logging": false,
+  "host_consumer_may_apply_stricter_ceilings": true,
+  "shared_writable_volume_with_application_host": false,
+  "shared_writable_volume_with_kernel_output": false,
+  "media_types": [
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "text/csv",
+    "application/json",
+    "image/jpeg",
+    "image/png"
+  ],
+  "filename_suffixes": [".pdf", ".docx", ".xlsx", ".pptx", ".csv", ".json", ".jpg", ".jpeg", ".png"],
+  "operations": [
+    "intake_document",
+    "render_artifact",
+    "validate_structure",
+    "compare_normalized_profiles",
+    "verify_evidence"
+  ],
+  "run_states": [
+    "pending",
+    "running",
+    "awaiting_tool",
+    "awaiting_approval",
+    "completed",
+    "completed_with_review",
+    "failed",
+    "blocked",
+    "cancelled",
+    "timed_out"
+  ]
+}

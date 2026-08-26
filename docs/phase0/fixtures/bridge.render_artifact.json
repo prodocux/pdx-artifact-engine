@@ -1,0 +1,8 @@
+{
+  "schema_version": "pdx_engine_kernel_bridge_v1",
+  "operation": "render_artifact",
+  "kernel_method": "POST",
+  "kernel_path": "/v1/render/artifact",
+  "identity_scheme": "artifact",
+  "forbidden_identity_schemes": ["gs", "file", "http", "https"]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/phase0/pdx_phase0_e05_route_mapping_v1.schema.json",
+  "title": "PDX Phase 0 E-05 route mapping v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "base_path", "error_schema", "routes"],
+  "properties": {
+    "schema_version": {"const": "pdx_phase0_e05_route_mapping_v1"},
+    "base_path": {"const": "/internal/v1"},
+    "error_schema": {"const": "pdx_internal_error_v1"},
+    "routes": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "method",
+          "path",
+          "request_schema",
+          "request_example",
+          "success_status",
+          "success_schema",
+          "success_example"
+        ],
+        "properties": {
+          "method": {"enum": ["GET", "POST"]},
+          "path": {"type": "string", "minLength": 1, "maxLength": 128},
+          "request_schema": {"type": ["string", "null"], "maxLength": 128},
+          "request_example": {"type": ["string", "null"], "maxLength": 256},
+          "success_status": {"type": "integer", "minimum": 200, "maximum": 299},
+          "success_schema": {"type": "string", "minLength": 1, "maxLength": 128},
+          "success_example": {"type": "string", "minLength": 1, "maxLength": 256},
+          "conflict_status": {"const": 409},
+          "not_found_status": {"const": 404},
+          "validation_status": {"const": 400}
+        }
+      }
+    }
+  }
+}

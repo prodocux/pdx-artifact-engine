@@ -1,0 +1,23 @@
+{
+  "schema_version": "pdx_internal_job_create_v1",
+  "job_id": "job-example-1",
+  "operation": "intake_document",
+  "subject": {
+    "binding_id": "subject-example-1",
+    "revision": "rev-1"
+  },
+  "input_digest": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
+  "operation_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "idempotency_key": "job-example-1:intake_document",
+  "correlation_id": "correlation-example-1",
+  "request_id": "request-example-1",
+  "deadline_at": "2026-08-26T12:00:00Z",
+  "kernel_contract": "v1",
+  "payload": {
+    "encoding": "base64",
+    "media_type": "application/pdf",
+    "filename": "document.pdf",
+    "content_b64": "YQ==",
+    "decoded_size_bytes": 1
+  }
+}

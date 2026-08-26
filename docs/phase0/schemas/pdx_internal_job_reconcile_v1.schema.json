@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/phase0/pdx_internal_job_reconcile_v1.schema.json",
+  "title": "PDX private job reconcile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "job_id", "request_id", "correlation_id"],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_job_reconcile_v1"},
+    "job_id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9_.-]+$"},
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "correlation_id": {"type": "string", "minLength": 1, "maxLength": 128}
+  }
+}

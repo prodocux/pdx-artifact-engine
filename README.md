@@ -181,7 +181,7 @@ Model weights stay outside git. Describe them with
 ## Repository layout
 
 ```text
-docs/                 Architecture, roadmap, model cards
+docs/                 Architecture, roadmap, model cards, Phase 0 contracts
 packages/             Packaged Core source and schemas
 adapters/             Product-neutral optional integration packages
 schemas/              JSON contracts
@@ -214,6 +214,7 @@ Apache License 2.0. See [LICENSE](LICENSE).
 ## Near-term roadmap
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the M0-M8 milestone definitions.
+Phase 0 private-job paper freeze: [`docs/PHASE0_DECISIONS.md`](docs/PHASE0_DECISIONS.md).
 
 1. Integrate the available ProDocuX HTTP adapter tools into product-owned skill
    registries and executors (M1).

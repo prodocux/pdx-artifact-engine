@@ -1,0 +1,9 @@
+{
+  "schema_version": "pdx_internal_error_v1",
+  "ok": false,
+  "code": "DIGEST_CONFLICT",
+  "message": "idempotency key reused with a different operation digest",
+  "retryable": false,
+  "request_id": "request-example-2",
+  "correlation_id": "correlation-example-1"
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/phase0/pdx_prodocux_artifact_identity_profile_v1.schema.json",
+  "title": "PDX ProDocuX hop artifact identity profile v1",
+  "description": "Restricts Engine to Kernel identities at the ProDocuX integration boundary. Does not mutate generic Core artifact_storage_identity.v1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_id",
+    "uri",
+    "sha256",
+    "size_bytes",
+    "media_type"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_prodocux_artifact_identity_profile_v1"},
+    "artifact_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "uri": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^artifact://[a-zA-Z0-9_-]+/(?!(?:.*/)?\\.\\.(?:/|$))(?!(?:.*/)?\\.(?:/|$))[a-zA-Z0-9/_.-]+$"
+    },
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "size_bytes": {"type": "integer", "minimum": 0, "maximum": 104857600},
+    "media_type": {"type": "string", "minLength": 1, "maxLength": 128},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

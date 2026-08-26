@@ -1,0 +1,8 @@
+{
+  "schema_version": "pdx_engine_kernel_bridge_v1",
+  "operation": "verify_evidence",
+  "kernel_method": "POST",
+  "kernel_path": "/v1/verify/evidence-bundle",
+  "identity_scheme": "artifact",
+  "forbidden_identity_schemes": ["gs", "file", "http", "https"]
+}

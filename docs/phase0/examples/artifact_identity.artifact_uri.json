@@ -1,0 +1,9 @@
+{
+  "schema_version": "pdx_prodocux_artifact_identity_profile_v1",
+  "artifact_id": "artifact-example-1",
+  "uri": "artifact://sink/summary.pdf",
+  "sha256": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
+  "size_bytes": 128,
+  "media_type": "application/pdf",
+  "created_at": "2026-08-26T12:00:00Z"
+}

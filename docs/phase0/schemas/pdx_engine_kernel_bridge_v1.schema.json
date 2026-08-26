@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/phase0/pdx_engine_kernel_bridge_v1.schema.json",
+  "title": "PDX Engine to Kernel bridge mapping v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "operation",
+    "kernel_method",
+    "kernel_path",
+    "identity_scheme",
+    "forbidden_identity_schemes"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_engine_kernel_bridge_v1"},
+    "operation": {
+      "enum": [
+        "intake_document",
+        "render_artifact",
+        "validate_structure",
+        "compare_normalized_profiles",
+        "verify_evidence"
+      ]
+    },
+    "kernel_method": {"const": "POST"},
+    "kernel_path": {
+      "enum": [
+        "/v1/intake/extract-blocks",
+        "/v1/render/artifact",
+        "/v1/validate-structure",
+        "/v1/compare/normalized-profiles",
+        "/v1/verify/evidence-bundle",
+        "/v1/content-blocks/validate"
+      ]
+    },
+    "identity_scheme": {"const": "artifact"},
+    "forbidden_identity_schemes": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {"enum": ["gs", "file", "http", "https", "s3"]}
+    }
+  }
+}

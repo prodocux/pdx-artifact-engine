@@ -1,0 +1,7 @@
+{
+  "schema_version": "pdx_internal_job_cancel_v1",
+  "job_id": "job-example-1",
+  "request_id": "request-cancel-1",
+  "correlation_id": "correlation-example-1",
+  "reason_code": "CANCELLED"
+}
