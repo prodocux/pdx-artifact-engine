@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/phase1/pdx_internal_job_result_v1.schema.json",
+  "title": "PDX private job result v1 (Phase 1 additive)",
+  "description": "Exact item body for GET /internal/v1/jobs/{job_id}/result and entries in GET .../results. Does not modify pdx_internal_job_status_v1. kind is bound to URI namespace: materialized_source→artifact://intake/…; processing_output→artifact://derived|sink|render/…. Bytes never appear on this wire.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "job_id",
+    "kind",
+    "artifact"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_job_result_v1"},
+    "job_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "kind": {
+      "enum": ["materialized_source", "processing_output"],
+      "description": "materialized_source=intake bytes; processing_output=derived/render output artifact."
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "artifact_id",
+        "uri",
+        "sha256",
+        "size_bytes",
+        "media_type"
+      ],
+      "properties": {
+        "schema_version": {"const": "prodocux_opaque_artifact_v1"},
+        "artifact_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "uri": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^artifact://(intake|derived|sink|render)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)?$"
+        },
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "size_bytes": {"type": "integer", "minimum": 0, "maximum": 104857600},
+        "media_type": {"type": "string", "minLength": 1, "maxLength": 128}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"kind": {"const": "materialized_source"}},
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "artifact": {
+            "properties": {
+              "uri": {
+                "type": "string",
+                "pattern": "^artifact://intake/[A-Za-z0-9_-]+/[A-Za-z0-9._-]+$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"kind": {"const": "processing_output"}},
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "artifact": {
+            "properties": {
+              "uri": {
+                "type": "string",
+                "pattern": "^artifact://(derived|sink|render)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)?$"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

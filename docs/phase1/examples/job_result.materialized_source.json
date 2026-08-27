@@ -1,0 +1,13 @@
+{
+  "schema_version": "pdx_internal_job_result_v1",
+  "job_id": "job-example-1",
+  "kind": "materialized_source",
+  "artifact": {
+    "schema_version": "prodocux_opaque_artifact_v1",
+    "artifact_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "uri": "artifact://intake/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/document.pdf",
+    "sha256": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
+    "size_bytes": 1,
+    "media_type": "application/pdf"
+  }
+}

@@ -1,0 +1,398 @@
+"""Private job worker: claim → Kernel artifact hop → terminal status.
+
+Phase 1 dock slice:
+
+``intake_document``
+1. Read Engine staging bytes ephemerally
+2. ``POST /v1/intake/materialize`` once (Kernel-owned ``artifact://intake/…``)
+3. ``POST /v1/intake/extract-blocks`` with ``document_artifact`` (no b64)
+4. Persist extract JSON via ``POST /v1/artifacts/derived`` (``processing_output``)
+5. Persist result list; ``GET …/result`` prefers ``materialized_source``
+
+``render_artifact``
+1. Staging bytes are the Kernel render request JSON
+2. ``POST /v1/render/artifact``
+3. Persist ``processing_output`` from Kernel artifact / derived store
+"""
+
+from __future__ import annotations
+
+import base64
+import hashlib
+import json
+import os
+import socket
+import time
+from dataclasses import dataclass
+from typing import Any, Protocol
+
+from pdx_artifact_engine.jobs import TERMINAL_STATES, JobRecord, JobStore
+from pdx_artifact_engine.jobs.service import JobService
+from pdx_artifact_engine.staging import StagingStore
+
+
+class KernelClient(Protocol):
+    def materialize_intake(
+        self,
+        *,
+        document_b64: str,
+        document_filename: str,
+        media_type: str,
+        sha256: str | None = None,
+    ) -> dict[str, Any]: ...
+
+    def extract_content_blocks_from_artifact(
+        self, *, document_artifact: dict[str, Any], document_filename: str
+    ) -> dict[str, Any]: ...
+
+    def store_derived(
+        self,
+        *,
+        output_name: str,
+        content_b64: str,
+        media_type: str,
+        sha256: str | None = None,
+    ) -> dict[str, Any]: ...
+
+    def render_artifact(self, payload: dict[str, Any]) -> dict[str, Any]: ...
+
+
+def _result_item(
+    *,
+    job_id: str,
+    kind: str,
+    artifact: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "schema_version": "pdx_internal_job_result_v1",
+        "job_id": job_id,
+        "kind": kind,
+        "artifact": {
+            "schema_version": "prodocux_opaque_artifact_v1",
+            "artifact_id": artifact["artifact_id"],
+            "uri": artifact["uri"],
+            "sha256": artifact["sha256"],
+            "size_bytes": artifact["size_bytes"],
+            "media_type": artifact["media_type"],
+        },
+    }
+
+
+@dataclass
+class JobWorker:
+    store: JobStore
+    staging: StagingStore
+    service: JobService
+    kernel: KernelClient
+    owner: str = "worker-1"
+    lease_seconds: int = 60
+    max_attempts: int = 3
+    poll_seconds: float = 0.5
+
+    def run_once(self) -> JobRecord | None:
+        claimed = self.store.claim_next(
+            owner=self.owner,
+            lease_seconds=self.lease_seconds,
+            max_attempts=self.max_attempts,
+        )
+        if claimed is None:
+            return None
+        self._process(claimed)
+        return self.store.get(claimed.job_id)
+
+    def run_forever(self, *, max_jobs: int | None = None) -> int:
+        done = 0
+        while max_jobs is None or done < max_jobs:
+            record = self.run_once()
+            if record is None:
+                time.sleep(self.poll_seconds)
+                continue
+            done += 1
+        return done
+
+    def _process(self, record: JobRecord) -> None:
+        latest = self.store.get(record.job_id)
+        if latest is None or latest.state in TERMINAL_STATES:
+            return
+        if latest.state == "cancelled":
+            return
+
+        staging = latest.document.get("staging")
+        if not isinstance(staging, dict) or "handle" not in staging:
+            self.service._finalize(
+                latest,
+                state="failed",
+                error=self._error(latest, "STAGING_MISSING", "staging handle absent"),
+            )
+            return
+
+        handle = str(staging["handle"])
+        payload = self.staging.read_bytes(handle)
+        if payload is None:
+            self.service._finalize(
+                latest,
+                state="failed",
+                error=self._error(
+                    latest, "STAGING_MISSING", "staging bytes missing or expired"
+                ),
+            )
+            return
+
+        digest = hashlib.sha256(payload).hexdigest()
+        if digest != latest.document.get("input_digest"):
+            self.service._finalize(
+                latest,
+                state="failed",
+                error=self._error(
+                    latest, "DIGEST_MISMATCH", "staging digest diverged from job"
+                ),
+            )
+            return
+
+        operation = latest.document.get("operation")
+        if operation == "intake_document":
+            self._run_intake(latest, handle, payload, digest)
+            return
+        if operation == "render_artifact":
+            self._run_render(latest, handle, payload)
+            return
+
+        self.service._finalize(
+            latest,
+            state="blocked",
+            error=self._error(
+                latest,
+                "OPERATION_UNSUPPORTED",
+                f"worker does not yet execute {operation}",
+            ),
+        )
+
+    def _run_intake(
+        self,
+        latest: JobRecord,
+        handle: str,
+        payload: bytes,
+        digest: str,
+    ) -> None:
+        document_b64 = base64.b64encode(payload).decode("ascii")
+        payload = b""
+        try:
+            identity = self.kernel.materialize_intake(
+                document_b64=document_b64,
+                document_filename=latest.payload_filename,
+                media_type=latest.payload_media_type,
+                sha256=digest,
+            )
+            document_b64 = ""
+            if not str(identity.get("uri", "")).startswith("artifact://"):
+                raise RuntimeError("kernel materialize did not return artifact://")
+            extract = self.kernel.extract_content_blocks_from_artifact(
+                document_artifact=identity,
+                document_filename=latest.payload_filename,
+            )
+            extract_bytes = json.dumps(
+                extract, ensure_ascii=True, separators=(",", ":")
+            ).encode("utf-8")
+            extract_digest = hashlib.sha256(extract_bytes).hexdigest()
+            derived = self.kernel.store_derived(
+                output_name="content_blocks.json",
+                content_b64=base64.b64encode(extract_bytes).decode("ascii"),
+                media_type="application/json",
+                sha256=extract_digest,
+            )
+            extract_bytes = b""
+            if not str(derived.get("uri", "")).startswith("artifact://derived/"):
+                raise RuntimeError("kernel derived store did not return artifact://derived/")
+        except Exception:  # noqa: BLE001
+            document_b64 = ""
+            self._maybe_retry_or_fail(latest)
+            return
+
+        latest = self.store.get(latest.job_id)
+        if latest is None:
+            return
+        if latest.state == "cancelled" or latest.state in TERMINAL_STATES:
+            self.staging.delete(handle)
+            return
+
+        latest.result = [
+            _result_item(
+                job_id=latest.job_id,
+                kind="materialized_source",
+                artifact=identity,
+            ),
+            _result_item(
+                job_id=latest.job_id,
+                kind="processing_output",
+                artifact=derived,
+            ),
+        ]
+        self.store.update(latest)
+        self.service._finalize(latest, state="completed", error=None)
+
+    def _run_render(
+        self,
+        latest: JobRecord,
+        handle: str,
+        payload: bytes,
+    ) -> None:
+        try:
+            request = json.loads(payload.decode("utf-8"))
+            if not isinstance(request, dict):
+                raise ValueError("render request must be a JSON object")
+            output = request.get("output")
+            if isinstance(output, dict) and output.get("delivery_mode") != "artifact":
+                # Private Engine path always asks Kernel for artifact delivery.
+                request = dict(request)
+                request["output"] = {
+                    **output,
+                    "delivery_mode": "artifact",
+                }
+            response = self.kernel.render_artifact(request)
+            artifact = response.get("artifact")
+            if isinstance(artifact, dict) and str(artifact.get("uri", "")).startswith(
+                "artifact://"
+            ):
+                processing = artifact
+            elif isinstance(response.get("content_b64"), str):
+                raw = base64.b64decode(response["content_b64"], validate=True)
+                name = "render.bin"
+                if isinstance(output, dict) and output.get("output_name"):
+                    name = str(output["output_name"])
+                processing = self.kernel.store_derived(
+                    output_name=_safe_output_name(name),
+                    content_b64=base64.b64encode(raw).decode("ascii"),
+                    media_type=str(
+                        response.get("media_type") or "application/octet-stream"
+                    ),
+                    sha256=hashlib.sha256(raw).hexdigest(),
+                )
+            else:
+                raise RuntimeError("kernel render returned neither artifact nor content")
+        except Exception:  # noqa: BLE001
+            self._maybe_retry_or_fail(latest)
+            return
+
+        latest = self.store.get(latest.job_id)
+        if latest is None:
+            return
+        if latest.state == "cancelled" or latest.state in TERMINAL_STATES:
+            self.staging.delete(handle)
+            return
+
+        latest.result = [
+            _result_item(
+                job_id=latest.job_id,
+                kind="processing_output",
+                artifact=processing,
+            )
+        ]
+        self.store.update(latest)
+        self.service._finalize(latest, state="completed", error=None)
+
+    def _maybe_retry_or_fail(self, latest: JobRecord) -> None:
+        retryable = latest.attempt_count < self.max_attempts
+        if retryable:
+            latest.state = "pending"
+            latest.lease_owner = None
+            latest.lease_expires_unix = None
+            doc = dict(latest.document)
+            doc["state"] = "pending"
+            latest.document = doc
+            self.store.update(latest)
+            return
+        self.service._finalize(
+            latest,
+            state="failed",
+            error=self._error(
+                latest,
+                "KERNEL_CALL_FAILED",
+                "kernel call failed after attempts",
+                retryable=False,
+            ),
+        )
+
+    def _error(
+        self,
+        record: JobRecord,
+        code: str,
+        message: str,
+        *,
+        retryable: bool = False,
+    ) -> dict[str, Any]:
+        return {
+            "schema_version": "pdx_internal_error_v1",
+            "ok": False,
+            "code": code,
+            "message": message,
+            "retryable": retryable,
+            "request_id": str(record.document.get("request_id") or "unknown"),
+            "correlation_id": str(record.document.get("correlation_id") or "unknown"),
+        }
+
+
+def _safe_output_name(name: str) -> str:
+    """Keep only a basename-safe output name for derived store."""
+    base = name.replace("\\", "/").split("/")[-1]
+    if not base or base in {".", ".."}:
+        return "render.bin"
+    return base[:127]
+
+
+def build_default_kernel_client():
+    from pdx_adapter_prodocux.http_client import (
+        ProDocuXHttpClient,
+        build_client_ssl_context,
+    )
+
+    base = os.environ.get("PDX_KERNEL_BASE_URL", "http://127.0.0.1:8900/v1")
+    token = os.environ.get("PRODOCUX_BEARER_TOKEN", "").strip() or None
+    return ProDocuXHttpClient(
+        base_url=base,
+        bearer_token=token,
+        ssl_context=build_client_ssl_context(),
+    )
+
+
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+    from pathlib import Path
+
+    parser = argparse.ArgumentParser(description="PDX Engine private job worker")
+    parser.add_argument(
+        "--db",
+        default=os.environ.get("PDX_ENGINE_JOB_DB", "./.pdx-engine/jobs.sqlite3"),
+    )
+    parser.add_argument(
+        "--staging",
+        default=os.environ.get("PDX_ENGINE_STAGING_ROOT", "./.pdx-engine/staging"),
+    )
+    parser.add_argument(
+        "--owner",
+        default=os.environ.get("PDX_ENGINE_WORKER_OWNER", socket.gethostname()),
+    )
+    parser.add_argument("--max-jobs", type=int, default=None)
+    args = parser.parse_args(argv)
+
+    store = JobStore(Path(args.db))
+    staging = StagingStore(Path(args.staging))
+    service = JobService(store=store, staging=staging)
+    worker = JobWorker(
+        store=store,
+        staging=staging,
+        service=service,
+        kernel=build_default_kernel_client(),
+        owner=str(args.owner),
+    )
+    print(f"pdx-worker owner={args.owner} db={args.db}")
+    try:
+        worker.run_forever(max_jobs=args.max_jobs)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        store.close()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

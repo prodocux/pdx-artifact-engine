@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/phase1/pdx_internal_job_results_v1.schema.json",
+  "title": "PDX private job results list v1 (Phase 1 additive)",
+  "description": "Exact body for GET /internal/v1/jobs/{job_id}/results. Additive; does not mutate status v1. Semantics locked by service validation + contract tests (not fully expressible in JSON Schema alone): (1) at most one item per kind; (2) every item.job_id MUST equal envelope.job_id; (3) array order is non-semantic — consumers MUST select by kind; (4) incomplete jobs return results=[] with HTTP 200 (contrast GET /result which returns 404 RESULT_NOT_READY). GET /result remains the Farpals-stable single-item view preferring materialized_source. Bytes never appear on this wire. Derived/render byte retrieval is Phase 3.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "job_id", "results"],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_job_results_v1"},
+    "job_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "results": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 2,
+      "description": "At most one item per kind (max two kinds). Order is non-semantic.",
+      "items": {
+        "$ref": "https://prodocux.dev/schemas/phase1/pdx_internal_job_result_v1.schema.json"
+      }
+    }
+  }
+}

@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 import socket
+import ssl
 import urllib.error
 import urllib.request
 from typing import Any
@@ -24,6 +26,26 @@ def validate_http_service_url(value: str, *, label: str) -> str:
     return value
 
 
+def build_client_ssl_context(
+    *,
+    client_cert: str | None = None,
+    client_key: str | None = None,
+    ca_cert: str | None = None,
+) -> ssl.SSLContext | None:
+    """Build an optional client TLS context for production mTLS hops."""
+    cert = (client_cert or os.environ.get("PRODOCUX_CLIENT_CERT", "")).strip()
+    key = (client_key or os.environ.get("PRODOCUX_CLIENT_KEY", "")).strip()
+    ca = (ca_cert or os.environ.get("PRODOCUX_CA_CERT", "")).strip()
+    if not cert and not key and not ca:
+        return None
+    if bool(cert) != bool(key):
+        raise ValueError("PRODOCUX_CLIENT_CERT and PRODOCUX_CLIENT_KEY must be set together")
+    ctx = ssl.create_default_context(cafile=ca or None)
+    if cert and key:
+        ctx.load_cert_chain(certfile=cert, keyfile=key)
+    return ctx
+
+
 class ProDocuXHttpError(RuntimeError):
     """Kernel HTTP call failed."""
 
@@ -40,16 +62,39 @@ class ProDocuXHttpClient:
         base_url: str = "http://127.0.0.1:8900/v1",
         *,
         timeout_s: float = 60.0,
+        bearer_token: str | None = None,
         opener: Any | None = None,
+        ssl_context: ssl.SSLContext | None = None,
     ) -> None:
         validate_http_service_url(base_url, label="base_url")
         if not isinstance(timeout_s, (int, float)) or not math.isfinite(timeout_s):
             raise ValueError("timeout_s must be a finite positive number")
         if timeout_s <= 0:
             raise ValueError("timeout_s must be a finite positive number")
+        if bearer_token is not None and (
+            not isinstance(bearer_token, str) or not bearer_token.strip()
+        ):
+            raise ValueError("bearer_token must be a non-empty string when set")
         self.base_url = base_url.rstrip("/") + "/"
         self.timeout_s = float(timeout_s)
-        self._opener = opener  # injectable for tests (urlopen-compatible)
+        self.bearer_token = bearer_token.strip() if bearer_token else None
+        self._ssl_context = ssl_context
+        if opener is not None:
+            self._opener = opener
+        elif ssl_context is not None:
+            self._opener = urllib.request.build_opener(
+                urllib.request.HTTPSHandler(context=ssl_context)
+            ).open
+        else:
+            self._opener = None
+
+    def _headers(self, *, accept: str, content_type: str | None = None) -> dict[str, str]:
+        headers = {"Accept": accept}
+        if content_type is not None:
+            headers["Content-Type"] = content_type
+        if self.bearer_token:
+            headers["Authorization"] = f"Bearer {self.bearer_token}"
+        return headers
 
     def _url(self, path: str) -> str:
         if not path or urlparse(path).scheme or path.startswith(("/", "\\")):
@@ -58,17 +103,22 @@ class ProDocuXHttpClient:
             raise ValueError("path traversal is not allowed")
         return urljoin(self.base_url, path.lstrip("/"))
 
+    def _open(self, req: urllib.request.Request):
+        open_fn = self._opener or urllib.request.urlopen
+        return open_fn(req, timeout=self.timeout_s)
+
     def post_json(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
             self._url(path),
             data=data,
-            headers={"Content-Type": "application/json", "Accept": "application/json"},
+            headers=self._headers(
+                accept="application/json", content_type="application/json"
+            ),
             method="POST",
         )
-        open_fn = self._opener or urllib.request.urlopen
         try:
-            with open_fn(req, timeout=self.timeout_s) as resp:
+            with self._open(req) as resp:
                 raw = resp.read().decode("utf-8")
                 status = getattr(resp, "status", None) or resp.getcode()
         except urllib.error.HTTPError as exc:
@@ -146,6 +196,54 @@ class ProDocuXHttpClient:
             },
         )
 
+    def materialize_intake(
+        self,
+        *,
+        document_b64: str,
+        document_filename: str,
+        media_type: str,
+        sha256: str | None = None,
+    ) -> dict[str, Any]:
+        """``POST /v1/intake/materialize`` → opaque ``artifact://`` identity."""
+        payload: dict[str, Any] = {
+            "document_b64": document_b64,
+            "document_filename": document_filename,
+            "media_type": media_type,
+        }
+        if sha256 is not None:
+            payload["sha256"] = sha256
+        return self.post_json("intake/materialize", payload)
+
+    def extract_content_blocks_from_artifact(
+        self, *, document_artifact: dict[str, Any], document_filename: str
+    ) -> dict[str, Any]:
+        """``POST /v1/intake/extract-blocks`` with opaque artifact identity."""
+        return self.post_json(
+            "intake/extract-blocks",
+            {
+                "document_filename": document_filename,
+                "document_artifact": document_artifact,
+            },
+        )
+
+    def store_derived(
+        self,
+        *,
+        output_name: str,
+        content_b64: str,
+        media_type: str,
+        sha256: str | None = None,
+    ) -> dict[str, Any]:
+        """``POST /v1/artifacts/derived`` → opaque ``artifact://derived/…`` identity."""
+        payload: dict[str, Any] = {
+            "output_name": output_name,
+            "content_b64": content_b64,
+            "media_type": media_type,
+        }
+        if sha256 is not None:
+            payload["sha256"] = sha256
+        return self.post_json("artifacts/derived", payload)
+
     def render_artifact(self, payload: dict[str, Any]) -> dict[str, Any]:
         """``POST /v1/render/artifact``."""
         return self.post_json("render/artifact", payload)
@@ -156,12 +254,11 @@ class ProDocuXHttpClient:
             raise ValueError("artifact_id is not a safe identifier")
         req = urllib.request.Request(
             self._url(f"render/artifacts/{artifact_id}"),
-            headers={"Accept": "*/*"},
+            headers=self._headers(accept="*/*"),
             method="GET",
         )
-        open_fn = self._opener or urllib.request.urlopen
         try:
-            with open_fn(req, timeout=self.timeout_s) as resp:
+            with self._open(req) as resp:
                 raw = resp.read()
                 status = getattr(resp, "status", None) or resp.getcode()
         except urllib.error.HTTPError as exc:
@@ -222,12 +319,11 @@ class ProDocuXHttpClient:
         """``GET /v1/version``."""
         req = urllib.request.Request(
             self._url("version"),
-            headers={"Accept": "application/json"},
+            headers=self._headers(accept="application/json"),
             method="GET",
         )
-        open_fn = self._opener or urllib.request.urlopen
         try:
-            with open_fn(req, timeout=self.timeout_s) as resp:
+            with self._open(req) as resp:
                 raw = resp.read().decode("utf-8")
         except urllib.error.HTTPError as exc:
             raise ProDocuXHttpError(

@@ -30,6 +30,8 @@ dev = [
 [project.scripts]
 pdx-validate = "pdx_artifact_engine.cli.validate:main"
 pdx-run = "pdx_artifact_engine.cli.run:main"
+pdx-internal = "pdx_artifact_engine.internal_http:main"
+pdx-worker = "pdx_artifact_engine.worker:main"
 
 [project.urls]
 Homepage = "https://github.com/prodocux/pdx-artifact-engine"

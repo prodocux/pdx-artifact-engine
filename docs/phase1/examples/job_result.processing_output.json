@@ -1,0 +1,13 @@
+{
+  "schema_version": "pdx_internal_job_result_v1",
+  "job_id": "job-example-1",
+  "kind": "processing_output",
+  "artifact": {
+    "schema_version": "prodocux_opaque_artifact_v1",
+    "artifact_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "uri": "artifact://derived/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/content_blocks.json",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "size_bytes": 128,
+    "media_type": "application/json"
+  }
+}
