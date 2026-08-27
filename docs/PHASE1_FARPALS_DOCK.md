@@ -118,5 +118,7 @@ Worker `render_artifact` path:
 
 ## Phase 1 freeze SHAs
 
-Recorded in [`PHASE1_STATUS.md`](PHASE1_STATUS.md) after the Phase 1
-implementation commits.
+- Kernel: `f5fc9516b36e0ca5fb105244a45799fc441c3a76`
+- Engine: `a2cd14a166dd8b9985530d007731acdabf7cc19a`
+
+See also [`PHASE1_STATUS.md`](PHASE1_STATUS.md).

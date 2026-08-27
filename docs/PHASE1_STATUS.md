@@ -19,8 +19,8 @@ unchanged.
 
 | Repo | Role | Phase 1 freeze |
 | --- | --- | --- |
-| `prodocux` | Kernel | recorded after Kernel Phase 1 commit |
-| `pdx-artifact-engine` | Engine | recorded after Engine Phase 1 commit |
+| `prodocux` | Kernel | `f5fc9516b36e0ca5fb105244a45799fc441c3a76` |
+| `pdx-artifact-engine` | Engine | `a2cd14a166dd8b9985530d007731acdabf7cc19a` |
 
 Phase 0 baselines (still valid):
 
