@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker, RefResolver
-
 from pdx_artifact_engine.jobs import JobStore
 from pdx_artifact_engine.jobs.service import JobService
 from pdx_artifact_engine.staging import StagingStore

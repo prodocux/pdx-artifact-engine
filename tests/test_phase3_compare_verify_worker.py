@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-
 from pdx_artifact_engine.jobs import JobStore
 from pdx_artifact_engine.jobs.service import JobService
 from pdx_artifact_engine.staging import StagingStore
@@ -17,23 +16,72 @@ from pdx_artifact_engine.worker import JobWorker
 
 ROOT = Path(__file__).resolve().parents[1]
 PHASE0 = ROOT / "docs" / "phase0"
-KERNEL_ROOT = ROOT.parent / "prodocux"
 
 
 def _compare_request() -> dict[str, Any]:
-    return json.loads(
-        (
-            KERNEL_ROOT / "examples" / "contracts" / "normalized_diff_request_v1.json"
-        ).read_text(encoding="utf-8")
-    )
+    return {
+        "schema_version": "prodocux_normalized_diff_request_v1",
+        "before": {
+            "document_id": "document-before",
+            "source_sha256": "a" * 64,
+            "values": {"name": "Example", "size": 50},
+        },
+        "after": {
+            "document_id": "document-after",
+            "source_sha256": "b" * 64,
+            "values": {"name": "Example", "size": 60},
+        },
+        "string_normalization": "exact",
+        "max_changes": 1000,
+    }
 
 
 def _verify_request() -> dict[str, Any]:
-    return json.loads(
-        (
-            KERNEL_ROOT / "examples" / "contracts" / "evidence_bundle_request_v1.json"
-        ).read_text(encoding="utf-8")
-    )
+    return {
+        "schema_version": "prodocux_evidence_bundle_request_v1",
+        "request_id": "evidence-example-001",
+        "rule_set": {"id": "example.consistency", "version": "1", "sha256": "a" * 64},
+        "documents": [
+            {
+                "document_id": "document-a",
+                "source_sha256": "b" * 64,
+                "media_type": "application/pdf",
+            }
+        ],
+        "evidence": [
+            {
+                "evidence_id": "ev-volume",
+                "document_id": "document-a",
+                "field_name": "declared_volume_ml",
+                "value_type": "number",
+                "value": 60,
+                "confidence": 0.99,
+                "source_reference": {
+                    "schema_version": "prodocux_source_reference_v1",
+                    "source_sha256": "b" * 64,
+                    "media_type": "application/pdf",
+                    "locator": {"kind": "pdf_page", "page": 2},
+                    "snippet": "Declared volume: 60 ml",
+                    "extraction": {
+                        "method": "native_text",
+                        "extractor_id": "example.extractor",
+                        "extractor_version": "1",
+                    },
+                    "truncated": False,
+                },
+            }
+        ],
+        "checks": [
+            {
+                "check_id": "volume-range",
+                "kind": "numeric_range",
+                "evidence_ids": ["ev-volume"],
+                "minimum": 50,
+                "maximum": 70,
+                "minimum_confidence": 0.9,
+            }
+        ],
+    }
 
 
 def _create_body(*, job_id: str, operation: str, request: dict[str, Any]) -> dict:
