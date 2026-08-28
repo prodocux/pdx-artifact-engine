@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/phase3/pdx_internal_job_artifact_content_v1.schema.json",
+  "title": "PDX private job artifact content v1",
+  "description": "Success body for POST /internal/v1/jobs/{job_id}/retrieve. Binds job_id, kind, and artifact identity to verified bytes from Kernel.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "job_id",
+    "kind",
+    "artifact",
+    "media_type",
+    "size_bytes",
+    "sha256",
+    "content_b64"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_job_artifact_content_v1"},
+    "job_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "kind": {
+      "enum": ["materialized_source", "processing_output"]
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "artifact_id",
+        "uri",
+        "sha256",
+        "size_bytes",
+        "media_type"
+      ],
+      "properties": {
+        "schema_version": {"const": "prodocux_opaque_artifact_v1"},
+        "artifact_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "uri": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^artifact://(intake|derived|sink|render)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)?$"
+        },
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "size_bytes": {"type": "integer", "minimum": 0, "maximum": 104857600},
+        "media_type": {"type": "string", "minLength": 1, "maxLength": 128}
+      }
+    },
+    "media_type": {"type": "string", "minLength": 1, "maxLength": 128},
+    "size_bytes": {"type": "integer", "minimum": 0, "maximum": 104857600},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "content_b64": {"type": "string", "minLength": 1, "maxLength": 45000000}
+  }
+}

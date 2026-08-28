@@ -273,6 +273,16 @@ class InternalJobHandler(BaseHTTPRequestHandler):
             self._send(200, doc)
             return
 
+        retrieve = re.fullmatch(r"/internal/v1/jobs/([^/]+)/retrieve", path)
+        if retrieve:
+            try:
+                doc = self.service.retrieve(retrieve.group(1), body)
+            except JobServiceError as exc:
+                self._send(exc.status, exc.as_error_document())
+                return
+            self._send(200, doc)
+            return
+
         self._send(
             404,
             {
@@ -287,16 +297,40 @@ class InternalJobHandler(BaseHTTPRequestHandler):
         )
 
 
+def _default_kernel_client() -> Any | None:
+    base = os.environ.get("PDX_KERNEL_BASE_URL", "").strip()
+    token = os.environ.get("PRODOCUX_BEARER_TOKEN", "").strip()
+    if not base or not token:
+        return None
+    from pdx_adapter_prodocux.http_client import (
+        ProDocuXHttpClient,
+        build_client_ssl_context,
+    )
+
+    ssl_ctx = None
+    try:
+        ssl_ctx = build_client_ssl_context()
+    except ValueError:
+        ssl_ctx = None
+    return ProDocuXHttpClient(
+        base_url=base,
+        bearer_token=token,
+        ssl_context=ssl_ctx,
+    )
+
+
 def make_server(
     *,
     host: str = "127.0.0.1",
     port: int = 8910,
     db_path: Path,
     staging_root: Path,
+    kernel: Any | None = None,
 ) -> ThreadingHTTPServer:
     store = JobStore(db_path)
     staging = StagingStore(staging_root)
-    service = JobService(store=store, staging=staging)
+    kernel_client = kernel if kernel is not None else _default_kernel_client()
+    service = JobService(store=store, staging=staging, kernel=kernel_client)
 
     class BoundHandler(InternalJobHandler):
         pass

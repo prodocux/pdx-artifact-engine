@@ -62,6 +62,30 @@ def default_contract_root() -> Path:
     return Path(__file__).resolve().parents[3] / "docs" / "phase0"
 
 
+def default_phase3_contract_root() -> Path:
+    import os
+
+    env = os.environ.get("PDX_ENGINE_PHASE3_CONTRACT_ROOT", "").strip()
+    if env:
+        return Path(env)
+    return Path(__file__).resolve().parents[3] / "docs" / "phase3"
+
+
+_RETRIEVAL_TERMINAL_STATES = frozenset({"completed", "completed_with_review"})
+
+
+def _artifact_identity_equal(left: dict[str, Any], right: dict[str, Any]) -> bool:
+    keys = (
+        "schema_version",
+        "artifact_id",
+        "uri",
+        "sha256",
+        "size_bytes",
+        "media_type",
+    )
+    return all(left.get(key) == right.get(key) for key in keys)
+
+
 def _parse_deadline(value: str | None) -> datetime | None:
     if not value:
         return None
@@ -79,9 +103,12 @@ class JobService:
     store: JobStore
     staging: StagingStore
     contract_root: Path | None = None
+    phase3_contract_root: Path | None = None
+    kernel: Any | None = None
 
     def __post_init__(self) -> None:
         root = self.contract_root or default_contract_root()
+        phase3 = self.phase3_contract_root or default_phase3_contract_root()
         self._create_schema = json.loads(
             (root / "schemas" / "pdx_internal_job_create_v1.schema.json").read_text(
                 encoding="utf-8"
@@ -96,6 +123,11 @@ class JobService:
             (root / "schemas" / "pdx_internal_job_reconcile_v1.schema.json").read_text(
                 encoding="utf-8"
             )
+        )
+        self._retrieve_schema = json.loads(
+            (
+                phase3 / "schemas" / "pdx_internal_job_artifact_retrieve_v1.schema.json"
+            ).read_text(encoding="utf-8")
         )
 
     def _validate_request(
@@ -324,6 +356,104 @@ class JobService:
             "schema_version": "pdx_internal_job_results_v1",
             "job_id": job_id,
             "results": items,
+        }
+
+    def retrieve(self, job_id: str, body: dict[str, Any]) -> dict[str, Any]:
+        """Phase 3 verified bytes: bind job + kind + artifact, then Kernel hop."""
+        self._validate_request(
+            self._retrieve_schema,
+            body,
+            path_job_id=job_id,
+            invalid_message="artifact retrieve document failed schema validation",
+        )
+        request_id = str(body.get("request_id") or "unknown")
+        correlation_id = str(body.get("correlation_id") or "unknown")
+        record = self.store.get(job_id)
+        if record is None:
+            raise JobServiceError(
+                code="JOB_NOT_FOUND",
+                message="job not found",
+                status=404,
+                request_id=request_id,
+                correlation_id=correlation_id,
+            )
+        if record.state not in _RETRIEVAL_TERMINAL_STATES:
+            raise JobServiceError(
+                code="RESULT_NOT_READY",
+                message="job is not in a retrievable terminal state",
+                status=404,
+                request_id=request_id,
+                correlation_id=correlation_id,
+            )
+        try:
+            items = validate_result_items(
+                normalize_result_items(record.result), job_id=job_id
+            )
+        except ResultContractError as exc:
+            raise JobServiceError(
+                code="RESULT_CONTRACT_INVALID",
+                message=str(exc),
+                status=500,
+                request_id=request_id,
+                correlation_id=correlation_id,
+            ) from exc
+        kind = str(body["kind"])
+        stored = next((item for item in items if item.get("kind") == kind), None)
+        if stored is None:
+            raise JobServiceError(
+                code="RESULT_KIND_MISSING",
+                message="job has no result for the requested kind",
+                status=404,
+                request_id=request_id,
+                correlation_id=correlation_id,
+            )
+        if not _artifact_identity_equal(stored["artifact"], body["artifact"]):
+            raise JobServiceError(
+                code="ARTIFACT_BINDING_MISMATCH",
+                message="artifact identity does not match the stored job result",
+                status=409,
+                request_id=request_id,
+                correlation_id=correlation_id,
+            )
+        if self.kernel is None:
+            raise JobServiceError(
+                code="KERNEL_UNAVAILABLE",
+                message="Kernel retrieval client is not configured",
+                status=503,
+                request_id=request_id,
+                correlation_id=correlation_id,
+            )
+        try:
+            kernel_body = self.kernel.retrieve_artifact(
+                request_id=request_id,
+                artifact=body["artifact"],
+            )
+        except Exception as exc:  # noqa: BLE001
+            raise JobServiceError(
+                code="KERNEL_RETRIEVAL_FAILED",
+                message="Kernel artifact retrieval failed",
+                status=502,
+                request_id=request_id,
+                correlation_id=correlation_id,
+                retryable=True,
+            ) from exc
+        if not _artifact_identity_equal(kernel_body.get("artifact", {}), body["artifact"]):
+            raise JobServiceError(
+                code="KERNEL_RESPONSE_INVALID",
+                message="Kernel retrieval response artifact mismatch",
+                status=502,
+                request_id=request_id,
+                correlation_id=correlation_id,
+            )
+        return {
+            "schema_version": "pdx_internal_job_artifact_content_v1",
+            "job_id": job_id,
+            "kind": kind,
+            "artifact": dict(kernel_body["artifact"]),
+            "media_type": kernel_body["media_type"],
+            "size_bytes": kernel_body["size_bytes"],
+            "sha256": kernel_body["sha256"],
+            "content_b64": kernel_body["content_b64"],
         }
 
     def cancel(self, job_id: str, body: dict[str, Any]) -> dict[str, Any]:

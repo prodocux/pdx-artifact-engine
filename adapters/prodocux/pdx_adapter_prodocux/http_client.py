@@ -248,6 +248,22 @@ class ProDocuXHttpClient:
         """``POST /v1/render/artifact``."""
         return self.post_json("render/artifact", payload)
 
+    def retrieve_artifact(
+        self,
+        *,
+        request_id: str,
+        artifact: dict[str, Any],
+    ) -> dict[str, Any]:
+        """``POST /v1/artifacts/retrieve`` — Phase 3 verified opaque bytes."""
+        return self.post_json(
+            "artifacts/retrieve",
+            {
+                "schema_version": "prodocux_artifact_retrieve_v1",
+                "request_id": request_id,
+                "artifact": artifact,
+            },
+        )
+
     def get_artifact_bytes(self, artifact_id: str) -> bytes:
         """``GET /v1/render/artifacts/{artifact_id}``."""
         if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,126}", artifact_id):
