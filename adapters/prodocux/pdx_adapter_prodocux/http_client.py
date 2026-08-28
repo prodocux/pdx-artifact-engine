@@ -264,6 +264,14 @@ class ProDocuXHttpClient:
             },
         )
 
+    def compare_normalized_profiles(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """``POST /v1/compare/normalized-profiles``."""
+        return self.post_json("compare/normalized-profiles", payload)
+
+    def verify_evidence_bundle(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """``POST /v1/verify/evidence-bundle``."""
+        return self.post_json("verify/evidence-bundle", payload)
+
     def get_artifact_bytes(self, artifact_id: str) -> bytes:
         """``GET /v1/render/artifacts/{artifact_id}``."""
         if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,126}", artifact_id):

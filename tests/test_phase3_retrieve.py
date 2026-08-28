@@ -251,3 +251,67 @@ def test_service_retrieve_kernel_unconfigured(tmp_path: Path) -> None:
         )
     assert excinfo.value.code == "KERNEL_UNAVAILABLE"
     assert excinfo.value.status == 503
+
+
+def test_service_retrieve_maps_artifact_too_large(tmp_path: Path) -> None:
+    from pdx_adapter_prodocux.http_client import ProDocuXHttpError
+
+    class TooLargeKernel:
+        def retrieve_artifact(self, *, request_id: str, artifact: dict) -> dict:
+            raise ProDocuXHttpError("Kernel HTTP 413 on artifacts/retrieve", status=413)
+
+    store = JobStore(tmp_path / "jobs.sqlite3")
+    staging = StagingStore(tmp_path / "staging")
+    service = JobService(
+        store=store,
+        staging=staging,
+        contract_root=PHASE0,
+        phase3_contract_root=PHASE3,
+        kernel=TooLargeKernel(),
+    )
+    job_id = "job-too-large"
+    artifact_id = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    store.insert(
+        JobRecord(
+            job_id=job_id,
+            state="completed",
+            document={
+                "schema_version": "pdx_internal_job_status_v1",
+                "job_id": job_id,
+                "operation": "render_artifact",
+                "state": "completed",
+                "input_digest": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
+                "operation_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "idempotency_key": f"{job_id}:render_artifact",
+                "correlation_id": "c",
+                "request_id": "r",
+                "kernel_contract": "v1",
+            },
+            idempotency_key=f"{job_id}:render_artifact",
+            operation_digest="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            result=[
+                _item(
+                    job_id=job_id,
+                    kind="processing_output",
+                    uri=f"artifact://sink/{artifact_id}/output.docx",
+                    artifact_id=artifact_id,
+                ),
+            ],
+        )
+    )
+    artifact = store.get(job_id).result[0]["artifact"]
+    with pytest.raises(JobServiceError) as excinfo:
+        service.retrieve(
+            job_id,
+            {
+                "schema_version": "pdx_internal_job_artifact_retrieve_v1",
+                "job_id": job_id,
+                "kind": "processing_output",
+                "request_id": "req-1",
+                "correlation_id": "corr-1",
+                "artifact": artifact,
+            },
+        )
+    assert excinfo.value.code == "ARTIFACT_TOO_LARGE"
+    assert excinfo.value.status == 413
+    assert excinfo.value.retryable is False

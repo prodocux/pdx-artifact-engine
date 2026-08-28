@@ -112,11 +112,18 @@ Worker `render_artifact` path:
 
 ## Phase 3 freeze SHAs (verified bytes — unblocks Farpals publish)
 
-- Kernel: `f6cee0d`
-- Engine: `fb3aa6d`
+- Kernel: `f6cee0d` (+ tail: compare/verify N/A on Kernel; `ARTIFACT_TOO_LARGE`)
+- Engine: `fb3aa6d` (+ tail: compare/verify worker, retrieval error mapping)
 - Routes: `POST /v1/artifacts/retrieve`, `POST /internal/v1/jobs/{job_id}/retrieve`
+- Worker ops: `compare_normalized_profiles`, `verify_evidence` → `processing_output`
 
 See [`PHASE3_STATUS.md`](PHASE3_STATUS.md) and `docs/phase3/README.md`.
+
+## Remaining (Farpals-owned)
+
+- retrieve consumer → T2 `prodocux_publish_artifact` → Media Library
+- linked audit / receipt admin views
+- deployment `production_mtls` client cert wiring
 
 ## Pins (Phase 0, still valid)
 

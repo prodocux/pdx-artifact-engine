@@ -429,6 +429,17 @@ class JobService:
                 artifact=body["artifact"],
             )
         except Exception as exc:  # noqa: BLE001
+            from pdx_adapter_prodocux.http_client import ProDocuXHttpError
+
+            if isinstance(exc, ProDocuXHttpError) and exc.status == 413:
+                raise JobServiceError(
+                    code="ARTIFACT_TOO_LARGE",
+                    message="artifact exceeds retrieval byte limit",
+                    status=413,
+                    request_id=request_id,
+                    correlation_id=correlation_id,
+                    retryable=False,
+                ) from exc
             raise JobServiceError(
                 code="KERNEL_RETRIEVAL_FAILED",
                 message="Kernel artifact retrieval failed",

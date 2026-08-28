@@ -13,6 +13,11 @@ Phase 1 dock slice:
 1. Staging bytes are the Kernel render request JSON
 2. ``POST /v1/render/artifact``
 3. Persist ``processing_output`` from Kernel artifact / derived store
+
+``compare_normalized_profiles`` / ``verify_evidence``
+1. Staging bytes are the Kernel request JSON
+2. ``POST /v1/compare/normalized-profiles`` or ``POST /v1/verify/evidence-bundle``
+3. Persist structured JSON via ``POST /v1/artifacts/derived`` as ``processing_output``
 """
 
 from __future__ import annotations
@@ -55,6 +60,10 @@ class KernelClient(Protocol):
     ) -> dict[str, Any]: ...
 
     def render_artifact(self, payload: dict[str, Any]) -> dict[str, Any]: ...
+
+    def compare_normalized_profiles(self, payload: dict[str, Any]) -> dict[str, Any]: ...
+
+    def verify_evidence_bundle(self, payload: dict[str, Any]) -> dict[str, Any]: ...
 
 
 def _result_item(
@@ -155,6 +164,12 @@ class JobWorker:
             return
         if operation == "render_artifact":
             self._run_render(latest, handle, payload)
+            return
+        if operation == "compare_normalized_profiles":
+            self._run_compare(latest, handle, payload)
+            return
+        if operation == "verify_evidence":
+            self._run_verify(latest, handle, payload)
             return
 
         self.service._finalize(
@@ -289,6 +304,89 @@ class JobWorker:
         ]
         self.store.update(latest)
         self.service._finalize(latest, state="completed", error=None)
+
+    def _run_compare(
+        self,
+        latest: JobRecord,
+        handle: str,
+        payload: bytes,
+    ) -> None:
+        self._run_kernel_json_operation(
+            latest,
+            handle,
+            payload,
+            output_name="normalized_diff_result.json",
+            kernel_call=self.kernel.compare_normalized_profiles,
+        )
+
+    def _run_verify(
+        self,
+        latest: JobRecord,
+        handle: str,
+        payload: bytes,
+    ) -> None:
+        self._run_kernel_json_operation(
+            latest,
+            handle,
+            payload,
+            output_name="evidence_bundle_result.json",
+            kernel_call=self.kernel.verify_evidence_bundle,
+        )
+
+    def _run_kernel_json_operation(
+        self,
+        latest: JobRecord,
+        handle: str,
+        payload: bytes,
+        *,
+        output_name: str,
+        kernel_call: Any,
+    ) -> None:
+        try:
+            request = json.loads(payload.decode("utf-8"))
+            if not isinstance(request, dict):
+                raise ValueError("kernel request must be a JSON object")
+            response = kernel_call(request)
+            if not isinstance(response, dict):
+                raise RuntimeError("kernel response must be a JSON object")
+            processing = self._persist_kernel_json(response, output_name)
+        except Exception:  # noqa: BLE001
+            self._maybe_retry_or_fail(latest)
+            return
+
+        latest = self.store.get(latest.job_id)
+        if latest is None:
+            return
+        if latest.state == "cancelled" or latest.state in TERMINAL_STATES:
+            self.staging.delete(handle)
+            return
+
+        latest.result = [
+            _result_item(
+                job_id=latest.job_id,
+                kind="processing_output",
+                artifact=processing,
+            )
+        ]
+        self.store.update(latest)
+        self.service._finalize(latest, state="completed", error=None)
+
+    def _persist_kernel_json(
+        self, response: dict[str, Any], output_name: str
+    ) -> dict[str, Any]:
+        result_bytes = json.dumps(
+            response, ensure_ascii=True, separators=(",", ":")
+        ).encode("utf-8")
+        digest = hashlib.sha256(result_bytes).hexdigest()
+        derived = self.kernel.store_derived(
+            output_name=output_name,
+            content_b64=base64.b64encode(result_bytes).decode("ascii"),
+            media_type="application/json",
+            sha256=digest,
+        )
+        if not str(derived.get("uri", "")).startswith("artifact://derived/"):
+            raise RuntimeError("kernel derived store did not return artifact://derived/")
+        return derived
 
     def _maybe_retry_or_fail(self, latest: JobRecord) -> None:
         retryable = latest.attempt_count < self.max_attempts

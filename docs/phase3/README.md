@@ -28,6 +28,7 @@ context** before delegating to Kernel verified bytes.
 | `ARTIFACT_BINDING_MISMATCH` | Request artifact ≠ stored result artifact |
 | `KERNEL_UNAVAILABLE` | No Kernel client env (`PDX_KERNEL_BASE_URL` + `PRODOCUX_BEARER_TOKEN`) |
 | `KERNEL_RETRIEVAL_FAILED` | Kernel hop failed (retryable) |
+| `ARTIFACT_TOO_LARGE` | Resolved artifact exceeds 32 MiB retrieval policy (non-retryable) |
 
 ## Kernel hop
 
@@ -46,3 +47,26 @@ Worker and internal HTTP share the same env vars as Phase 1:
 - `schemas/pdx_internal_job_artifact_content_v1.schema.json`
 
 Kernel companion schemas live in `prodocux/docs/phase3/schemas/`.
+
+## Compare / verify worker
+
+Operations `compare_normalized_profiles` and `verify_evidence` are expensive
+T1 paths and **must** execute through the Engine worker (not Core→Kernel sync).
+
+1. Staging bytes = Kernel request JSON (`application/json` payload)
+2. Adapter calls `compare/normalized-profiles` or `verify/evidence-bundle`
+3. Worker persists structured JSON to derived store as **`processing_output`**
+
+Derived artifact basenames:
+
+- `normalized_diff_result.json`
+- `evidence_bundle_result.json`
+
+Frozen `pdx_internal_job_status_v1` is unchanged. Result bytes, when needed,
+use the frozen retrieval contract above.
+
+## Retrieval limit layering
+
+Opaque identity `size_bytes` may be up to **100 MiB** in metadata schemas.
+Retrieval wire policy is **32 MiB** (Kernel) with stable `ARTIFACT_TOO_LARGE`.
+See `prodocux/docs/phase3/README.md`.
