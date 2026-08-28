@@ -253,6 +253,36 @@ def test_service_retrieve_kernel_unconfigured(tmp_path: Path) -> None:
     assert excinfo.value.status == 503
 
 
+def test_service_retrieve_rejects_unverified_kernel_bytes(tmp_path: Path) -> None:
+    class TamperedKernel:
+        def retrieve_artifact(self, *, request_id: str, artifact: dict) -> dict:
+            return {
+                "schema_version": "prodocux_artifact_content_v1",
+                "request_id": request_id,
+                "artifact": dict(artifact),
+                "media_type": artifact["media_type"],
+                "size_bytes": artifact["size_bytes"],
+                "sha256": artifact["sha256"],
+                "content_b64": base64.b64encode(b"Z").decode("ascii"),
+            }
+
+    service, artifact = _completed_job(tmp_path)
+    service.kernel = TamperedKernel()
+    with pytest.raises(JobServiceError) as excinfo:
+        service.retrieve(
+            "job-retrieve-1",
+            {
+                "schema_version": "pdx_internal_job_artifact_retrieve_v1",
+                "job_id": "job-retrieve-1",
+                "kind": "processing_output",
+                "request_id": "req-1",
+                "correlation_id": "corr-1",
+                "artifact": artifact,
+            },
+        )
+    assert excinfo.value.code == "KERNEL_RESPONSE_INVALID"
+
+
 def test_service_retrieve_maps_artifact_too_large(tmp_path: Path) -> None:
     from pdx_adapter_prodocux.http_client import ProDocuXHttpError
 
@@ -315,3 +345,33 @@ def test_service_retrieve_maps_artifact_too_large(tmp_path: Path) -> None:
     assert excinfo.value.code == "ARTIFACT_TOO_LARGE"
     assert excinfo.value.status == 413
     assert excinfo.value.retryable is False
+
+
+def test_service_retrieve_rejects_unverified_kernel_bytes(tmp_path: Path) -> None:
+    class TamperedKernel:
+        def retrieve_artifact(self, *, request_id: str, artifact: dict) -> dict:
+            return {
+                "schema_version": "prodocux_artifact_content_v1",
+                "request_id": request_id,
+                "artifact": dict(artifact),
+                "media_type": artifact["media_type"],
+                "size_bytes": artifact["size_bytes"],
+                "sha256": artifact["sha256"],
+                "content_b64": base64.b64encode(b"Z").decode("ascii"),
+            }
+
+    service, artifact = _completed_job(tmp_path)
+    service.kernel = TamperedKernel()
+    with pytest.raises(JobServiceError) as excinfo:
+        service.retrieve(
+            "job-retrieve-1",
+            {
+                "schema_version": "pdx_internal_job_artifact_retrieve_v1",
+                "job_id": "job-retrieve-1",
+                "kind": "processing_output",
+                "request_id": "req-1",
+                "correlation_id": "corr-1",
+                "artifact": artifact,
+            },
+        )
+    assert excinfo.value.code == "KERNEL_RESPONSE_INVALID"

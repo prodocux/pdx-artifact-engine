@@ -95,7 +95,14 @@ class InternalJobHandler(BaseHTTPRequestHandler):
                 message="request body shorter than Content-Length",
                 status=400,
             )
-        return json.loads(raw.decode("utf-8"))
+        value = json.loads(raw.decode("utf-8"))
+        if not isinstance(value, dict):
+            raise BodyLimitError(
+                code="BODY_INVALID",
+                message="request body must be a JSON object",
+                status=400,
+            )
+        return value
 
     def _send(self, status: int, body: dict[str, Any]) -> None:
         payload = json.dumps(body, ensure_ascii=True, separators=(",", ":")).encode(
@@ -111,7 +118,10 @@ class InternalJobHandler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         if path in {"/health", "/ready"}:
             return True
-        error = authenticate_request(self.headers)
+        error = authenticate_request(
+            self.headers,
+            peer=self.client_address[0] if self.client_address else None,
+        )
         if error is None:
             return True
         status = 503 if error.get("code") == "AUTH_MISCONFIGURED" else 401

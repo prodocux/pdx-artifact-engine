@@ -52,8 +52,10 @@ class JobStore:
         self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
-        self._conn = sqlite3.connect(self.path, check_same_thread=False)
+        self._conn = sqlite3.connect(self.path, check_same_thread=False, timeout=5.0)
         self._conn.row_factory = sqlite3.Row
+        self._conn.execute("PRAGMA journal_mode=WAL")
+        self._conn.execute("PRAGMA busy_timeout=5000")
         self._init()
 
     def _init(self) -> None:
@@ -257,6 +259,7 @@ class JobStore:
             if row is None:
                 return None
             record = self._row_to_record(row)
+            previous_attempts = record.attempt_count
             record.state = "running"
             record.attempt_count += 1
             record.lease_owner = owner
@@ -267,12 +270,21 @@ class JobStore:
                 doc["run_id"] = f"run_{record.job_id}_{record.attempt_count}"
             record.document = doc
             dumped = json.dumps(doc, ensure_ascii=True, separators=(",", ":"))
-            self._conn.execute(
+            updated = self._conn.execute(
                 """
                 UPDATE jobs
                 SET state = ?, document_json = ?, attempt_count = ?,
                     lease_owner = ?, lease_expires_unix = ?
                 WHERE job_id = ?
+                  AND attempt_count = ?
+                  AND (
+                    state = 'pending'
+                    OR (
+                        state = 'running'
+                        AND lease_expires_unix IS NOT NULL
+                        AND lease_expires_unix < ?
+                    )
+                  )
                 """,
                 (
                     record.state,
@@ -281,10 +293,38 @@ class JobStore:
                     record.lease_owner,
                     record.lease_expires_unix,
                     record.job_id,
+                    previous_attempts,
+                    now_unix,
                 ),
             )
+            if updated.rowcount != 1:
+                self._conn.rollback()
+                return None
             self._conn.commit()
             return record
+
+    def renew_lease(
+        self,
+        job_id: str,
+        *,
+        owner: str,
+        lease_seconds: int = 60,
+        now: int | None = None,
+    ) -> bool:
+        """Extend a running lease only if this owner still holds it."""
+        now_unix = int(time.time() if now is None else now)
+        lease_expires = now_unix + lease_seconds
+        with self._lock:
+            updated = self._conn.execute(
+                """
+                UPDATE jobs
+                SET lease_expires_unix = ?
+                WHERE job_id = ? AND lease_owner = ? AND state = 'running'
+                """,
+                (lease_expires, job_id, owner),
+            )
+            self._conn.commit()
+            return updated.rowcount == 1
 
     def close(self) -> None:
         with self._lock:

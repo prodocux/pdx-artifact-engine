@@ -48,6 +48,14 @@ def main() -> int:
             f"; assert schema_root.joinpath({name!r}).is_file()"
             for name in PACKAGED_SCHEMAS
         )
+        smoke += "; from pathlib import Path; from tempfile import mkdtemp"
+        smoke += "; from pdx_artifact_engine.jobs import JobStore"
+        smoke += "; from pdx_artifact_engine.jobs.service import JobService"
+        smoke += "; from pdx_artifact_engine.staging import StagingStore"
+        smoke += "; root = Path(mkdtemp()); JobService(store=JobStore(root / 'jobs.sqlite3'), staging=StagingStore(root / 'staging'))"
+        smoke += "; from importlib.resources import files as _files"
+        smoke += "; assert _files('pdx_artifact_engine.contracts.phase0').joinpath('pdx_internal_job_create_v1.schema.json').is_file()"
+        smoke += "; assert _files('pdx_artifact_engine.contracts.phase3').joinpath('pdx_internal_job_artifact_retrieve_v1.schema.json').is_file()"
         _run(str(python), "-c", smoke, cwd=work)
         print(f"clean-install PASS: {wheel.name}")
         print(f"isolated cwd: {work}")

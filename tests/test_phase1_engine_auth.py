@@ -58,5 +58,21 @@ def test_engine_production_mtls_and_ready(tmp_path: Path, monkeypatch) -> None:
             body = json.loads(exc.read().decode("utf-8"))
             assert exc.code == 404
             assert body["code"] == "JOB_NOT_FOUND"
+
+        spoof = urllib.request.Request(
+            f"{base}/internal/v1/jobs/missing",
+            headers={
+                "Authorization": "Bearer engine-token",
+                "X-Client-Cert": "-----BEGIN CERTIFICATE-----fake",
+            },
+            method="GET",
+        )
+        try:
+            urllib.request.urlopen(spoof)
+            raise AssertionError("expected AUTH_MTLS_REQUIRED for cert header spoof")
+        except urllib.error.HTTPError as exc:
+            body = json.loads(exc.read().decode("utf-8"))
+            assert exc.code == 401
+            assert body["code"] == "AUTH_MTLS_REQUIRED"
     finally:
         server.shutdown()

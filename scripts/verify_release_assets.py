@@ -36,14 +36,17 @@ def main() -> int:
     parser.add_argument("--source", type=Path, required=True)
     args = parser.parse_args()
 
-    project_files = (
-        args.source / "pyproject.toml",
-        args.source / "adapters" / "media" / "pyproject.toml",
-    )
-    projects = [tomllib.loads(path.read_text("utf-8"))["project"] for path in project_files]
-    engine = projects[0]
+    engine = tomllib.loads((args.source / "pyproject.toml").read_text("utf-8"))["project"]
     if args.tag != f"v{engine['version']}":
         raise ValueError(f"tag {args.tag!r} does not match engine version {engine['version']!r}")
+
+    media_present = any(args.dist.glob("pdx_adapter_media-*"))
+    projects = [engine]
+    if media_present:
+        media = tomllib.loads(
+            (args.source / "adapters" / "media" / "pyproject.toml").read_text("utf-8")
+        )["project"]
+        projects.append(media)
 
     expected_names: set[str] = set()
     wheel_paths: dict[str, Path] = {}

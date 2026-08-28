@@ -13,6 +13,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from pdx_artifact_engine.contracts import load_schema
 from pdx_artifact_engine.jobs import TERMINAL_STATES, JobRecord, JobStore
 from pdx_artifact_engine.jobs.result_contract import (
     ResultContractError,
@@ -53,22 +54,22 @@ class JobServiceError(Exception):
         }
 
 
-def default_contract_root() -> Path:
+def default_contract_root() -> Path | None:
     import os
 
     env = os.environ.get("PDX_ENGINE_CONTRACT_ROOT", "").strip()
     if env:
         return Path(env)
-    return Path(__file__).resolve().parents[3] / "docs" / "phase0"
+    return None
 
 
-def default_phase3_contract_root() -> Path:
+def default_phase3_contract_root() -> Path | None:
     import os
 
     env = os.environ.get("PDX_ENGINE_PHASE3_CONTRACT_ROOT", "").strip()
     if env:
         return Path(env)
-    return Path(__file__).resolve().parents[3] / "docs" / "phase3"
+    return None
 
 
 _RETRIEVAL_TERMINAL_STATES = frozenset({"completed", "completed_with_review"})
@@ -84,6 +85,35 @@ def _artifact_identity_equal(left: dict[str, Any], right: dict[str, Any]) -> boo
         "media_type",
     )
     return all(left.get(key) == right.get(key) for key in keys)
+
+
+def _verify_retrieved_bytes(
+    kernel_body: dict[str, Any], expected: dict[str, Any]
+) -> dict[str, Any]:
+    """Re-decode Kernel bytes and check size, SHA-256, and media type."""
+    content_b64 = kernel_body.get("content_b64")
+    if not isinstance(content_b64, str) or not content_b64:
+        raise ValueError("Kernel retrieval response missing content_b64")
+    try:
+        raw = base64.b64decode(content_b64, validate=True)
+    except (ValueError, binascii.Error) as exc:
+        raise ValueError("Kernel retrieval content_b64 is not canonical base64") from exc
+    size_bytes = kernel_body.get("size_bytes")
+    sha256 = kernel_body.get("sha256")
+    media_type = kernel_body.get("media_type")
+    if size_bytes != expected.get("size_bytes") or size_bytes != len(raw):
+        raise ValueError("Kernel retrieval size mismatch")
+    digest = hashlib.sha256(raw).hexdigest()
+    if sha256 != expected.get("sha256") or digest != sha256:
+        raise ValueError("Kernel retrieval digest mismatch")
+    if media_type != expected.get("media_type"):
+        raise ValueError("Kernel retrieval media type mismatch")
+    return {
+        "media_type": media_type,
+        "size_bytes": size_bytes,
+        "sha256": digest,
+        "content_b64": base64.b64encode(raw).decode("ascii"),
+    }
 
 
 def _parse_deadline(value: str | None) -> datetime | None:
@@ -107,27 +137,25 @@ class JobService:
     kernel: Any | None = None
 
     def __post_init__(self) -> None:
-        root = self.contract_root or default_contract_root()
-        phase3 = self.phase3_contract_root or default_phase3_contract_root()
-        self._create_schema = json.loads(
-            (root / "schemas" / "pdx_internal_job_create_v1.schema.json").read_text(
-                encoding="utf-8"
-            )
+        root = self.contract_root if self.contract_root is not None else default_contract_root()
+        phase3 = (
+            self.phase3_contract_root
+            if self.phase3_contract_root is not None
+            else default_phase3_contract_root()
         )
-        self._cancel_schema = json.loads(
-            (root / "schemas" / "pdx_internal_job_cancel_v1.schema.json").read_text(
-                encoding="utf-8"
-            )
+        self._create_schema = load_schema(
+            "phase0", "pdx_internal_job_create_v1.schema.json", root=root
         )
-        self._reconcile_schema = json.loads(
-            (root / "schemas" / "pdx_internal_job_reconcile_v1.schema.json").read_text(
-                encoding="utf-8"
-            )
+        self._cancel_schema = load_schema(
+            "phase0", "pdx_internal_job_cancel_v1.schema.json", root=root
         )
-        self._retrieve_schema = json.loads(
-            (
-                phase3 / "schemas" / "pdx_internal_job_artifact_retrieve_v1.schema.json"
-            ).read_text(encoding="utf-8")
+        self._reconcile_schema = load_schema(
+            "phase0", "pdx_internal_job_reconcile_v1.schema.json", root=root
+        )
+        self._retrieve_schema = load_schema(
+            "phase3",
+            "pdx_internal_job_artifact_retrieve_v1.schema.json",
+            root=phase3,
         )
 
     def _validate_request(
@@ -138,16 +166,16 @@ class JobService:
         path_job_id: str | None = None,
         invalid_message: str = "request document failed schema validation",
     ) -> None:
-        request_id = str(body.get("request_id") or "unknown")
-        correlation_id = str(body.get("correlation_id") or "unknown")
         if not isinstance(body, dict):
             raise JobServiceError(
                 code="REQUEST_INVALID",
                 message="request body must be a JSON object",
                 status=400,
-                request_id=request_id,
-                correlation_id=correlation_id,
+                request_id="unknown",
+                correlation_id="unknown",
             )
+        request_id = str(body.get("request_id") or "unknown")
+        correlation_id = str(body.get("correlation_id") or "unknown")
         errors = list(
             Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(
                 body
@@ -456,15 +484,25 @@ class JobService:
                 request_id=request_id,
                 correlation_id=correlation_id,
             )
+        try:
+            verified = _verify_retrieved_bytes(kernel_body, body["artifact"])
+        except ValueError as exc:
+            raise JobServiceError(
+                code="KERNEL_RESPONSE_INVALID",
+                message=str(exc),
+                status=502,
+                request_id=request_id,
+                correlation_id=correlation_id,
+            ) from exc
         return {
             "schema_version": "pdx_internal_job_artifact_content_v1",
             "job_id": job_id,
             "kind": kind,
             "artifact": dict(kernel_body["artifact"]),
-            "media_type": kernel_body["media_type"],
-            "size_bytes": kernel_body["size_bytes"],
-            "sha256": kernel_body["sha256"],
-            "content_b64": kernel_body["content_b64"],
+            "media_type": verified["media_type"],
+            "size_bytes": verified["size_bytes"],
+            "sha256": verified["sha256"],
+            "content_b64": verified["content_b64"],
         }
 
     def cancel(self, job_id: str, body: dict[str, Any]) -> dict[str, Any]:

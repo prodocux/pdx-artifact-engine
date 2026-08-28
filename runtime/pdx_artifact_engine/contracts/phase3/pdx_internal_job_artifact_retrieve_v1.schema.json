@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/phase3/pdx_internal_job_artifact_retrieve_v1.schema.json",
+  "title": "PDX private job artifact retrieve v1",
+  "description": "POST /internal/v1/jobs/{job_id}/retrieve. Binds retrieval to a completed job result kind and exact artifact identity before calling Kernel verified retrieval.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "job_id",
+    "kind",
+    "request_id",
+    "correlation_id",
+    "artifact"
+  ],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_job_artifact_retrieve_v1"},
+    "job_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "kind": {
+      "enum": ["materialized_source", "processing_output"]
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "artifact_id",
+        "uri",
+        "sha256",
+        "size_bytes",
+        "media_type"
+      ],
+      "properties": {
+        "schema_version": {"const": "prodocux_opaque_artifact_v1"},
+        "artifact_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "uri": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^artifact://(intake|derived|sink|render)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)?$"
+        },
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "size_bytes": {"type": "integer", "minimum": 0, "maximum": 104857600},
+        "media_type": {"type": "string", "minLength": 1, "maxLength": 128}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"kind": {"const": "materialized_source"}}, "required": ["kind"]},
+      "then": {
+        "properties": {
+          "artifact": {
+            "properties": {
+              "uri": {
+                "type": "string",
+                "pattern": "^artifact://intake/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"kind": {"const": "processing_output"}}, "required": ["kind"]},
+      "then": {
+        "properties": {
+          "artifact": {
+            "properties": {
+              "uri": {
+                "type": "string",
+                "pattern": "^artifact://(derived|sink|render)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)?$"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

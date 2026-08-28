@@ -20,6 +20,8 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    outputs:
+      publish_media: ${{ steps.media.outputs.publish_media }}
     env:
       RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
       GH_TOKEN: ${{ github.token }}
@@ -49,9 +51,10 @@ jobs:
           mkdir release-dist
           gh release download "$RELEASE_TAG" --dir release-dist \
             --pattern "pdx_artifact_engine-*.whl" \
-            --pattern "pdx_artifact_engine-*.tar.gz" \
+            --pattern "pdx_artifact_engine-*.tar.gz"
+          gh release download "$RELEASE_TAG" --dir release-dist \
             --pattern "pdx_adapter_media-*.whl" \
-            --pattern "pdx_adapter_media-*.tar.gz"
+            --pattern "pdx_adapter_media-*.tar.gz" || true
           gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > release.json
       - name: Verify metadata and GitHub SHA-256 digests
         run: |
@@ -68,10 +71,17 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Stage media distributions
+        id: media
         run: |
-          mkdir pypi-media
-          cp release-dist/pdx_adapter_media-* pypi-media/
-      - uses: actions/upload-artifact@v4
+          if compgen -G "release-dist/pdx_adapter_media-*" > /dev/null; then
+            mkdir pypi-media
+            cp release-dist/pdx_adapter_media-* pypi-media/
+            echo "publish_media=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish_media=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.media.outputs.publish_media == 'true'
+        uses: actions/upload-artifact@v4
         with:
           name: pypi-media-${{ env.RELEASE_TAG }}
           path: pypi-media/
@@ -93,6 +103,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
 
   publish-media:
+    if: needs.verify.outputs.publish_media == 'true'
     needs: verify
     runs-on: ubuntu-latest
     environment: pypi-media

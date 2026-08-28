@@ -9,11 +9,8 @@ checksummed manifests.
 > provider. PDX-5B-1B+ experts are an optional future bundle, not a v0.1.0
 > requirement.
 
-**v0.3.0a2 prerelease:** the repository ships `pdx_artifact_core` execution
-contracts plus bounded snapshots, replay-safe resume primitives, repository
-ports, external-operation reconciliation, execution context/cancellation,
-publication receipts, and ordered run events. Legacy Dispatcher compatibility
-and the frozen compatibility v1 surface remain available.
+**Working tree `0.3.0a3` (unpublished).** Last PyPI prerelease is **`0.3.0a2`**.
+Media adapter remains **`0.2.0a2`** and is not republished with Engine a3.
 
 ## Positioning
 

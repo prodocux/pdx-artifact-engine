@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pdx-artifact-engine"
-version = "0.3.0a2"
+version = "0.3.0a3"
 description = "Model-optional deterministic artifact orchestration framework for PDX skills"
 readme = "README.md"
 license = "Apache-2.0"
@@ -45,6 +45,7 @@ include = ["pdx_artifact_engine*", "pdx_artifact_core*", "pdx_adapter_prodocux*"
 
 [tool.setuptools.package-data]
 pdx_artifact_core = ["schemas/*.json"]
+pdx_artifact_engine = ["contracts/**/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

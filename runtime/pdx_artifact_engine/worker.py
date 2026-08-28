@@ -27,6 +27,7 @@ import hashlib
 import json
 import os
 import socket
+import threading
 import time
 from dataclasses import dataclass
 from typing import Any, Protocol
@@ -120,6 +121,28 @@ class JobWorker:
         return done
 
     def _process(self, record: JobRecord) -> None:
+        stop = threading.Event()
+        heartbeat = threading.Thread(
+            target=self._heartbeat,
+            args=(record.job_id, stop),
+            daemon=True,
+            name=f"pdx-lease-{record.job_id}",
+        )
+        heartbeat.start()
+        try:
+            self._process_locked(record)
+        finally:
+            stop.set()
+            heartbeat.join(timeout=1)
+
+    def _heartbeat(self, job_id: str, stop: threading.Event) -> None:
+        interval = max(1, int(self.lease_seconds / 3))
+        while not stop.wait(interval):
+            self.store.renew_lease(
+                job_id, owner=self.owner, lease_seconds=self.lease_seconds
+            )
+
+    def _process_locked(self, record: JobRecord) -> None:
         latest = self.store.get(record.job_id)
         if latest is None or latest.state in TERMINAL_STATES:
             return

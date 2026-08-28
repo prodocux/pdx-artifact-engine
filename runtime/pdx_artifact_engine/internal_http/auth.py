@@ -66,22 +66,33 @@ def _mtls_verify_value() -> str:
     )
 
 
-def client_certificate_verified(headers: Mapping[str, str]) -> bool:
-    if headers.get(_mtls_verify_header()) == _mtls_verify_value():
-        return True
-    for name in ("X-Forwarded-Tls-Client-Cert", "X-Client-Cert"):
-        value = headers.get(name)
-        if isinstance(value, str) and value.strip():
-            return True
-    return False
+def _mtls_trusted_peers() -> frozenset[str]:
+    raw = os.environ.get(
+        "PDX_ENGINE_MTLS_TRUSTED_PEERS", "127.0.0.1,::1,localhost,testclient"
+    ).strip()
+    return frozenset(part.strip() for part in raw.split(",") if part.strip())
 
 
-def authenticate_request(headers: Mapping[str, str]) -> dict[str, Any] | None:
+def client_certificate_verified(
+    headers: Mapping[str, str], *, peer: str | None = None
+) -> bool:
+    """Trust only the configured proxy verify header from a trusted peer.
+
+    Presence of client-certificate forwarding headers is never sufficient.
+    """
+    if peer is None or peer not in _mtls_trusted_peers():
+        return False
+    return headers.get(_mtls_verify_header()) == _mtls_verify_value()
+
+
+def authenticate_request(
+    headers: Mapping[str, str], *, peer: str | None = None
+) -> dict[str, Any] | None:
     """Return an error document if auth fails; otherwise None."""
     if not auth_enabled():
         return None
 
-    if mtls_required() and not client_certificate_verified(headers):
+    if mtls_required() and not client_certificate_verified(headers, peer=peer):
         return {
             "schema_version": "pdx_internal_error_v1",
             "ok": False,

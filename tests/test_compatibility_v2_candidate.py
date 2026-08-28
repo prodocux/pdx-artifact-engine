@@ -86,4 +86,4 @@ def test_release_candidate_versions_are_coherent() -> None:
         pdx_artifact_core.__version__,
     }
     assert frozen_surface_version == "0.3.0a1"
-    assert package_versions == {"0.3.0a2"}
+    assert package_versions == {"0.3.0a3"}
