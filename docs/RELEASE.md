@@ -139,11 +139,13 @@ work.
 - Git commit pins remain authoritative until maintainers explicitly create a
   release tag.
 
-## Unpublished a3 overlay
+## Published a3 overlay
 
-Working tree `0.3.0a3` is unpublished (no tag, GitHub Release, or PyPI).
-Publication intent for this cut is recorded in
-`compatibility/pdx_prodocux_release_rc3_a3.json`. That overlay does not replace
-`pdx_prodocux_release_v1.json`, which remains the frozen published `0.3.0a2`
-record. Media remains `0.2.0a2` and must not be attached to an Engine a3
-GitHub Release. Fill tag SHA and asset digests only at publication.
+`0.3.0a3` is published from tag `v0.3.0a3` at release commit
+`1925f68cb171ef88cc2be8d72bb5975e11a8dcd8`. GitHub Actions run
+`33221430875` verified the release assets and promoted the unchanged Engine
+files to PyPI through the protected `pypi` environment. The Media publish job
+was skipped, so Media remains `0.2.0a2`. GitHub, PyPI, and Integrity API
+SHA-256 evidence is recorded in
+`compatibility/pdx_prodocux_release_rc3_a3.json`; the frozen a2/rc2 v1 record
+is unchanged.

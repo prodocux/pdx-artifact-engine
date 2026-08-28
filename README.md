@@ -9,9 +9,9 @@ checksummed manifests.
 > provider. PDX-5B-1B+ experts are an optional future bundle, not a v0.1.0
 > requirement.
 
-**Working tree `0.3.0a3` (unpublished).** Last PyPI prerelease is **`0.3.0a2`**.
-Media adapter remains **`0.2.0a2`** and is not republished with Engine a3.
-The unpublished rc3/a3 overlay is
+**Current PyPI prerelease: `0.3.0a3`**, published from tag **`v0.3.0a3`** at
+commit `1925f68cb171ef88cc2be8d72bb5975e11a8dcd8`. Media adapter remains
+**`0.2.0a2`** and was not republished with Engine a3. The published rc3/a3 overlay is
 [`compatibility/pdx_prodocux_release_rc3_a3.json`](compatibility/pdx_prodocux_release_rc3_a3.json);
 it does not rewrite the frozen published record.
 
@@ -19,10 +19,10 @@ it does not rewrite the frozen published record.
 
 | Claim | Status |
 |---|---|
-| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (working tree 0.3.0a3; introduced in 0.3.0a1)** |
+| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (0.3.0a3; introduced in 0.3.0a1)** |
 | v0→v1 plan translator (rejects unresolved `expert`) | **Available (core)** |
 | Run state machine (`awaiting_*` → `running`) | **Available (core)** |
-| Bounded run snapshot + step receipt contracts | **Available (working tree 0.3.0a3; introduced in 0.3.0a1)** |
+| Bounded run snapshot + step receipt contracts | **Available (0.3.0a3; introduced in 0.3.0a1)** |
 | Checkpoint CAS + decision record-once repository ports | **Available (core)** |
 | Replay-safe pending-only snapshot resume | **Available (engine)** |
 | External-operation pending/unknown/reconcile lifecycle | **Available (core)** |

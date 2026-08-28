@@ -1,41 +1,47 @@
 {
   "schema_version": "pdx_prodocux_release_overlay_v1",
-  "status": "unpublished_working_tree",
-  "published_at": null,
+  "status": "published",
+  "published_at": "2026-08-28T23:44:57Z",
   "supersedes": {
     "record": "pdx_prodocux_release_v1.json",
-    "note": "v1 remains the frozen published rc2/a2 compatibility record and must not be rewritten. This overlay records the unpublished rc3/a3 working tree only."
+    "note": "v1 remains the frozen published rc2/a2 compatibility record and must not be rewritten. This overlay records the published rc3/a3 cut."
   },
   "compatibility": {
     "manifest": "pdx_prodocux_compatibility_v3.json",
     "sha256": "9591ab363472db78efb64265e3050fa4626be43783f848d0888e732898486d2b",
-    "publication_gate_interpretation": "The frozen v3 publication_gate remains historical evidence. This overlay does not replace v1, v2, or v3 bytes."
+    "publication_gate_interpretation": "The frozen v3 publication_gate remains historical evidence. This published overlay does not replace v1, v2, or v3 bytes."
   },
   "prodocux": {
     "distribution": "prodocux",
     "version": "0.3.0rc3",
-    "tag": null,
-    "release_commit": null,
-    "github_release": null,
-    "pypi_release": null,
-    "workflow_run": null,
-    "files": {},
-    "note": "Working tree only. Do not tag, push, or publish until release gates pass. Commit SHA is recorded at tag time."
+    "tag": "v0.3.0rc3",
+    "release_commit": "466dd0de02a8cbb3834d78c9e5f91bcfe320087e",
+    "github_release": "https://github.com/prodocux/prodocux/releases/tag/v0.3.0rc3",
+    "pypi_release": "https://pypi.org/project/prodocux/0.3.0rc3/",
+    "workflow_run": "https://github.com/prodocux/prodocux/actions/runs/33221429380",
+    "files": {
+      "prodocux-0.3.0rc3-py3-none-any.whl": "016681fed6dd50a2482c158ed7c3a69fa6a94de1641e23575e40e38549513acf",
+      "prodocux-0.3.0rc3.tar.gz": "7e8b66cba4c1182eafd3deb69b0d3e74169e859207a7f7eddd8e42565a931efa"
+    },
+    "note": "Published from the audited release commit; GitHub and PyPI SHA-256 digests match."
   },
   "pdx_artifact_engine": {
     "distribution": "pdx-artifact-engine",
     "version": "0.3.0a3",
-    "tag": null,
-    "release_commit": null,
-    "github_release": null,
-    "pypi_release": null,
-    "workflow_run": null,
-    "files": {},
-    "note": "Working tree only. GitHub Release must not attach pdx-adapter-media a2 assets or the workflow will try to republish Media."
+    "tag": "v0.3.0a3",
+    "release_commit": "1925f68cb171ef88cc2be8d72bb5975e11a8dcd8",
+    "github_release": "https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a3",
+    "pypi_release": "https://pypi.org/project/pdx-artifact-engine/0.3.0a3/",
+    "workflow_run": "https://github.com/prodocux/pdx-artifact-engine/actions/runs/33221430875",
+    "files": {
+      "pdx_artifact_engine-0.3.0a3-py3-none-any.whl": "6308fdfb63555c21a6d50598ed4e6ae5b51b2c7ba90642c7990425dc9824db1d",
+      "pdx_artifact_engine-0.3.0a3.tar.gz": "ca8b160aedf47feed6c501cf91f7456ab1805aba76db857459756a2da303db3f"
+    },
+    "note": "Published without PDX Adapter Media assets; GitHub and PyPI SHA-256 digests match."
   },
   "pdx_adapter_media": {
     "distribution": "pdx-adapter-media",
     "version": "0.2.0a2",
-    "note": "Unchanged from the frozen v1 record. Do not republish with Engine a3."
+    "note": "Unchanged from the frozen v1 record. Engine a3 skipped Media publication."
   }
 }

@@ -57,13 +57,19 @@ def test_rc3_a3_overlay_does_not_rewrite_frozen_v1() -> None:
     assert record["status"] == "published"
     assert record["prodocux"]["version"] == "0.3.0rc2"
     assert overlay["schema_version"] == "pdx_prodocux_release_overlay_v1"
-    assert overlay["status"] == "unpublished_working_tree"
+    assert overlay["status"] == "published"
     assert overlay["supersedes"]["record"] == "pdx_prodocux_release_v1.json"
     assert overlay["prodocux"]["version"] == "0.3.0rc3"
     assert overlay["pdx_artifact_engine"]["version"] == "0.3.0a3"
     assert overlay["pdx_adapter_media"]["version"] == "0.2.0a2"
-    assert overlay["prodocux"]["release_commit"] is None
-    assert overlay["pdx_artifact_engine"]["release_commit"] is None
+    assert overlay["prodocux"]["release_commit"] == (
+        "466dd0de02a8cbb3834d78c9e5f91bcfe320087e"
+    )
+    assert overlay["pdx_artifact_engine"]["release_commit"] == (
+        "1925f68cb171ef88cc2be8d72bb5975e11a8dcd8"
+    )
+    assert len(overlay["prodocux"]["files"]) == 2
+    assert len(overlay["pdx_artifact_engine"]["files"]) == 2
 
 
 def test_rc3_a3_overlay_is_byte_identical_with_sibling_when_present() -> None:
