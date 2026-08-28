@@ -6,6 +6,7 @@ import json
 import sqlite3
 import threading
 import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -40,6 +41,7 @@ class JobRecord:
     attempt_count: int = 0
     lease_owner: str | None = None
     lease_expires_unix: int | None = None
+    lease_token: str | None = None
     # Single dict (legacy) or list of result items (Phase 1 multi-kind).
     result: dict[str, Any] | list[dict[str, Any]] | None = None
 
@@ -74,6 +76,7 @@ class JobStore:
                     attempt_count INTEGER NOT NULL DEFAULT 0,
                     lease_owner TEXT,
                     lease_expires_unix INTEGER,
+                    lease_token TEXT,
                     result_json TEXT
                 )
                 """
@@ -99,6 +102,7 @@ class JobStore:
             "attempt_count": "INTEGER NOT NULL DEFAULT 0",
             "lease_owner": "TEXT",
             "lease_expires_unix": "INTEGER",
+            "lease_token": "TEXT",
             "result_json": "TEXT",
         }
         for name, ddl in alters.items():
@@ -129,6 +133,9 @@ class JobStore:
             lease_owner=row["lease_owner"] if "lease_owner" in keys else None,
             lease_expires_unix=row["lease_expires_unix"]
             if "lease_expires_unix" in keys
+            else None,
+            lease_token=row["lease_token"]
+            if "lease_token" in keys and row["lease_token"]
             else None,
             result=result,
         )
@@ -163,9 +170,10 @@ class JobStore:
                 INSERT INTO jobs(
                     job_id, state, idempotency_key, operation_digest, document_json,
                     payload_filename, payload_media_type, deadline_at,
-                    attempt_count, lease_owner, lease_expires_unix, result_json
+                    attempt_count, lease_owner, lease_expires_unix, lease_token,
+                    result_json
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     record.job_id,
@@ -179,41 +187,51 @@ class JobStore:
                     record.attempt_count,
                     record.lease_owner,
                     record.lease_expires_unix,
+                    record.lease_token,
                     result_json,
                 ),
             )
             self._conn.commit()
 
-    def update(self, record: JobRecord) -> None:
+    def update(
+        self,
+        record: JobRecord,
+        *,
+        expected_lease_token: str | None = None,
+    ) -> bool:
         dumped = json.dumps(record.document, ensure_ascii=True, separators=(",", ":"))
         if "content_b64" in dumped:
             raise ValueError("REFUSAL_PERSIST_BYTES")
         result_json = self._dump_result(record)
+        values: tuple[Any, ...] = (
+            record.state,
+            dumped,
+            record.operation_digest,
+            record.payload_filename,
+            record.payload_media_type,
+            record.deadline_at,
+            record.attempt_count,
+            record.lease_owner,
+            record.lease_expires_unix,
+            record.lease_token,
+            result_json,
+            record.job_id,
+        )
+        sql = """
+            UPDATE jobs
+            SET state = ?, document_json = ?, operation_digest = ?,
+                payload_filename = ?, payload_media_type = ?, deadline_at = ?,
+                attempt_count = ?, lease_owner = ?, lease_expires_unix = ?,
+                lease_token = ?, result_json = ?
+            WHERE job_id = ?
+            """
+        if expected_lease_token is not None:
+            sql += " AND lease_token = ? AND state = 'running'"
+            values = (*values, expected_lease_token)
         with self._lock:
-            self._conn.execute(
-                """
-                UPDATE jobs
-                SET state = ?, document_json = ?, operation_digest = ?,
-                    payload_filename = ?, payload_media_type = ?, deadline_at = ?,
-                    attempt_count = ?, lease_owner = ?, lease_expires_unix = ?,
-                    result_json = ?
-                WHERE job_id = ?
-                """,
-                (
-                    record.state,
-                    dumped,
-                    record.operation_digest,
-                    record.payload_filename,
-                    record.payload_media_type,
-                    record.deadline_at,
-                    record.attempt_count,
-                    record.lease_owner,
-                    record.lease_expires_unix,
-                    result_json,
-                    record.job_id,
-                ),
-            )
+            updated = self._conn.execute(sql, values)
             self._conn.commit()
+            return updated.rowcount == 1
 
     def _dump_result(self, record: JobRecord) -> str | None:
         if record.result is None:
@@ -260,21 +278,24 @@ class JobStore:
                 return None
             record = self._row_to_record(row)
             previous_attempts = record.attempt_count
+            lease_token = uuid.uuid4().hex
             record.state = "running"
             record.attempt_count += 1
             record.lease_owner = owner
             record.lease_expires_unix = lease_expires
+            record.lease_token = lease_token
             doc = dict(record.document)
             doc["state"] = "running"
-            if "run_id" not in doc:
-                doc["run_id"] = f"run_{record.job_id}_{record.attempt_count}"
+            doc["run_id"] = (
+                f"run_{record.job_id}_{record.attempt_count}_{lease_token[:12]}"
+            )
             record.document = doc
             dumped = json.dumps(doc, ensure_ascii=True, separators=(",", ":"))
             updated = self._conn.execute(
                 """
                 UPDATE jobs
                 SET state = ?, document_json = ?, attempt_count = ?,
-                    lease_owner = ?, lease_expires_unix = ?
+                    lease_owner = ?, lease_expires_unix = ?, lease_token = ?
                 WHERE job_id = ?
                   AND attempt_count = ?
                   AND (
@@ -292,6 +313,7 @@ class JobStore:
                     record.attempt_count,
                     record.lease_owner,
                     record.lease_expires_unix,
+                    record.lease_token,
                     record.job_id,
                     previous_attempts,
                     now_unix,
@@ -308,10 +330,11 @@ class JobStore:
         job_id: str,
         *,
         owner: str,
+        lease_token: str,
         lease_seconds: int = 60,
         now: int | None = None,
     ) -> bool:
-        """Extend a running lease only if this owner still holds it."""
+        """Extend a running lease only if this owner still holds this claim."""
         now_unix = int(time.time() if now is None else now)
         lease_expires = now_unix + lease_seconds
         with self._lock:
@@ -319,12 +342,36 @@ class JobStore:
                 """
                 UPDATE jobs
                 SET lease_expires_unix = ?
-                WHERE job_id = ? AND lease_owner = ? AND state = 'running'
+                WHERE job_id = ?
+                  AND lease_owner = ?
+                  AND lease_token = ?
+                  AND state = 'running'
                 """,
-                (lease_expires, job_id, owner),
+                (lease_expires, job_id, owner, lease_token),
             )
             self._conn.commit()
             return updated.rowcount == 1
+
+    def holds_lease(
+        self,
+        job_id: str,
+        *,
+        owner: str,
+        lease_token: str,
+    ) -> bool:
+        """True if this owner still holds the given claim token while running."""
+        with self._lock:
+            row = self._conn.execute(
+                """
+                SELECT 1 FROM jobs
+                WHERE job_id = ?
+                  AND lease_owner = ?
+                  AND lease_token = ?
+                  AND state = 'running'
+                """,
+                (job_id, owner, lease_token),
+            ).fetchone()
+        return row is not None
 
     def close(self) -> None:
         with self._lock:

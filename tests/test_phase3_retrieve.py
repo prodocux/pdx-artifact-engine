@@ -8,7 +8,6 @@ from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator, FormatChecker
-
 from pdx_artifact_engine.jobs import JobRecord, JobStore
 from pdx_artifact_engine.jobs.service import JobService, JobServiceError
 from pdx_artifact_engine.staging import StagingStore
@@ -347,21 +346,21 @@ def test_service_retrieve_maps_artifact_too_large(tmp_path: Path) -> None:
     assert excinfo.value.retryable is False
 
 
-def test_service_retrieve_rejects_unverified_kernel_bytes(tmp_path: Path) -> None:
-    class TamperedKernel:
+def test_service_retrieve_rejects_kernel_media_type_mismatch(tmp_path: Path) -> None:
+    class MimeMismatchKernel:
         def retrieve_artifact(self, *, request_id: str, artifact: dict) -> dict:
             return {
                 "schema_version": "prodocux_artifact_content_v1",
                 "request_id": request_id,
                 "artifact": dict(artifact),
-                "media_type": artifact["media_type"],
+                "media_type": "text/plain",
                 "size_bytes": artifact["size_bytes"],
                 "sha256": artifact["sha256"],
-                "content_b64": base64.b64encode(b"Z").decode("ascii"),
+                "content_b64": base64.b64encode(b"a").decode("ascii"),
             }
 
     service, artifact = _completed_job(tmp_path)
-    service.kernel = TamperedKernel()
+    service.kernel = MimeMismatchKernel()
     with pytest.raises(JobServiceError) as excinfo:
         service.retrieve(
             "job-retrieve-1",

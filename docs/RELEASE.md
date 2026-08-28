@@ -138,3 +138,12 @@ work.
   product-specific verification rules remain outside PDX Core.
 - Git commit pins remain authoritative until maintainers explicitly create a
   release tag.
+
+## Unpublished a3 overlay
+
+Working tree `0.3.0a3` is unpublished (no tag, GitHub Release, or PyPI).
+Publication intent for this cut is recorded in
+`compatibility/pdx_prodocux_release_rc3_a3.json`. That overlay does not replace
+`pdx_prodocux_release_v1.json`, which remains the frozen published `0.3.0a2`
+record. Media remains `0.2.0a2` and must not be attached to an Engine a3
+GitHub Release. Fill tag SHA and asset digests only at publication.

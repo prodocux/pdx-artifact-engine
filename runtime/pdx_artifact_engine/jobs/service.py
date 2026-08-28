@@ -5,9 +5,8 @@ from __future__ import annotations
 import base64
 import binascii
 import hashlib
-import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -456,7 +455,7 @@ class JobService:
                 request_id=request_id,
                 artifact=body["artifact"],
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             from pdx_adapter_prodocux.http_client import ProDocuXHttpError
 
             if isinstance(exc, ProDocuXHttpError) and exc.status == 413:
@@ -549,7 +548,7 @@ class JobService:
         if record.state in TERMINAL_STATES:
             return record.status_document()
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         deadline = _parse_deadline(record.deadline_at)
         staging_meta = record.document.get("staging")
         handle = None
@@ -604,6 +603,7 @@ class JobService:
             record.state = "pending"
             record.lease_owner = None
             record.lease_expires_unix = None
+            record.lease_token = None
             record.document = updated
             self.store.update(record)
             return record.status_document()
@@ -616,10 +616,12 @@ class JobService:
         *,
         state: str,
         error: dict[str, Any] | None,
-    ) -> dict[str, Any]:
+        expected_lease_token: str | None = None,
+    ) -> dict[str, Any] | None:
         staging = record.document.get("staging")
+        handle = None
         if isinstance(staging, dict) and "handle" in staging:
-            self.staging.delete(str(staging["handle"]))
+            handle = str(staging["handle"])
         updated = dict(record.document)
         updated["state"] = state
         updated.pop("staging", None)
@@ -631,5 +633,9 @@ class JobService:
         record.document = updated
         record.lease_owner = None
         record.lease_expires_unix = None
-        self.store.update(record)
+        record.lease_token = None
+        if not self.store.update(record, expected_lease_token=expected_lease_token):
+            return None
+        if handle is not None:
+            self.staging.delete(handle)
         return updated

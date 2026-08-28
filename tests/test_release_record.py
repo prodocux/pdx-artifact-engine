@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_RECORD = ROOT / "compatibility" / "pdx_prodocux_release_v1.json"
+RELEASE_OVERLAY = ROOT / "compatibility" / "pdx_prodocux_release_rc3_a3.json"
 V3_MANIFEST = ROOT / "compatibility" / "pdx_prodocux_compatibility_v3.json"
 SIBLING = (
     ROOT.parent / "pdx-artifact-engine"
@@ -48,3 +49,24 @@ def test_release_record_is_byte_identical_with_sibling_when_present() -> None:
     sibling = SIBLING / "compatibility" / RELEASE_RECORD.name
     if sibling.exists():
         assert RELEASE_RECORD.read_bytes() == sibling.read_bytes()
+
+
+def test_rc3_a3_overlay_does_not_rewrite_frozen_v1() -> None:
+    record = json.loads(RELEASE_RECORD.read_text(encoding="utf-8"))
+    overlay = json.loads(RELEASE_OVERLAY.read_text(encoding="utf-8"))
+    assert record["status"] == "published"
+    assert record["prodocux"]["version"] == "0.3.0rc2"
+    assert overlay["schema_version"] == "pdx_prodocux_release_overlay_v1"
+    assert overlay["status"] == "unpublished_working_tree"
+    assert overlay["supersedes"]["record"] == "pdx_prodocux_release_v1.json"
+    assert overlay["prodocux"]["version"] == "0.3.0rc3"
+    assert overlay["pdx_artifact_engine"]["version"] == "0.3.0a3"
+    assert overlay["pdx_adapter_media"]["version"] == "0.2.0a2"
+    assert overlay["prodocux"]["release_commit"] is None
+    assert overlay["pdx_artifact_engine"]["release_commit"] is None
+
+
+def test_rc3_a3_overlay_is_byte_identical_with_sibling_when_present() -> None:
+    sibling = SIBLING / "compatibility" / RELEASE_OVERLAY.name
+    if sibling.exists():
+        assert RELEASE_OVERLAY.read_bytes() == sibling.read_bytes()

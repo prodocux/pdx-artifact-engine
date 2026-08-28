@@ -11,15 +11,18 @@ checksummed manifests.
 
 **Working tree `0.3.0a3` (unpublished).** Last PyPI prerelease is **`0.3.0a2`**.
 Media adapter remains **`0.2.0a2`** and is not republished with Engine a3.
+The unpublished rc3/a3 overlay is
+[`compatibility/pdx_prodocux_release_rc3_a3.json`](compatibility/pdx_prodocux_release_rc3_a3.json);
+it does not rewrite the frozen published record.
 
 ## Positioning
 
 | Claim | Status |
 |---|---|
-| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (core 0.3.0a2; introduced in 0.3.0a1)** |
+| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (working tree 0.3.0a3; introduced in 0.3.0a1)** |
 | v0→v1 plan translator (rejects unresolved `expert`) | **Available (core)** |
 | Run state machine (`awaiting_*` → `running`) | **Available (core)** |
-| Bounded run snapshot + step receipt contracts | **Available (core 0.3.0a2; introduced in 0.3.0a1)** |
+| Bounded run snapshot + step receipt contracts | **Available (working tree 0.3.0a3; introduced in 0.3.0a1)** |
 | Checkpoint CAS + decision record-once repository ports | **Available (core)** |
 | Replay-safe pending-only snapshot resume | **Available (engine)** |
 | External-operation pending/unknown/reconcile lifecycle | **Available (core)** |
@@ -147,7 +150,7 @@ to document the future shape. Without `--mock`, that plan **blocks**. With
 | `ManualPlanner` (`--plan`) | Yes |
 | `RulePlanner` (`--rule-request`) | Yes |
 | `ExternalPlanner` | Stub (raises) |
-| `LlamaCppPlanner` | Stub (raises; planned, not implemented in `0.3.0a2`) |
+| `LlamaCppPlanner` | Stub (raises; planned, not implemented in `0.3.0a3`) |
 | Future `PDXCorePlanner` | Not started |
 
 ## Schemas

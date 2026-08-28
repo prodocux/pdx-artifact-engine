@@ -1,0 +1,41 @@
+{
+  "schema_version": "pdx_prodocux_release_overlay_v1",
+  "status": "unpublished_working_tree",
+  "published_at": null,
+  "supersedes": {
+    "record": "pdx_prodocux_release_v1.json",
+    "note": "v1 remains the frozen published rc2/a2 compatibility record and must not be rewritten. This overlay records the unpublished rc3/a3 working tree only."
+  },
+  "compatibility": {
+    "manifest": "pdx_prodocux_compatibility_v3.json",
+    "sha256": "9591ab363472db78efb64265e3050fa4626be43783f848d0888e732898486d2b",
+    "publication_gate_interpretation": "The frozen v3 publication_gate remains historical evidence. This overlay does not replace v1, v2, or v3 bytes."
+  },
+  "prodocux": {
+    "distribution": "prodocux",
+    "version": "0.3.0rc3",
+    "tag": null,
+    "release_commit": null,
+    "github_release": null,
+    "pypi_release": null,
+    "workflow_run": null,
+    "files": {},
+    "note": "Working tree only. Do not tag, push, or publish until release gates pass. Commit SHA is recorded at tag time."
+  },
+  "pdx_artifact_engine": {
+    "distribution": "pdx-artifact-engine",
+    "version": "0.3.0a3",
+    "tag": null,
+    "release_commit": null,
+    "github_release": null,
+    "pypi_release": null,
+    "workflow_run": null,
+    "files": {},
+    "note": "Working tree only. GitHub Release must not attach pdx-adapter-media a2 assets or the workflow will try to republish Media."
+  },
+  "pdx_adapter_media": {
+    "distribution": "pdx-adapter-media",
+    "version": "0.2.0a2",
+    "note": "Unchanged from the frozen v1 record. Do not republish with Engine a3."
+  }
+}

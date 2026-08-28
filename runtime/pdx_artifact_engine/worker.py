@@ -29,7 +29,8 @@ import os
 import socket
 import threading
 import time
-from dataclasses import dataclass
+import uuid
+from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 from pdx_artifact_engine.jobs import TERMINAL_STATES, JobRecord, JobStore
@@ -88,13 +89,18 @@ def _result_item(
     }
 
 
+def default_worker_instance_id() -> str:
+    """Unique per process instance; hostname alone is not a worker identity."""
+    return f"{socket.gethostname()}-{os.getpid()}-{uuid.uuid4().hex}"
+
+
 @dataclass
 class JobWorker:
     store: JobStore
     staging: StagingStore
     service: JobService
     kernel: KernelClient
-    owner: str = "worker-1"
+    owner: str = field(default_factory=default_worker_instance_id)
     lease_seconds: int = 60
     max_attempts: int = 3
     poll_seconds: float = 0.5
@@ -121,28 +127,98 @@ class JobWorker:
         return done
 
     def _process(self, record: JobRecord) -> None:
+        lease_token = record.lease_token
+        if not lease_token:
+            return
         stop = threading.Event()
+        lost = threading.Event()
         heartbeat = threading.Thread(
             target=self._heartbeat,
-            args=(record.job_id, stop),
+            args=(record.job_id, lease_token, stop, lost),
             daemon=True,
             name=f"pdx-lease-{record.job_id}",
         )
         heartbeat.start()
         try:
-            self._process_locked(record)
+            self._process_locked(record, lease_token=lease_token, lost=lost)
         finally:
             stop.set()
             heartbeat.join(timeout=1)
 
-    def _heartbeat(self, job_id: str, stop: threading.Event) -> None:
+    def _heartbeat(
+        self,
+        job_id: str,
+        lease_token: str,
+        stop: threading.Event,
+        lost: threading.Event,
+    ) -> None:
         interval = max(1, int(self.lease_seconds / 3))
         while not stop.wait(interval):
-            self.store.renew_lease(
-                job_id, owner=self.owner, lease_seconds=self.lease_seconds
+            renewed = self.store.renew_lease(
+                job_id,
+                owner=self.owner,
+                lease_token=lease_token,
+                lease_seconds=self.lease_seconds,
             )
+            if not renewed:
+                lost.set()
+                return
 
-    def _process_locked(self, record: JobRecord) -> None:
+    def _lease_lost(
+        self, job_id: str, lease_token: str, lost: threading.Event
+    ) -> bool:
+        if lost.is_set():
+            return True
+        if not self.store.holds_lease(
+            job_id, owner=self.owner, lease_token=lease_token
+        ):
+            lost.set()
+            return True
+        return False
+
+    def _finalize_claim(
+        self,
+        record: JobRecord,
+        *,
+        lease_token: str,
+        lost: threading.Event,
+        state: str,
+        error: dict[str, Any] | None,
+    ) -> None:
+        if self._lease_lost(record.job_id, lease_token, lost):
+            return
+        applied = self.service._finalize(
+            record,
+            state=state,
+            error=error,
+            expected_lease_token=lease_token,
+        )
+        if applied is None:
+            lost.set()
+
+    def _update_claim(
+        self,
+        record: JobRecord,
+        *,
+        lease_token: str,
+        lost: threading.Event,
+    ) -> bool:
+        if self._lease_lost(record.job_id, lease_token, lost):
+            return False
+        if not self.store.update(record, expected_lease_token=lease_token):
+            lost.set()
+            return False
+        return True
+
+    def _process_locked(
+        self,
+        record: JobRecord,
+        *,
+        lease_token: str,
+        lost: threading.Event,
+    ) -> None:
+        if self._lease_lost(record.job_id, lease_token, lost):
+            return
         latest = self.store.get(record.job_id)
         if latest is None or latest.state in TERMINAL_STATES:
             return
@@ -151,8 +227,10 @@ class JobWorker:
 
         staging = latest.document.get("staging")
         if not isinstance(staging, dict) or "handle" not in staging:
-            self.service._finalize(
+            self._finalize_claim(
                 latest,
+                lease_token=lease_token,
+                lost=lost,
                 state="failed",
                 error=self._error(latest, "STAGING_MISSING", "staging handle absent"),
             )
@@ -161,8 +239,10 @@ class JobWorker:
         handle = str(staging["handle"])
         payload = self.staging.read_bytes(handle)
         if payload is None:
-            self.service._finalize(
+            self._finalize_claim(
                 latest,
+                lease_token=lease_token,
+                lost=lost,
                 state="failed",
                 error=self._error(
                     latest, "STAGING_MISSING", "staging bytes missing or expired"
@@ -172,8 +252,10 @@ class JobWorker:
 
         digest = hashlib.sha256(payload).hexdigest()
         if digest != latest.document.get("input_digest"):
-            self.service._finalize(
+            self._finalize_claim(
                 latest,
+                lease_token=lease_token,
+                lost=lost,
                 state="failed",
                 error=self._error(
                     latest, "DIGEST_MISMATCH", "staging digest diverged from job"
@@ -183,20 +265,30 @@ class JobWorker:
 
         operation = latest.document.get("operation")
         if operation == "intake_document":
-            self._run_intake(latest, handle, payload, digest)
+            self._run_intake(
+                latest, handle, payload, digest, lease_token=lease_token, lost=lost
+            )
             return
         if operation == "render_artifact":
-            self._run_render(latest, handle, payload)
+            self._run_render(
+                latest, handle, payload, lease_token=lease_token, lost=lost
+            )
             return
         if operation == "compare_normalized_profiles":
-            self._run_compare(latest, handle, payload)
+            self._run_compare(
+                latest, handle, payload, lease_token=lease_token, lost=lost
+            )
             return
         if operation == "verify_evidence":
-            self._run_verify(latest, handle, payload)
+            self._run_verify(
+                latest, handle, payload, lease_token=lease_token, lost=lost
+            )
             return
 
-        self.service._finalize(
+        self._finalize_claim(
             latest,
+            lease_token=lease_token,
+            lost=lost,
             state="blocked",
             error=self._error(
                 latest,
@@ -211,6 +303,9 @@ class JobWorker:
         handle: str,
         payload: bytes,
         digest: str,
+        *,
+        lease_token: str,
+        lost: threading.Event,
     ) -> None:
         document_b64 = base64.b64encode(payload).decode("ascii")
         payload = b""
@@ -243,14 +338,20 @@ class JobWorker:
                 raise RuntimeError("kernel derived store did not return artifact://derived/")
         except Exception:  # noqa: BLE001
             document_b64 = ""
-            self._maybe_retry_or_fail(latest)
+            self._maybe_retry_or_fail(
+                latest, lease_token=lease_token, lost=lost
+            )
             return
 
+        if self._lease_lost(latest.job_id, lease_token, lost):
+            return
         latest = self.store.get(latest.job_id)
         if latest is None:
             return
         if latest.state == "cancelled" or latest.state in TERMINAL_STATES:
             self.staging.delete(handle)
+            return
+        if self._lease_lost(latest.job_id, lease_token, lost):
             return
 
         latest.result = [
@@ -265,19 +366,27 @@ class JobWorker:
                 artifact=derived,
             ),
         ]
-        self.store.update(latest)
-        self.service._finalize(latest, state="completed", error=None)
+        self._finalize_claim(
+            latest,
+            lease_token=lease_token,
+            lost=lost,
+            state="completed",
+            error=None,
+        )
 
     def _run_render(
         self,
         latest: JobRecord,
         handle: str,
         payload: bytes,
+        *,
+        lease_token: str,
+        lost: threading.Event,
     ) -> None:
         try:
             request = json.loads(payload.decode("utf-8"))
             if not isinstance(request, dict):
-                raise ValueError("render request must be a JSON object")
+                raise TypeError("render request must be a JSON object")
             output = request.get("output")
             if isinstance(output, dict) and output.get("delivery_mode") != "artifact":
                 # Private Engine path always asks Kernel for artifact delivery.
@@ -308,14 +417,20 @@ class JobWorker:
             else:
                 raise RuntimeError("kernel render returned neither artifact nor content")
         except Exception:  # noqa: BLE001
-            self._maybe_retry_or_fail(latest)
+            self._maybe_retry_or_fail(
+                latest, lease_token=lease_token, lost=lost
+            )
             return
 
+        if self._lease_lost(latest.job_id, lease_token, lost):
+            return
         latest = self.store.get(latest.job_id)
         if latest is None:
             return
         if latest.state == "cancelled" or latest.state in TERMINAL_STATES:
             self.staging.delete(handle)
+            return
+        if self._lease_lost(latest.job_id, lease_token, lost):
             return
 
         latest.result = [
@@ -325,14 +440,22 @@ class JobWorker:
                 artifact=processing,
             )
         ]
-        self.store.update(latest)
-        self.service._finalize(latest, state="completed", error=None)
+        self._finalize_claim(
+            latest,
+            lease_token=lease_token,
+            lost=lost,
+            state="completed",
+            error=None,
+        )
 
     def _run_compare(
         self,
         latest: JobRecord,
         handle: str,
         payload: bytes,
+        *,
+        lease_token: str,
+        lost: threading.Event,
     ) -> None:
         self._run_kernel_json_operation(
             latest,
@@ -340,6 +463,8 @@ class JobWorker:
             payload,
             output_name="normalized_diff_result.json",
             kernel_call=self.kernel.compare_normalized_profiles,
+            lease_token=lease_token,
+            lost=lost,
         )
 
     def _run_verify(
@@ -347,6 +472,9 @@ class JobWorker:
         latest: JobRecord,
         handle: str,
         payload: bytes,
+        *,
+        lease_token: str,
+        lost: threading.Event,
     ) -> None:
         self._run_kernel_json_operation(
             latest,
@@ -354,6 +482,8 @@ class JobWorker:
             payload,
             output_name="evidence_bundle_result.json",
             kernel_call=self.kernel.verify_evidence_bundle,
+            lease_token=lease_token,
+            lost=lost,
         )
 
     def _run_kernel_json_operation(
@@ -364,24 +494,32 @@ class JobWorker:
         *,
         output_name: str,
         kernel_call: Any,
+        lease_token: str,
+        lost: threading.Event,
     ) -> None:
         try:
             request = json.loads(payload.decode("utf-8"))
             if not isinstance(request, dict):
-                raise ValueError("kernel request must be a JSON object")
+                raise TypeError("kernel request must be a JSON object")
             response = kernel_call(request)
             if not isinstance(response, dict):
-                raise RuntimeError("kernel response must be a JSON object")
+                raise TypeError("kernel response must be a JSON object")
             processing = self._persist_kernel_json(response, output_name)
         except Exception:  # noqa: BLE001
-            self._maybe_retry_or_fail(latest)
+            self._maybe_retry_or_fail(
+                latest, lease_token=lease_token, lost=lost
+            )
             return
 
+        if self._lease_lost(latest.job_id, lease_token, lost):
+            return
         latest = self.store.get(latest.job_id)
         if latest is None:
             return
         if latest.state == "cancelled" or latest.state in TERMINAL_STATES:
             self.staging.delete(handle)
+            return
+        if self._lease_lost(latest.job_id, lease_token, lost):
             return
 
         latest.result = [
@@ -391,8 +529,13 @@ class JobWorker:
                 artifact=processing,
             )
         ]
-        self.store.update(latest)
-        self.service._finalize(latest, state="completed", error=None)
+        self._finalize_claim(
+            latest,
+            lease_token=lease_token,
+            lost=lost,
+            state="completed",
+            error=None,
+        )
 
     def _persist_kernel_json(
         self, response: dict[str, Any], output_name: str
@@ -411,19 +554,28 @@ class JobWorker:
             raise RuntimeError("kernel derived store did not return artifact://derived/")
         return derived
 
-    def _maybe_retry_or_fail(self, latest: JobRecord) -> None:
+    def _maybe_retry_or_fail(
+        self,
+        latest: JobRecord,
+        *,
+        lease_token: str,
+        lost: threading.Event,
+    ) -> None:
         retryable = latest.attempt_count < self.max_attempts
         if retryable:
             latest.state = "pending"
             latest.lease_owner = None
             latest.lease_expires_unix = None
+            latest.lease_token = None
             doc = dict(latest.document)
             doc["state"] = "pending"
             latest.document = doc
-            self.store.update(latest)
+            self._update_claim(latest, lease_token=lease_token, lost=lost)
             return
-        self.service._finalize(
+        self._finalize_claim(
             latest,
+            lease_token=lease_token,
+            lost=lost,
             state="failed",
             error=self._error(
                 latest,
@@ -490,7 +642,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--owner",
-        default=os.environ.get("PDX_ENGINE_WORKER_OWNER", socket.gethostname()),
+        default=os.environ.get("PDX_ENGINE_WORKER_OWNER")
+        or default_worker_instance_id(),
     )
     parser.add_argument("--max-jobs", type=int, default=None)
     args = parser.parse_args(argv)

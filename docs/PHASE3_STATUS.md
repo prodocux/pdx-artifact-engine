@@ -7,7 +7,9 @@ Media remains **0.2.0a2** and is optional in the PyPI workflow.
 
 - Runtime E-05/Phase 3 schemas ship in the wheel (`contracts/phase0|phase3`)
 - `JobService.retrieve()` re-decodes bytes and checks size/SHA-256/MIME
-- `claim_next()` is a conditional CAS update under WAL; worker renews leases
+- `claim_next()` is a conditional CAS update under WAL; each claim mints a
+  unique lease token. Renew, result write, and finalize all require that token.
+  Heartbeat abort on renew failure; stale workers cannot overwrite a new attempt.
 - Non-object JSON bodies return 400 `REQUEST_INVALID` / `BODY_INVALID`
 - `production_mtls` trusts only the configured verify header from trusted peers
 - PyPI workflow publishes Media only when Media assets are on the GitHub Release
