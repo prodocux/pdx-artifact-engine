@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import binascii
 import hashlib
+import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -560,7 +561,7 @@ class JobService:
             staging_alive = self.staging.get_handle(handle) is not None
 
         if deadline is not None and now > deadline:
-            return self._finalize(
+            return self._reconcile_finalize(
                 record,
                 state="timed_out",
                 error={
@@ -572,10 +573,12 @@ class JobService:
                     "request_id": request_id,
                     "correlation_id": correlation_id,
                 },
+                request_id=request_id,
+                correlation_id=correlation_id,
             )
 
         if not staging_alive:
-            return self._finalize(
+            return self._reconcile_finalize(
                 record,
                 state="failed",
                 error={
@@ -587,28 +590,72 @@ class JobService:
                     "request_id": request_id,
                     "correlation_id": correlation_id,
                 },
+                request_id=request_id,
+                correlation_id=correlation_id,
             )
 
-        # Expired worker lease: return to pending so another worker may claim.
-        import time
-
+        # Expired worker lease: CAS back to pending so another worker may claim.
         now_unix = int(time.time())
         if (
             record.state == "running"
             and record.lease_expires_unix is not None
             and record.lease_expires_unix < now_unix
+            and record.lease_token
         ):
-            updated = dict(record.document)
-            updated["state"] = "pending"
-            record.state = "pending"
-            record.lease_owner = None
-            record.lease_expires_unix = None
-            record.lease_token = None
-            record.document = updated
-            self.store.update(record)
-            return record.status_document()
+            self.store.release_expired_lease(
+                record.job_id,
+                lease_token=record.lease_token,
+                now=now_unix,
+            )
+            return self._current_status(
+                record.job_id,
+                request_id=request_id,
+                correlation_id=correlation_id,
+            )
 
         return record.status_document()
+
+    def _current_status(
+        self,
+        job_id: str,
+        *,
+        request_id: str,
+        correlation_id: str,
+    ) -> dict[str, Any]:
+        fresh = self.store.get(job_id)
+        if fresh is None:
+            raise JobServiceError(
+                code="JOB_NOT_FOUND",
+                message="job not found",
+                status=404,
+                request_id=request_id,
+                correlation_id=correlation_id,
+            )
+        return fresh.status_document()
+
+    def _reconcile_finalize(
+        self,
+        record: JobRecord,
+        *,
+        state: str,
+        error: dict[str, Any] | None,
+        request_id: str,
+        correlation_id: str,
+    ) -> dict[str, Any]:
+        token = record.lease_token if record.state == "running" else None
+        applied = self._finalize(
+            record,
+            state=state,
+            error=error,
+            expected_lease_token=token,
+        )
+        if applied is not None:
+            return applied
+        return self._current_status(
+            record.job_id,
+            request_id=request_id,
+            correlation_id=correlation_id,
+        )
 
     def _finalize(
         self,

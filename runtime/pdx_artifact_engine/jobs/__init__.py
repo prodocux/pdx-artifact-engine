@@ -373,6 +373,49 @@ class JobStore:
             ).fetchone()
         return row is not None
 
+    def release_expired_lease(
+        self,
+        job_id: str,
+        *,
+        lease_token: str,
+        now: int | None = None,
+    ) -> bool:
+        """CAS: running + this token + expired lease → pending with lease cleared."""
+        now_unix = int(time.time() if now is None else now)
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM jobs WHERE job_id = ?", (job_id,)
+            ).fetchone()
+            if row is None:
+                return False
+            record = self._row_to_record(row)
+            doc = dict(record.document)
+            doc["state"] = "pending"
+            dumped = json.dumps(doc, ensure_ascii=True, separators=(",", ":"))
+            if "content_b64" in dumped:
+                raise ValueError("REFUSAL_PERSIST_BYTES")
+            updated = self._conn.execute(
+                """
+                UPDATE jobs
+                SET state = 'pending',
+                    document_json = ?,
+                    lease_owner = NULL,
+                    lease_expires_unix = NULL,
+                    lease_token = NULL
+                WHERE job_id = ?
+                  AND state = 'running'
+                  AND lease_token = ?
+                  AND lease_expires_unix IS NOT NULL
+                  AND lease_expires_unix < ?
+                """,
+                (dumped, job_id, lease_token, now_unix),
+            )
+            if updated.rowcount != 1:
+                self._conn.rollback()
+                return False
+            self._conn.commit()
+            return True
+
     def close(self) -> None:
         with self._lock:
             self._conn.close()

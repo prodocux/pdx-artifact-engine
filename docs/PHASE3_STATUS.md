@@ -10,6 +10,8 @@ Media remains **0.2.0a2** and is optional in the PyPI workflow.
 - `claim_next()` is a conditional CAS update under WAL; each claim mints a
   unique lease token. Renew, result write, and finalize all require that token.
   Heartbeat abort on renew failure; stale workers cannot overwrite a new attempt.
+  Expired-lease reconcile is the same CAS (`running` + token + expiry) and
+  re-reads current state when another worker already reclaimed.
 - Non-object JSON bodies return 400 `REQUEST_INVALID` / `BODY_INVALID`
 - `production_mtls` trusts only the configured verify header from trusted peers
 - PyPI workflow publishes Media only when Media assets are on the GitHub Release
