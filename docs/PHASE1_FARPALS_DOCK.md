@@ -106,9 +106,17 @@ Worker `render_artifact` path:
 
 ## Deferred to Phase 3 (PDX + Farpals delivery)
 
-- Verified retrieval of `artifact://derived|sink|render/…` bytes
-- Size / digest / MIME recheck
-- WordPress Media Library ingestion and attachment / publication binding
+- ~~Verified retrieval of `artifact://derived|sink|render/…` bytes~~ → **frozen** (see Phase 3 SHAs)
+- ~~Size / digest / MIME recheck~~ → Kernel `POST /v1/artifacts/retrieve`
+- WordPress Media Library ingestion and attachment / publication binding (Farpals slice 2)
+
+## Phase 3 freeze SHAs (verified bytes — unblocks Farpals publish)
+
+- Kernel: `f6cee0d`
+- Engine: `fb3aa6d`
+- Routes: `POST /v1/artifacts/retrieve`, `POST /internal/v1/jobs/{job_id}/retrieve`
+
+See [`PHASE3_STATUS.md`](PHASE3_STATUS.md) and `docs/phase3/README.md`.
 
 ## Pins (Phase 0, still valid)
 
