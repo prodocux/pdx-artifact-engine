@@ -16,7 +16,7 @@ All expensive T1 product work remains on the Engine worker path.
 
 - Engine Phase 3 implementation: `fb3aa6d`
 - Kernel Phase 3 companion: `f6cee0d`
-- Phase 3 tail (compare/verify worker + retrieval errors): _(this commit)_
+- Phase 3 tail (compare/verify worker + retrieval errors): `9b55213`
 
 ## Landed
 

@@ -112,8 +112,8 @@ Worker `render_artifact` path:
 
 ## Phase 3 freeze SHAs (verified bytes — unblocks Farpals publish)
 
-- Kernel: `f6cee0d` (+ tail: compare/verify N/A on Kernel; `ARTIFACT_TOO_LARGE`)
-- Engine: `fb3aa6d` (+ tail: compare/verify worker, retrieval error mapping)
+- Kernel: `f6cee0d` (retrieve), `50d250a` (ARTIFACT_TOO_LARGE + limit docs)
+- Engine: `fb3aa6d` (retrieve), `9b55213` (compare/verify worker + error map)
 - Routes: `POST /v1/artifacts/retrieve`, `POST /internal/v1/jobs/{job_id}/retrieve`
 - Worker ops: `compare_normalized_profiles`, `verify_evidence` → `processing_output`
 
