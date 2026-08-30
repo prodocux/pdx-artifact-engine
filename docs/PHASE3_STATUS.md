@@ -15,6 +15,8 @@ Media remains **0.2.0a2** and is optional in the PyPI workflow.
 - Non-object JSON bodies return 400 `REQUEST_INVALID` / `BODY_INVALID`
 - `production_mtls` trusts only the configured verify header from trusted peers
 - PyPI workflow publishes Media only when Media assets are on the GitHub Release
+- Working-tree security overlay: production `Dockerfile` uninstalls
+  `pip`/`setuptools` after install. See `docs/SECURITY_RUNTIME.md`.
 
 
 ## Formal record
