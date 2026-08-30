@@ -9,25 +9,29 @@ checksummed manifests.
 > provider. PDX-5B-1B+ experts are an optional future bundle, not a v0.1.0
 > requirement.
 
-**Current PyPI prerelease: `0.3.0a3`**, published from tag **`v0.3.0a3`** at
-commit `1925f68cb171ef88cc2be8d72bb5975e11a8dcd8`. Media adapter remains
-**`0.2.0a2`** and was not republished with Engine a3. The published rc3/a3 overlay is
-[`compatibility/pdx_prodocux_release_rc3_a3.json`](compatibility/pdx_prodocux_release_rc3_a3.json);
-it does not rewrite the frozen published record.
+**Current PyPI prerelease: `0.3.0a4`**, published from tag **`v0.3.0a4`** at
+commit `2acdebf73134ed106a636ed38e1ecce6596eb751`. Media adapter remains
+**`0.2.0a2`** and was not republished with Engine a4. The published rc4/a4 overlay is
+[`compatibility/pdx_prodocux_release_rc4_a4.json`](compatibility/pdx_prodocux_release_rc4_a4.json);
+it does not rewrite the frozen rc2/a2 or rc3/a3 records.
 
-Next release candidate: **`0.3.0a4`** (not published). This coordinated security
+This coordinated security
 cut keeps runtime behavior and frozen contracts unchanged; its image omits
 pip/setuptools and pins the reviewed base digest. Media stays `0.2.0a2`.
-See [rc4/a4 release preparation](docs/RELEASE_RC4_A4.md).
+See [rc4/a4 publication and security boundary](docs/RELEASE_RC4_A4.md).
+
+```powershell
+python -m pip install "pdx-artifact-engine==0.3.0a4"
+```
 
 ## Positioning
 
 | Claim | Status |
 |---|---|
-| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (0.3.0a3; introduced in 0.3.0a1)** |
+| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (0.3.0a4; introduced in 0.3.0a1)** |
 | v0→v1 plan translator (rejects unresolved `expert`) | **Available (core)** |
 | Run state machine (`awaiting_*` → `running`) | **Available (core)** |
-| Bounded run snapshot + step receipt contracts | **Available (0.3.0a3; introduced in 0.3.0a1)** |
+| Bounded run snapshot + step receipt contracts | **Available (0.3.0a4; introduced in 0.3.0a1)** |
 | Checkpoint CAS + decision record-once repository ports | **Available (core)** |
 | Replay-safe pending-only snapshot resume | **Available (engine)** |
 | External-operation pending/unknown/reconcile lifecycle | **Available (core)** |
@@ -155,7 +159,7 @@ to document the future shape. Without `--mock`, that plan **blocks**. With
 | `ManualPlanner` (`--plan`) | Yes |
 | `RulePlanner` (`--rule-request`) | Yes |
 | `ExternalPlanner` | Stub (raises) |
-| `LlamaCppPlanner` | Stub (raises; planned, not implemented in `0.3.0a3`) |
+| `LlamaCppPlanner` | Stub (raises; planned, not implemented in `0.3.0a4`) |
 | Future `PDXCorePlanner` | Not started |
 
 ## Schemas

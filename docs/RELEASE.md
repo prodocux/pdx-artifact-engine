@@ -139,11 +139,14 @@ work.
 - Git commit pins remain authoritative until maintainers explicitly create a
   release tag.
 
-## Next coordinated release candidate
+## Published rc4 / a4 overlay
 
-See [rc4/a4 preparation](RELEASE_RC4_A4.md) for the new versioned candidate,
-exact-source build boundary and remaining publication gates. Historical
-published records below remain unchanged.
+See [rc4/a4 publication](RELEASE_RC4_A4.md) for the published source pins,
+exact-source build boundary, verification results and residual security risks.
+Both GitHub/PyPI release workflows succeeded on 2026-08-30. Public hashes,
+workflow URLs and Integrity API evidence are recorded in
+[`pdx_prodocux_release_rc4_a4.json`](../compatibility/pdx_prodocux_release_rc4_a4.json).
+Historical published records below remain unchanged.
 
 ## Published a3 overlay
 
