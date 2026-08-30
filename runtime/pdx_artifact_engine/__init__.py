@@ -1,10 +1,10 @@
 """PDX Artifact Engine runtime package.
 
-Working tree ``0.3.0a3`` re-exports Core contracts. Dispatcher normalizes
+Release candidate ``0.3.0a4`` re-exports Core contracts. Dispatcher normalizes
 ``pdx_plan_v0`` → ``pdx_execution_plan_v1`` (tool / approval / transform /
 verify). Legacy ``expert`` has no Core equivalent (D3): blocked unless
 ``--mock`` demo rewrite. Stable façade: ``ArtifactRuntime.execute_plan``.
-Last published PyPI prerelease remains ``0.3.0a2``.
+Publication state is recorded in the repository release documentation.
 """
 
 from pdx_artifact_core import (
@@ -25,7 +25,7 @@ from pdx_artifact_core import (
 
 from .runtime import ArtifactRuntime
 
-__version__ = "0.3.0a3"
+__version__ = "0.3.0a4"
 
 __all__ = [
     "ArtifactRuntime",

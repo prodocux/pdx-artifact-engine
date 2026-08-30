@@ -1,5 +1,8 @@
 # Engine Phase 3 — verified retrieval + compare/verify worker (freeze)
 
+Next coordinated release candidate: see [rc4/a4 preparation](RELEASE_RC4_A4.md).
+The published versions and freeze history below are historical records.
+
 Published version: **0.3.0a3** (`v0.3.0a3`; PyPI and provenance verified).
 Media remains **0.2.0a2** and is optional in the PyPI workflow.
 

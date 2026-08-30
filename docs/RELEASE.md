@@ -139,6 +139,12 @@ work.
 - Git commit pins remain authoritative until maintainers explicitly create a
   release tag.
 
+## Next coordinated release candidate
+
+See [rc4/a4 preparation](RELEASE_RC4_A4.md) for the new versioned candidate,
+exact-source build boundary and remaining publication gates. Historical
+published records below remain unchanged.
+
 ## Published a3 overlay
 
 `0.3.0a3` is published from tag `v0.3.0a3` at release commit

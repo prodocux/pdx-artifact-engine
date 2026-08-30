@@ -15,6 +15,11 @@ commit `1925f68cb171ef88cc2be8d72bb5975e11a8dcd8`. Media adapter remains
 [`compatibility/pdx_prodocux_release_rc3_a3.json`](compatibility/pdx_prodocux_release_rc3_a3.json);
 it does not rewrite the frozen published record.
 
+Next release candidate: **`0.3.0a4`** (not published). This coordinated security
+cut keeps runtime behavior and frozen contracts unchanged; its image omits
+pip/setuptools and pins the reviewed base digest. Media stays `0.2.0a2`.
+See [rc4/a4 release preparation](docs/RELEASE_RC4_A4.md).
+
 ## Positioning
 
 | Claim | Status |
