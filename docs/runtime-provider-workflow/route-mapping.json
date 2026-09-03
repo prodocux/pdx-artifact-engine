@@ -1,0 +1,24 @@
+{
+  "schema_version": "pdx_runtime_provider_route_mapping_v1",
+  "routes": [
+    {"operation": "create", "method": "POST", "path": "/internal/v1/runtime-provider-workflows", "request_schema": "pdx_internal_runtime_provider_workflow_create_request_v1", "success_schema": "pdx_internal_runtime_provider_workflow_create_response_v1"},
+    {"operation": "get_state", "method": "GET", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}", "request_schema": null, "success_schema": "pdx_runtime_provider_workflow_state_v1"},
+    {"operation": "get_plan", "method": "GET", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/plan", "request_schema": null, "success_schema": "pdx_runtime_provider_workflow_plan_v1"},
+    {"operation": "cancel", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/cancel", "request_schema": "pdx_internal_runtime_workflow_cancel_v1", "success_schema": "pdx_runtime_provider_workflow_state_v1"},
+    {"operation": "reconcile", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/reconcile", "request_schema": "pdx_internal_runtime_workflow_reconcile_v1", "success_schema": "pdx_runtime_provider_workflow_state_v1"},
+    {"operation": "claim_provider", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/provider-claims", "request_schema": "pdx_internal_runtime_provider_claim_request_v1", "success_schema": "pdx_internal_runtime_provider_claim_v1"},
+    {"operation": "renew_provider_lease", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/provider-leases/renew", "request_schema": "pdx_internal_runtime_provider_lease_renew_v1", "success_schema": "pdx_internal_runtime_lease_renew_response_v1"},
+    {"operation": "update_provider", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/provider-updates", "request_schema": "pdx_internal_runtime_provider_update_v1", "success_schema": "pdx_runtime_provider_workflow_state_v1"},
+    {"operation": "claim_check", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/check-claims", "request_schema": "pdx_internal_runtime_check_claim_request_v1", "success_schema": "pdx_internal_runtime_check_claim_v1"},
+    {"operation": "renew_check_lease", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/check-leases/renew", "request_schema": "pdx_internal_runtime_check_lease_renew_v1", "success_schema": "pdx_internal_runtime_lease_renew_response_v1"},
+    {"operation": "update_check", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/check-updates", "request_schema": "pdx_internal_runtime_check_update_v1", "success_schema": "pdx_runtime_provider_workflow_state_v1"},
+    {"operation": "get_receipt", "method": "GET", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/receipt", "request_schema": null, "success_schema": "pdx_runtime_provider_workflow_receipt_v1"}
+  ],
+  "http_semantics": {
+    "accepted": 202, "ok": 200, "request_invalid": 400, "not_found": 404,
+    "conflict": 409, "gone": 410, "too_large": 413,
+    "conflict_codes": ["IDEMPOTENCY_CONFLICT", "CLAIM_STALE", "SEQUENCE_CONFLICT", "PAYLOAD_DIGEST_INVALID", "ARTIFACT_RECORD_CONFLICT", "ARTIFACT_EDGE_UNPLANNED", "ARTIFACT_REFERENCE_UNAUTHORIZED"],
+    "gone_codes": ["WORKFLOW_NOT_ACTIVE", "POST_TERMINAL_ACTIVITY_REJECTED", "LEASE_EXPIRED"],
+    "too_large_codes": ["WORKFLOW_REQUEST_TOO_LARGE"]
+  }
+}

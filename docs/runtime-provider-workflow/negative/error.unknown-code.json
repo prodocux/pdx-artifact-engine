@@ -1,0 +1,7 @@
+{
+  "schema_version": "pdx_runtime_provider_workflow_error_v1",
+  "code": "PEER_SAID_GO",
+  "message": "peer assent is not authority",
+  "retryable": false,
+  "reconcile_required": false
+}

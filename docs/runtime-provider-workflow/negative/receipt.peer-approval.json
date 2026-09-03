@@ -1,0 +1,14 @@
+{
+  "schema_version": "pdx_runtime_provider_workflow_receipt_v1",
+  "receipt_id": "receipt_001",
+  "workflow_job_id": "workflow_job_001",
+  "task_id": "task_001",
+  "run_id": "run_001",
+  "plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "status": "completed",
+  "step_receipts": [],
+  "artifact_edges": [],
+  "authority_records": [{"record_id": "peer_go_001", "authority_kind": "reviewer_recommendation", "subject_digest": "4444444444444444444444444444444444444444444444444444444444444444", "decision": "approved", "workflow_step_id": "step_reviewer", "attempt_number": 1}],
+  "final_counters": {"provider_attempts": 0, "check_attempts": 0, "active_steps": 0, "repair_iterations": 0, "total_runtime_seconds": 0, "total_event_bytes": 0, "total_artifact_bytes": 0, "cross_step_artifact_edges": 0, "external_operations": 0},
+  "recorded_at": "2026-09-03T10:05:00Z"
+}

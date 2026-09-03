@@ -1,0 +1,17 @@
+{
+  "schema_version": "pdx_runtime_provider_workflow_consumer_proposal_agreement_v1",
+  "status": "bilateral_contract_frozen",
+  "recorded_on": "2026-09-03",
+  "scope": "Digest record only. These six consumer-owned envelopes are unchanged and are not republished as PDX contracts.",
+  "consumer_proposals": {
+    "engine_runtime_claim_v1": "228ee7f281f2f6a4e822fe4a97d4c84dc417bd0c0f642251256c6be28e755e06",
+    "local_runtime_execution_v1": "84f5d3e57165f0399a254e240b417cdcbdf33ea493bd569bbe81b04922a668e6",
+    "engine_runtime_update_v1": "f45f9338676ca38693029860540d3a9d899f5008b789e4095479820118d839e3",
+    "engine_check_claim_v1": "a10d8efb0be0e769228c20d2683211dad5a2f9475afcbbdd9fb0e1d0e12f7880",
+    "local_check_execution_v1": "e5b61de4e86476fd8f0fac3edc427c2e6cdb73ce58a93d061ae86cc127d6abe5",
+    "engine_check_update_v1": "375e77e98ee98b465541db27d457fdad83f1ce6fb5aa99c40c43e55f7eb34640"
+  },
+  "kernel_change_required": false,
+  "engine_route_enabled": false,
+  "engine_implementation_authorized": false
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/route-mapping-v1.json",
+  "type": "object", "additionalProperties": false, "required": ["schema_version", "routes", "http_semantics"],
+  "properties": {
+    "schema_version": {"const": "pdx_runtime_provider_route_mapping_v1"},
+    "routes": {"type": "array", "minItems": 12, "maxItems": 12, "items": {"type": "object", "additionalProperties": false, "required": ["operation", "method", "path", "request_schema", "success_schema"], "properties": {"operation": {"enum": ["create", "get_state", "cancel", "reconcile", "claim_provider", "renew_provider_lease", "update_provider", "claim_check", "renew_check_lease", "update_check", "get_receipt", "get_plan"]}, "method": {"enum": ["GET", "POST"]}, "path": {"type": "string", "pattern": "^/internal/v1/runtime-provider-workflows"}, "request_schema": {"type": ["string", "null"]}, "success_schema": {"type": "string", "minLength": 1}}}},
+    "http_semantics": {"type": "object", "additionalProperties": false, "required": ["accepted", "ok", "request_invalid", "not_found", "conflict", "gone", "too_large", "conflict_codes", "gone_codes", "too_large_codes"], "properties": {"accepted": {"const": 202}, "ok": {"const": 200}, "request_invalid": {"const": 400}, "not_found": {"const": 404}, "conflict": {"const": 409}, "gone": {"const": 410}, "too_large": {"const": 413}, "conflict_codes": {"type": "array", "minItems": 5, "uniqueItems": true, "items": {"enum": ["IDEMPOTENCY_CONFLICT", "CLAIM_STALE", "SEQUENCE_CONFLICT", "PAYLOAD_DIGEST_INVALID", "ARTIFACT_RECORD_CONFLICT", "ARTIFACT_EDGE_UNPLANNED", "ARTIFACT_REFERENCE_UNAUTHORIZED"]}}, "gone_codes": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"enum": ["WORKFLOW_NOT_ACTIVE", "POST_TERMINAL_ACTIVITY_REJECTED", "LEASE_EXPIRED"]}}, "too_large_codes": {"const": ["WORKFLOW_REQUEST_TOO_LARGE"]}}}
+  }
+}

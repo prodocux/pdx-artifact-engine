@@ -1,0 +1,41 @@
+{
+  "schema_version": "pdx_runtime_check_event_mapping_fixture_v1",
+  "source": {
+    "schema_version": "farpals_engine_check_update_v1",
+    "workflow_job_id": "workflow_job_001",
+    "workflow_step_id": "step_check",
+    "step_kind": "check",
+    "claim_id": "claim_check_001",
+    "lease_token": "lease-token-check-001-00000000000000000000000000000000",
+    "attempt_number": 1,
+    "check_definition_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "execution_constraints_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "idempotency_key": "idem-check-event-001",
+    "sequence": 0,
+    "kind": "event",
+    "payload_record_id": "record_check_001",
+    "payload_schema_id": "farpals_check_event_record_v1",
+    "payload": {"message": "checking"},
+    "payload_digest": "fe6a13347451ad6bdb281cf8a76b3591f5c040ada89a7993385b3db399a83670"
+  },
+  "target": {
+    "schema_version": "pdx_internal_runtime_check_update_v1",
+    "workflow_job_id": "workflow_job_001",
+    "workflow_step_id": "step_check",
+    "step_kind": "check",
+    "claim_id": "claim_check_001",
+    "lease_token": "lease-token-check-001-00000000000000000000000000000000",
+    "attempt_number": 1,
+    "check_definition_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "execution_constraints_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "idempotency_key": "idem-check-event-001",
+    "record": {
+      "schema_version": "pdx_runtime_check_record_v1",
+      "record_id": "record_check_001",
+      "record_kind": "event",
+      "sequence": 0,
+      "payload": {"message": "checking"},
+      "payload_digest": "fe6a13347451ad6bdb281cf8a76b3591f5c040ada89a7993385b3db399a83670"
+    }
+  }
+}

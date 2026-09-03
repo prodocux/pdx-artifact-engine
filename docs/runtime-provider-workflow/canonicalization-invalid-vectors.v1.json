@@ -1,0 +1,4 @@
+[
+  { "name": "lone high surrogate in value", "encoded_json": "\"\\ud800\"", "code": "canonical_json_invalid" },
+  { "name": "lone low surrogate in property name", "encoded_json": "{\"\\udc00\":1}", "code": "canonical_json_invalid" }
+]

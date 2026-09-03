@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/receipt-v1.json",
+  "title": "PDX runtime provider workflow receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "receipt_id", "workflow_job_id", "task_id", "run_id", "plan_digest", "status", "step_receipts", "artifact_edges", "authority_records", "final_counters", "recorded_at"],
+  "properties": {
+    "schema_version": {"const": "pdx_runtime_provider_workflow_receipt_v1"},
+    "receipt_id": {"$ref": "#/$defs/id"}, "workflow_job_id": {"$ref": "#/$defs/id"}, "task_id": {"$ref": "#/$defs/id"}, "run_id": {"$ref": "#/$defs/id"},
+    "plan_digest": {"$ref": "#/$defs/digest"},
+    "status": {"enum": ["completed", "completed_with_review", "failed", "blocked", "cancelled", "timed_out"]},
+    "step_receipts": {
+      "type": "array", "maxItems": 10000,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["workflow_step_id", "step_kind", "attempt_number", "status", "execution_constraints_digest"],
+        "properties": {
+          "workflow_step_id": {"$ref": "#/$defs/id"}, "step_kind": {"enum": ["builder", "check", "reviewer", "repair"]},
+          "attempt_number": {"type": "integer", "minimum": 1, "maximum": 1000},
+          "status": {"enum": ["succeeded", "failed", "cancelled", "timed_out", "unsupported", "stale_rejected"]},
+          "execution_constraints_digest": {"$ref": "#/$defs/digest"},
+          "recommendation_record_id": {"$ref": "#/$defs/id"},
+          "verified_check_report_artifact": {"$ref": "#/$defs/opaqueArtifact"},
+          "safe_error": {"$ref": "#/$defs/safeError"}
+        },
+        "allOf": [
+          {"if": {"properties": {"step_kind": {"const": "check"}, "status": {"const": "succeeded"}}, "required": ["step_kind", "status"]}, "then": {"required": ["verified_check_report_artifact"], "properties": {"verified_check_report_artifact": {"$ref": "#/$defs/opaqueArtifact"}}}},
+          {"if": {"properties": {"status": {"const": "succeeded"}}, "required": ["status"]}, "then": {"properties": {"safe_error": false}}, "else": {"required": ["safe_error"], "properties": {"safe_error": {"$ref": "#/$defs/safeError"}}}}
+        ]
+      }
+    },
+    "artifact_edges": {
+      "type": "array", "maxItems": 10000,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["edge_id", "artifact", "artifact_identity_digest", "producer_step_id", "producer_attempt_number", "consumer_step_id", "recorded_once"],
+        "properties": {
+          "edge_id": {"$ref": "#/$defs/id"}, "artifact": {"$ref": "#/$defs/opaqueArtifact"}, "artifact_identity_digest": {"$ref": "#/$defs/digest"},
+          "producer_step_id": {"$ref": "#/$defs/id"}, "producer_attempt_number": {"type": "integer", "minimum": 1, "maximum": 1000},
+          "consumer_step_id": {"$ref": "#/$defs/id"}, "recorded_once": {"const": true}
+        }
+      }
+    },
+    "authority_records": {
+      "type": "array", "maxItems": 1000,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["record_id", "authority_kind", "subject_digest", "decision"],
+        "properties": {
+          "record_id": {"$ref": "#/$defs/id"},
+          "authority_kind": {"enum": ["provider_recommendation", "reviewer_recommendation", "human_approval", "application_native_authorization"]},
+          "subject_digest": {"$ref": "#/$defs/digest"},
+          "decision": {"enum": ["recommend", "do_not_recommend", "approved", "denied"]},
+          "workflow_step_id": {"$ref": "#/$defs/id"},
+          "attempt_number": {"type": "integer", "minimum": 1, "maximum": 1000},
+          "principal_id": {"$ref": "#/$defs/id"},
+          "approval_id": {"$ref": "#/$defs/id"},
+          "application_id": {"$ref": "#/$defs/id"},
+          "adapter_id": {"$ref": "#/$defs/id"}
+        },
+        "allOf": [
+          {"if": {"properties": {"authority_kind": {"enum": ["provider_recommendation", "reviewer_recommendation"]}}, "required": ["authority_kind"]}, "then": {"required": ["workflow_step_id", "attempt_number"], "properties": {"workflow_step_id": {"$ref": "#/$defs/id"}, "attempt_number": {"type": "integer", "minimum": 1, "maximum": 1000}, "decision": {"enum": ["recommend", "do_not_recommend"]}, "principal_id": false, "approval_id": false, "application_id": false, "adapter_id": false}}},
+          {"if": {"properties": {"authority_kind": {"const": "human_approval"}}, "required": ["authority_kind"]}, "then": {"required": ["principal_id", "approval_id"], "properties": {"principal_id": {"$ref": "#/$defs/id"}, "approval_id": {"$ref": "#/$defs/id"}, "decision": {"enum": ["approved", "denied"]}, "application_id": false, "adapter_id": false}}},
+          {"if": {"properties": {"authority_kind": {"const": "application_native_authorization"}}, "required": ["authority_kind"]}, "then": {"required": ["application_id", "adapter_id"], "properties": {"application_id": {"$ref": "#/$defs/id"}, "adapter_id": {"$ref": "#/$defs/id"}, "decision": {"enum": ["approved", "denied"]}, "principal_id": false, "approval_id": false}}}
+        ]
+      }
+    },
+    "post_terminal_activity": {
+      "type": "array", "maxItems": 1000,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["record_id", "activity_kind", "terminal_cause", "rejected_with", "observed_at"],
+        "properties": {
+          "record_id": {"$ref": "#/$defs/id"}, "activity_kind": {"enum": ["event", "artifact", "outcome", "process_activity"]},
+          "terminal_cause": {"enum": ["failed", "blocked", "cancelled", "timed_out"]},
+          "rejected_with": {"const": "POST_TERMINAL_ACTIVITY_REJECTED"}, "observed_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "final_counters": {"$ref": "#/$defs/counters"},
+    "terminal_error": {"$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/error-v1.json"},
+    "recorded_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {"if": {"properties": {"status": {"enum": ["failed", "blocked", "cancelled", "timed_out"]}}, "required": ["status"]}, "then": {"required": ["terminal_error"], "properties": {"terminal_error": {"$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/error-v1.json"}}}, "else": {"properties": {"terminal_error": false}}}
+  ],
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "safeError": {
+      "type": "object", "additionalProperties": false,
+      "required": ["code", "message", "retryable", "reconcile_required"],
+      "properties": {
+        "code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+        "message": {"type": "string", "maxLength": 1024},
+        "retryable": {"type": "boolean"},
+        "reconcile_required": {"type": "boolean"}
+      }
+    },
+    "counters": {
+      "type": "object", "additionalProperties": false,
+      "required": ["provider_attempts", "check_attempts", "active_steps", "repair_iterations", "total_runtime_seconds", "total_event_bytes", "total_artifact_bytes", "cross_step_artifact_edges", "external_operations"],
+      "properties": {
+        "provider_attempts": {"type": "integer", "minimum": 0}, "check_attempts": {"type": "integer", "minimum": 0},
+        "active_steps": {"type": "integer", "minimum": 0}, "repair_iterations": {"type": "integer", "minimum": 0}, "total_runtime_seconds": {"type": "integer", "minimum": 0},
+        "total_event_bytes": {"type": "integer", "minimum": 0}, "total_artifact_bytes": {"type": "integer", "minimum": 0},
+        "cross_step_artifact_edges": {"type": "integer", "minimum": 0}, "external_operations": {"type": "integer", "minimum": 0}
+      }
+    },
+    "opaqueArtifact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "artifact_id", "uri", "sha256", "size_bytes", "media_type"],
+      "properties": {
+        "schema_version": {"const": "prodocux_opaque_artifact_v1"},
+        "artifact_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "uri": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "^artifact://[a-zA-Z0-9_-]+/(?!(?:.*/)?\\.\\.(?:/|$))(?!(?:.*/)?\\.(?:/|$))[a-zA-Z0-9/_.-]+$"},
+        "sha256": {"$ref": "#/$defs/digest"},
+        "size_bytes": {"type": "integer", "minimum": 0, "maximum": 104857600},
+        "media_type": {"type": "string", "minLength": 1, "maxLength": 128}
+      }
+    }
+  }
+}

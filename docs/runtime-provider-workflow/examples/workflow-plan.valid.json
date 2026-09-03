@@ -1,0 +1,28 @@
+{
+  "schema_version": "pdx_runtime_provider_workflow_plan_v1",
+  "workflow_job_id": "workflow_job_001",
+  "task_id": "task_001",
+  "run_id": "run_001",
+  "plan_digest": "2e2a93bea36f08f644eef1949e9a85e56fb190eef357fe700166eb1e174aec37",
+  "steps": [
+    {"workflow_step_id": "step_builder", "step_kind": "builder", "depends_on": [], "max_attempts": 1, "operation_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+    {"workflow_step_id": "step_check", "step_kind": "check", "depends_on": ["step_builder"], "max_attempts": 1, "check_definition_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+    {"workflow_step_id": "step_reviewer", "step_kind": "reviewer", "depends_on": ["step_check"], "max_attempts": 1, "operation_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"},
+    {"workflow_step_id": "step_repair_1", "step_kind": "repair", "depends_on": ["step_reviewer"], "max_attempts": 1, "operation_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "repair_iteration": 1, "parent_step_id": "step_reviewer"}
+  ],
+  "budgets": {
+    "max_provider_attempts": 3,
+    "max_check_attempts": 1,
+    "max_concurrent_steps": 1,
+    "max_repair_iterations": 1,
+    "max_total_runtime_seconds": 1800,
+    "max_total_event_bytes": 1048576,
+    "max_total_artifact_bytes": 104857600,
+    "max_cross_step_artifact_edges": 4,
+    "max_external_operations": 4
+  },
+  "artifact_edges": [
+    {"edge_id": "edge_builder_check", "producer_step_id": "step_builder", "consumer_step_id": "step_check", "artifact_role": "patch"},
+    {"edge_id": "edge_check_reviewer", "producer_step_id": "step_check", "consumer_step_id": "step_reviewer", "artifact_role": "check_report"}
+  ]
+}

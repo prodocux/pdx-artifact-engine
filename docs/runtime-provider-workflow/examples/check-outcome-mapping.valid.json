@@ -1,0 +1,57 @@
+{
+  "schema_version": "pdx_runtime_check_outcome_mapping_fixture_v1",
+  "source": {
+    "schema_version": "farpals_engine_check_update_v1",
+    "workflow_job_id": "workflow_job_001",
+    "workflow_step_id": "step_check",
+    "step_kind": "check",
+    "claim_id": "claim_check_001",
+    "lease_token": "lease-token-check-001-00000000000000000000000000000000",
+    "attempt_number": 1,
+    "check_definition_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "execution_constraints_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "idempotency_key": "idem-check-outcome-001",
+    "sequence": 1,
+    "kind": "outcome",
+    "payload_record_id": "record_check_outcome_001",
+    "payload_schema_id": "farpals_check_outcome_record_v1",
+    "payload": {
+      "terminal_outcome": "succeeded",
+      "summary": "checks passed",
+      "report_artifact": "artifact://workflow_job_001/check-report.json"
+    },
+    "payload_digest": "3882f9ade6a68e7c601e7c5420e0de56af3d8ba357fb99847ac170da5009b639"
+  },
+  "target": {
+    "schema_version": "pdx_internal_runtime_check_update_v1",
+    "workflow_job_id": "workflow_job_001",
+    "workflow_step_id": "step_check",
+    "step_kind": "check",
+    "claim_id": "claim_check_001",
+    "lease_token": "lease-token-check-001-00000000000000000000000000000000",
+    "attempt_number": 1,
+    "check_definition_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "execution_constraints_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "idempotency_key": "idem-check-outcome-001",
+    "record": {
+      "schema_version": "pdx_runtime_check_record_v1",
+      "record_id": "record_check_outcome_001",
+      "record_kind": "outcome",
+      "sequence": 1,
+      "payload": {
+        "terminal_outcome": "succeeded",
+        "summary": "checks passed",
+        "report_artifact": "artifact://workflow_job_001/check-report.json"
+      },
+      "payload_digest": "3882f9ade6a68e7c601e7c5420e0de56af3d8ba357fb99847ac170da5009b639"
+    },
+    "verified_report_artifact": {
+      "schema_version": "prodocux_opaque_artifact_v1",
+      "artifact_id": "artifact_check_report_001",
+      "uri": "artifact://workflow_job_001/check-report.json",
+      "sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+      "size_bytes": 512,
+      "media_type": "application/json"
+    }
+  }
+}

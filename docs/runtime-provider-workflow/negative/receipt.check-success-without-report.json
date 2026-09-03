@@ -1,0 +1,14 @@
+{
+  "schema_version": "pdx_runtime_provider_workflow_receipt_v1",
+  "receipt_id": "receipt_001",
+  "workflow_job_id": "workflow_job_001",
+  "task_id": "task_001",
+  "run_id": "run_001",
+  "plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "status": "completed",
+  "step_receipts": [{"workflow_step_id": "step_check", "step_kind": "check", "attempt_number": 1, "status": "succeeded", "execution_constraints_digest": "2222222222222222222222222222222222222222222222222222222222222222"}],
+  "artifact_edges": [],
+  "authority_records": [],
+  "final_counters": {"provider_attempts": 0, "check_attempts": 1, "active_steps": 0, "repair_iterations": 0, "total_runtime_seconds": 1, "total_event_bytes": 0, "total_artifact_bytes": 0, "cross_step_artifact_edges": 0, "external_operations": 0},
+  "recorded_at": "2026-09-03T10:05:00Z"
+}

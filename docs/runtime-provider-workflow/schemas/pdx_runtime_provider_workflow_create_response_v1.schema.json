@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/create-response-v1.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "request_id", "correlation_id", "workflow_job_id", "task_id", "run_id", "plan_digest", "state"],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_runtime_provider_workflow_create_response_v1"},
+    "request_id": {"$ref": "#/$defs/id"}, "correlation_id": {"$ref": "#/$defs/id"}, "workflow_job_id": {"$ref": "#/$defs/id"},
+    "task_id": {"$ref": "#/$defs/id"}, "run_id": {"$ref": "#/$defs/id"}, "plan_digest": {"$ref": "#/$defs/digest"}, "state": {"const": "pending"}
+  },
+  "$defs": {"id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"}, "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}
+}

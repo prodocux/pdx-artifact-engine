@@ -1,0 +1,33 @@
+{
+  "schema_version": "pdx_runtime_provider_workflow_receipt_v1",
+  "receipt_id": "receipt_001",
+  "workflow_job_id": "workflow_job_001",
+  "task_id": "task_001",
+  "run_id": "run_001",
+  "plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "status": "completed_with_review",
+  "step_receipts": [
+    {"workflow_step_id": "step_builder", "step_kind": "builder", "attempt_number": 1, "status": "succeeded", "execution_constraints_digest": "1111111111111111111111111111111111111111111111111111111111111111"},
+    {"workflow_step_id": "step_check", "step_kind": "check", "attempt_number": 1, "status": "succeeded", "execution_constraints_digest": "2222222222222222222222222222222222222222222222222222222222222222", "verified_check_report_artifact": {"schema_version": "prodocux_opaque_artifact_v1", "artifact_id": "artifact_check_report_001", "uri": "artifact://workflow_job_001/check-report.json", "sha256": "5555555555555555555555555555555555555555555555555555555555555555", "size_bytes": 512, "media_type": "application/json"}},
+    {"workflow_step_id": "step_reviewer", "step_kind": "reviewer", "attempt_number": 1, "status": "succeeded", "execution_constraints_digest": "3333333333333333333333333333333333333333333333333333333333333333", "recommendation_record_id": "recommendation_001"}
+  ],
+  "artifact_edges": [
+    {"edge_id": "edge_check_reviewer", "artifact": {"schema_version": "prodocux_opaque_artifact_v1", "artifact_id": "artifact_check_report_001", "uri": "artifact://workflow_job_001/check-report.json", "sha256": "5555555555555555555555555555555555555555555555555555555555555555", "size_bytes": 512, "media_type": "application/json"}, "artifact_identity_digest": "143b8cf6e824eff5a67cee04b4c342aea14d458b70fda7808b162effd1ad108f", "producer_step_id": "step_check", "producer_attempt_number": 1, "consumer_step_id": "step_reviewer", "recorded_once": true}
+  ],
+  "authority_records": [
+    {"record_id": "recommendation_001", "authority_kind": "reviewer_recommendation", "subject_digest": "4444444444444444444444444444444444444444444444444444444444444444", "decision": "recommend", "workflow_step_id": "step_reviewer", "attempt_number": 1},
+    {"record_id": "approval_001", "authority_kind": "human_approval", "subject_digest": "4444444444444444444444444444444444444444444444444444444444444444", "decision": "approved", "principal_id": "principal_001", "approval_id": "approval_001"}
+  ],
+  "final_counters": {
+    "provider_attempts": 2,
+    "check_attempts": 1,
+    "active_steps": 0,
+    "repair_iterations": 0,
+    "total_runtime_seconds": 120,
+    "total_event_bytes": 2048,
+    "total_artifact_bytes": 4096,
+    "cross_step_artifact_edges": 1,
+    "external_operations": 0
+  },
+  "recorded_at": "2026-09-03T10:05:00Z"
+}

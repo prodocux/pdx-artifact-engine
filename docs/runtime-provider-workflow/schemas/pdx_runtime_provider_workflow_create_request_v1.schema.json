@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/create-request-v1.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "request_id", "correlation_id", "idempotency_key", "operation_digest", "plan"],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_runtime_provider_workflow_create_request_v1"},
+    "request_id": {"$ref": "#/$defs/id"}, "correlation_id": {"$ref": "#/$defs/id"},
+    "idempotency_key": {"type": "string", "minLength": 16, "maxLength": 128}, "operation_digest": {"$ref": "#/$defs/digest"},
+    "plan": {"$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/plan-v1.json"}
+  },
+  "$defs": {"id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"}, "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}
+}

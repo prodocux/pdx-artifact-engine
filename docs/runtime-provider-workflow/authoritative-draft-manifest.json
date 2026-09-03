@@ -1,0 +1,51 @@
+{
+  "schema_version": "pdx_runtime_provider_workflow_authoritative_draft_manifest_v1",
+  "status": "bilateral_contract_frozen_implementation_unauthorized",
+  "recorded_on": "2026-09-03",
+  "canonicalization": "raw UTF-8 evidence bytes; payload digests use the pinned RFC 8785-compatible vectors",
+  "schemas": {
+    "pdx_runtime_check_claim_request_v1.schema.json": "963b6b83a854729132df149c0c8d8e5df32c80a802774691659116bb5c957b5d",
+    "pdx_runtime_check_claim_v1.schema.json": "cadbacc2e4bb785b713543d2bfbf26bfefd56d88eb57639837df54594873169f",
+    "pdx_runtime_check_lease_renew_v1.schema.json": "a3bafe34d0a0194f658e6220156af559d06ce3db6ac40ab7fa920d1869fa16e3",
+    "pdx_runtime_check_record_v1.schema.json": "27ed63142c4f7060ca3102b334064426bd3faabcab5cd49f1a66286ab6bba1ae",
+    "pdx_runtime_check_update_v1.schema.json": "0d3dc4c75a97062722fa06e9fc226e0246e9077d2451e1b7b447a1b5bfbad1ad",
+    "pdx_runtime_lease_renew_response_v1.schema.json": "2a91f59b3f81778e96226ff3bfc656a07ed295fc99aeb0f836cec50677bd3ee0",
+    "pdx_runtime_provider_claim_request_v1.schema.json": "ffbca3d8cfff3772762575299be58cb830f105dccf25623dac0c208b047468f7",
+    "pdx_runtime_provider_claim_v1.schema.json": "a75f5417d53f430ae561b71c8e52ec3ce8390b934a6d213f753c46ceccded14d",
+    "pdx_runtime_provider_common_v1.schema.json": "9691a6ed6441dfb7bab706f518b0749aa381cb4ee5ea7b59a84a503a6d8e4f5d",
+    "pdx_runtime_provider_lease_renew_v1.schema.json": "ea7de6307323cbc963120ac56385e9e08b55e3f18d5e703bf493d89b6f31f75a",
+    "pdx_runtime_provider_record_v1.schema.json": "da40f210b0973c62847effb485c62ae742b00be3a3100a91cce12bec50de0a64",
+    "pdx_runtime_provider_route_mapping_v1.schema.json": "8d4edc95d801b004792f5a620a9fffd75f88c5edbda95a58353495c61ed30bf5",
+    "pdx_runtime_provider_update_v1.schema.json": "c7bec844e5e5c069d2f8345361e0410bc29c0ced4e79471ca510dd7a8b9393cb",
+    "pdx_runtime_provider_workflow_create_request_v1.schema.json": "f3e50f66ab3a8454d89424842e77274e1a9c7e9a00cf7069508711d1bbfc6804",
+    "pdx_runtime_provider_workflow_create_response_v1.schema.json": "e06f3b21c6531c7c0a2352701b97f7afd869202e6e925a5e14eb3f9d3203354d",
+    "pdx_runtime_provider_workflow_error_v1.schema.json": "60baeb90fd2f7e68fdb816235b14f913552a1c9e6ee5764950adb4e7f62f704a",
+    "pdx_runtime_provider_workflow_plan_v1.schema.json": "87da14f07b1d86cfa8ade1fd24a7dc9db487772ce850693e997374314ae37a64",
+    "pdx_runtime_provider_workflow_receipt_v1.schema.json": "12e9c03ac36ac964d87fc39f3ba5111bad73b16051df180446a620e92d699484",
+    "pdx_runtime_provider_workflow_state_v1.schema.json": "1ef8068ef3a9bf1856e585231410b91e12def485425a4317f086b82f6241d21a",
+    "pdx_runtime_workflow_cancel_v1.schema.json": "0fea2c09b36cabe1b878f221338c2c3f2a186e526a10abde278180ba5274dfaf",
+    "pdx_runtime_workflow_reconcile_v1.schema.json": "2f75c3d18f3c713df0b838751c3cefb9bf65b6ba5b5365c4b7edcd2cc727635c"
+  },
+  "evidence": {
+    "route-mapping.json": "33fa7bef80c954f26a41101d6446b34f42f2315d154f8a2c1b0a4d4bba19e18e",
+    "semantic_validator.py": "21f263dc38eea24d446da665b59e961123786cd74a7a7c3e1a38c7e413ff4586",
+    "canonicalization-vectors.v1.json": "f56823a99f6472be6daa5b62d6c308f23825d6ba97cf1a6a7a84fe07921f12d3",
+    "canonicalization-invalid-vectors.v1.json": "7dad5b85b207713719f56848fd6fd9fa5f839a89d323ddbb3acdf0dc601137da",
+    "verify-ajv-strict.mjs": "ef79b5aaa77f62900ec061ec2154af291dc8d0046bde99e792e84b0bbb5162c3",
+    "verify-canonical-parity.mjs": "5014305b5b36bc1f04549116e349f3f56da9d828a7104698c58be0a49b05de6d",
+    "verify-consumer-mappings.mjs": "0a78a23cbde92fada597d8ae407949c4d82451e02f44566d53f70dfb0dacd81d",
+    "consumer-proposal-agreement.json": "4963037ab3a14b3f128f05ee98091ec069f738e7cdfbffa877922067b70a9548",
+    "examples/check-event-mapping.valid.json": "771947081683ad51ca547ead8c415810b3d7856430c8f79d0d0329ab5e8e1ef8",
+    "examples/check-outcome-mapping.valid.json": "0baa7f5e6a43e6c6a919ea716f73dfc673083501fd59719e50851c7d1a82bc9d"
+  },
+  "verification": {
+    "python_jsonschema": "PASS 21 schemas",
+    "ajv_2020_12_strict": "PASS 21 schemas",
+    "canonical_vectors": "PASS 3 positive + 2 negative; bytes match Farpals source vectors",
+    "consumer_mapping": "PASS 2 complete source/target envelopes with canonical payload digests",
+    "production_implementation_authorized": false
+  },
+  "published_engine_version": "0.3.0a4",
+  "published_contracts_modified": false,
+  "runtime_route_enabled": false
+}

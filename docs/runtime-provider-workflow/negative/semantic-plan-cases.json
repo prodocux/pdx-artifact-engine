@@ -1,0 +1,15 @@
+[
+  {"case": "duplicate_step", "mutation": "duplicate_step", "expected": "WORKFLOW_STEP_ID_DUPLICATE"},
+  {"case": "unknown_dependency", "mutation": "unknown_dependency", "expected": "WORKFLOW_DEPENDENCY_UNKNOWN"},
+  {"case": "dependency_cycle", "mutation": "dependency_cycle", "expected": "WORKFLOW_DEPENDENCY_CYCLE"},
+  {"case": "unknown_edge_step", "mutation": "unknown_edge_step", "expected": "ARTIFACT_EDGE_STEP_UNKNOWN"},
+  {"case": "invalid_edge_role", "mutation": "invalid_edge_role", "expected": "ARTIFACT_EDGE_ROLE_INVALID"},
+  {"case": "provider_budget_contradiction", "mutation": "provider_budget_contradiction", "expected": "WORKFLOW_PROVIDER_ATTEMPT_BUDGET_CONTRADICTION"},
+  {"case": "check_budget_contradiction", "mutation": "check_budget_contradiction", "expected": "WORKFLOW_CHECK_ATTEMPT_BUDGET_CONTRADICTION"},
+  {"case": "repair_budget_contradiction", "mutation": "repair_budget_contradiction", "expected": "WORKFLOW_REPAIR_BUDGET_CONTRADICTION"},
+  {"case": "edge_budget_contradiction", "mutation": "edge_budget_contradiction", "expected": "WORKFLOW_EDGE_BUDGET_CONTRADICTION"},
+  {"case": "invalid_digest", "mutation": "invalid_digest", "expected": "WORKFLOW_PLAN_DIGEST_INVALID"},
+  {"case": "repair_iteration_non_contiguous", "mutation": "repair_iteration_non_contiguous", "expected": "WORKFLOW_REPAIR_ITERATION_INVALID"},
+  {"case": "repair_parent_unknown", "mutation": "repair_parent_unknown", "expected": "WORKFLOW_REPAIR_PARENT_INVALID"},
+  {"case": "repair_parent_not_dependency", "mutation": "repair_parent_not_dependency", "expected": "WORKFLOW_REPAIR_PARENT_DEPENDENCY_REQUIRED"}
+]

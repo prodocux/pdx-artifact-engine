@@ -28,6 +28,20 @@ durable databases, schedulers, tenant policy, or distributed exactly-once
 delivery. Hosts supply those mechanisms through adapters and retain ownership
 of domain semantics.
 
+### Runtime provider workflow contract freeze
+
+The frozen additive `runtime_provider_workflow_v1` bounded step graph keeps provider
+execution outside Engine while making Engine authoritative for workflow steps,
+attempt fencing, aggregate counters, artifact producer/consumer edges,
+cancellation and receipts. Agent/provider/reviewer messages remain evidence and
+cannot become approval or policy authority. Network/process isolation and local
+credential injection remain host responsibilities.
+
+The authoritative contract and transactional invariants are documented in
+[`runtime-provider-workflow/README.md`](runtime-provider-workflow/README.md).
+They are deliberately outside packaged runtime contracts until implementation is
+separately authorized and completed.
+
 ## Runtime Flow
 
 ```text

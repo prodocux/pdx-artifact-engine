@@ -10,6 +10,12 @@ ordered run events. The runtime and adapters remain product-neutral; product
 workflows register their own skills, executors, durable stores, schedulers, and
 provider clients.
 
+The additive PDX-owned contract for `runtime_provider_workflow_v1` is bilaterally
+frozen in [`runtime-provider-workflow/README.md`](runtime-provider-workflow/README.md).
+It defines bounded application-neutral provider/check step kinds, aggregate budgets, authorized artifact
+edges, authority-separated receipts and post-terminal rejection semantics. The
+freeze does not enable a route or authorize persistence/worker implementation.
+
 ---
 
 ## North Star

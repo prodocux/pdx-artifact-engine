@@ -1,0 +1,18 @@
+[
+  {
+    "name": "property ordering and Unicode",
+    "input": { "€": "Euro Sign", "\r": "Carriage Return", "1": "One", "😀": "Emoji", "ö": "Latin Small Letter O With Diaeresis" },
+    "canonical": "{\"\\r\":\"Carriage Return\",\"1\":\"One\",\"ö\":\"Latin Small Letter O With Diaeresis\",\"€\":\"Euro Sign\",\"😀\":\"Emoji\"}"
+  },
+  {
+    "name": "ECMAScript number normalization",
+    "input": [333333333.33333329, 1e+30, 4.50, 0.002, 1e-27],
+    "canonical": "[333333333.3333333,1e+30,4.5,0.002,1e-27]"
+  },
+  {
+    "name": "nested approval arguments",
+    "input": { "z": true, "path": "src/é.js", "count": 1, "items": [3, 2, 1] },
+    "canonical": "{\"count\":1,\"items\":[3,2,1],\"path\":\"src/é.js\",\"z\":true}",
+    "sha256": "1ade6f3a1cca3496966afeed2aaa9b0676653399cf287df3a886cba3217e59a3"
+  }
+]

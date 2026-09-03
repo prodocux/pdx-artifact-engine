@@ -1,0 +1,20 @@
+{
+  "schema_version": "pdx_runtime_provider_workflow_state_v1",
+  "workflow_job_id": "workflow_job_001",
+  "task_id": "task_001",
+  "run_id": "run_001",
+  "plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "state": "running",
+  "counters": {
+    "provider_attempts": 1,
+    "check_attempts": 0,
+    "active_steps": 1,
+    "repair_iterations": 0,
+    "total_runtime_seconds": 10,
+    "total_event_bytes": 128,
+    "total_artifact_bytes": 0,
+    "cross_step_artifact_edges": 0,
+    "external_operations": 0
+  },
+  "updated_at": "2026-09-03T10:00:00Z"
+}
