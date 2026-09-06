@@ -156,11 +156,19 @@ def test_receipt_binds_full_artifact_identity_and_nine_counters() -> None:
     )
 
 
-def test_freeze_does_not_enable_a_runtime_route_or_modify_published_contracts() -> None:
+def test_frozen_schemas_are_packaged_without_modifying_published_contracts() -> None:
     runtime_contracts = ROOT / "runtime" / "pdx_artifact_engine" / "contracts"
-    assert not (runtime_contracts / "runtime_provider_workflow").exists()
+    packaged = runtime_contracts / "runtime_provider_workflow"
+    assert packaged.is_dir()
+    assert {
+        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in SCHEMAS.glob("*.json")
+    } == {
+        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in packaged.glob("*.json")
+    }
     text = (CONTRACT / "README.md").read_text(encoding="utf-8")
-    assert "production implementation is not authorized" in text
+    assert "Production implementation was separately authorized" in text
 
 
 def test_collective_controls_are_workflow_level_not_handshake_extensions() -> None:

@@ -3,8 +3,9 @@
 Status: the `77a6a1b15619ca133c664a938014fdfd3393f29c` bilateral freeze remains
 historical provenance, but its claim-request v1 surface is superseded for
 implementation by this additive v2 erratum candidate. Production implementation
-is paused until Farpals accepts and freezes the erratum;
-production implementation is not authorized during this erratum review.
+was accepted by Farpals and frozen as `891f837013251e70755c4eb0eac14df3be9bb87b`.
+Production implementation was separately authorized after that bilateral freeze;
+the unpublished implementation candidate is tracked in `IMPLEMENTATION.md`.
 
 This additive contract answers the application-neutral workflow capability request.
 It does not modify the published `0.3.0a4` contracts, the frozen compatibility
@@ -100,8 +101,9 @@ The contract freezes these codes:
 - `CHECK_REPORT_REQUIRED`
 - `CHECK_REPORT_UNVERIFIED`
 
-No route, database migration, worker dispatch or release capability is implied by
-these files. Implementation and release require separate authorization.
+No route, database migration, worker dispatch or release capability was implied
+by the freeze files themselves. Implementation was authorized separately; release
+and publication still require their own integration approval.
 
 Budget exhaustion uses the existing `failed` machine state with
 `terminal_error.code=WORKFLOW_BUDGET_EXHAUSTED`; it is not a parallel RunState.

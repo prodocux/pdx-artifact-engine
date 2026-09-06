@@ -10,11 +10,17 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from pdx_artifact_engine.jobs import JobStore
-from pdx_artifact_engine.jobs.service import JobService, JobServiceError
 from pdx_artifact_engine.internal_http.auth import (
     auth_profile_ok,
     authenticate_request,
+    authenticated_control_plane_instance,
+)
+from pdx_artifact_engine.jobs import JobStore
+from pdx_artifact_engine.jobs.service import JobService, JobServiceError
+from pdx_artifact_engine.runtime_workflows import (
+    RuntimeWorkflowError,
+    RuntimeWorkflowService,
+    RuntimeWorkflowStore,
 )
 from pdx_artifact_engine.staging import StagingStore
 
@@ -52,6 +58,7 @@ class BodyLimitError(Exception):
 
 class InternalJobHandler(BaseHTTPRequestHandler):
     service: JobService
+    workflow_service: RuntimeWorkflowService | None = None
 
     def log_message(self, format: str, *args: Any) -> None:
         # Never log request bodies; keep access lines minimal.
@@ -128,7 +135,19 @@ class InternalJobHandler(BaseHTTPRequestHandler):
         self._send(status, error)
         return False
 
-    def do_GET(self) -> None:  # noqa: N802
+    def _workflow(self) -> RuntimeWorkflowService:
+        if self.workflow_service is None:
+            raise RuntimeWorkflowError(
+                "ACTIVATION_AUTH_FORBIDDEN",
+                "runtime workflows require a configured HMAC secret",
+                503,
+            )
+        return self.workflow_service
+
+    def _send_workflow_error(self, error: RuntimeWorkflowError) -> None:
+        self._send(error.status, error.as_document())
+
+    def do_GET(self) -> None:
         if not self._auth_ok():
             return
         path = urlparse(self.path).path
@@ -137,13 +156,48 @@ class InternalJobHandler(BaseHTTPRequestHandler):
             return
         if path == "/ready":
             ok = auth_profile_ok()
+            checks: dict[str, Any] = {"auth_profile_ok": ok}
+            if self.workflow_service is not None:
+                workflow_ready = self.workflow_service.readiness()
+                checks["runtime_workflow_hmac_ready"] = workflow_ready["ready"]
+                ok = ok and workflow_ready["ready"]
+            elif os.environ.get("PDX_ENGINE_RUNTIME_WORKFLOWS_ENABLED", "").strip() == "1":
+                checks["runtime_workflow_hmac_ready"] = False
+                ok = False
             self._send(
                 200 if ok else 503,
                 {
                     "status": "ready" if ok else "not_ready",
-                    "checks": {"auth_profile_ok": ok},
+                    "checks": checks,
                 },
             )
+            return
+        workflow = re.fullmatch(r"/internal/v1/runtime-provider-workflows/([^/]+)", path)
+        if workflow:
+            try:
+                doc = self._workflow().get_state(workflow.group(1))
+            except RuntimeWorkflowError as exc:
+                self._send_workflow_error(exc)
+                return
+            self._send(200, doc)
+            return
+        workflow_plan = re.fullmatch(r"/internal/v1/runtime-provider-workflows/([^/]+)/plan", path)
+        if workflow_plan:
+            try:
+                doc = self._workflow().get_plan(workflow_plan.group(1))
+            except RuntimeWorkflowError as exc:
+                self._send_workflow_error(exc)
+                return
+            self._send(200, doc)
+            return
+        workflow_receipt = re.fullmatch(r"/internal/v1/runtime-provider-workflows/([^/]+)/receipt", path)
+        if workflow_receipt:
+            try:
+                doc = self._workflow().get_receipt(workflow_receipt.group(1))
+            except RuntimeWorkflowError as exc:
+                self._send_workflow_error(exc)
+                return
+            self._send(200, doc)
             return
         match = re.fullmatch(r"/internal/v1/jobs/([^/]+)", path)
         if match:
@@ -230,7 +284,7 @@ class InternalJobHandler(BaseHTTPRequestHandler):
             },
         )
 
-    def do_POST(self) -> None:  # noqa: N802
+    def do_POST(self) -> None:
         if not self._auth_ok():
             return
         path = urlparse(self.path).path
@@ -261,6 +315,53 @@ class InternalJobHandler(BaseHTTPRequestHandler):
                 self._send(exc.status, exc.as_error_document())
                 return
             self._send(status, doc)
+            return
+
+        if path == "/internal/v1/runtime-provider-workflows":
+            try:
+                status, doc = self._workflow().create(body)
+            except RuntimeWorkflowError as exc:
+                self._send_workflow_error(exc)
+                return
+            self._send(status, doc)
+            return
+
+        runtime_route = re.fullmatch(
+            r"/internal/v1/runtime-provider-workflows/([^/]+)/(cancel|reconcile|provider-claims|provider-leases/renew|provider-updates|check-claims|check-leases/renew|check-updates)",
+            path,
+        )
+        if runtime_route:
+            workflow_job_id, operation = runtime_route.groups()
+            try:
+                workflow_service = self._workflow()
+                if operation == "cancel":
+                    doc = workflow_service.cancel(workflow_job_id, body)
+                elif operation == "reconcile":
+                    doc = workflow_service.reconcile(workflow_job_id, body)
+                elif operation in {"provider-claims", "check-claims"}:
+                    instance = authenticated_control_plane_instance(self.headers)
+                    if operation == "provider-claims":
+                        doc = workflow_service.activate_provider(
+                            workflow_job_id, body,
+                            authenticated_instance_id=instance or "",
+                        )
+                    else:
+                        doc = workflow_service.activate_check(
+                            workflow_job_id, body,
+                            authenticated_instance_id=instance or "",
+                        )
+                elif operation == "provider-leases/renew":
+                    doc = workflow_service.renew(workflow_job_id, body, "provider")
+                elif operation == "check-leases/renew":
+                    doc = workflow_service.renew(workflow_job_id, body, "check")
+                elif operation == "provider-updates":
+                    doc = workflow_service.update(workflow_job_id, body, "provider")
+                else:
+                    doc = workflow_service.update(workflow_job_id, body, "check")
+            except RuntimeWorkflowError as exc:
+                self._send_workflow_error(exc)
+                return
+            self._send(200, doc)
             return
 
         cancel = re.fullmatch(r"/internal/v1/jobs/([^/]+)/cancel", path)
@@ -329,6 +430,28 @@ def _default_kernel_client() -> Any | None:
     )
 
 
+def _workflow_hmac_configuration() -> tuple[dict[str, bytes], str] | None:
+    raw_keys = os.environ.get("PDX_ENGINE_WORKFLOW_HMAC_KEYS", "").strip()
+    active = os.environ.get("PDX_ENGINE_WORKFLOW_ACTIVE_HMAC_KEY_ID", "default").strip()
+    if raw_keys:
+        try:
+            value = json.loads(raw_keys)
+        except json.JSONDecodeError:
+            return None
+        if not isinstance(value, dict):
+            return None
+        keys = {
+            key: secret.encode("utf-8")
+            for key, secret in value.items()
+            if isinstance(key, str) and isinstance(secret, str)
+        }
+        return keys, active
+    secret = os.environ.get("PDX_ENGINE_WORKFLOW_HMAC_SECRET", "").encode("utf-8")
+    if secret:
+        return {"default": secret}, "default"
+    return None
+
+
 def make_server(
     *,
     host: str = "127.0.0.1",
@@ -341,11 +464,20 @@ def make_server(
     staging = StagingStore(staging_root)
     kernel_client = kernel if kernel is not None else _default_kernel_client()
     service = JobService(store=store, staging=staging, kernel=kernel_client)
+    workflow_service = None
+    hmac_configuration = _workflow_hmac_configuration()
+    if hmac_configuration is not None:
+        keys, active_key_id = hmac_configuration
+        workflow_service = RuntimeWorkflowService(
+            store=RuntimeWorkflowStore(db_path), hmac_keys=keys,
+            active_hmac_key_id=active_key_id,
+        )
 
     class BoundHandler(InternalJobHandler):
         pass
 
     BoundHandler.service = service
+    BoundHandler.workflow_service = workflow_service
     return ThreadingHTTPServer((host, port), BoundHandler)
 
 

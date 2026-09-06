@@ -39,8 +39,11 @@ credential injection remain host responsibilities.
 
 The authoritative contract and transactional invariants are documented in
 [`runtime-provider-workflow/README.md`](runtime-provider-workflow/README.md).
-They are deliberately outside packaged runtime contracts until implementation is
-separately authorized and completed.
+The bilateral erratum is now implemented as an unpublished candidate under
+`runtime/pdx_artifact_engine/runtime_workflows`. The 23 authoritative schemas are
+packaged, while provider execution, credentials, network/process isolation and
+approval authority remain outside Engine. See
+[`runtime-provider-workflow/IMPLEMENTATION.md`](runtime-provider-workflow/IMPLEMENTATION.md).
 
 ## Runtime Flow
 

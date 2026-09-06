@@ -9,6 +9,7 @@ Mirrors Kernel sidecar profiles without changing E-05 job contracts:
 
 from __future__ import annotations
 
+import json
 import os
 import secrets
 from collections.abc import Mapping
@@ -137,4 +138,29 @@ def authenticate_request(
             "request_id": "unauthenticated",
             "correlation_id": "unauthenticated",
         }
+    return None
+
+
+def authenticated_control_plane_instance(headers: Mapping[str, str]) -> str | None:
+    """Map an authenticated bearer credential to its registered Hub instance.
+
+    The JSON environment value maps opaque instance IDs to bearer tokens. Body
+    fields and forwarding headers are deliberately not identity authorities.
+    """
+    raw = os.environ.get("PDX_ENGINE_CONTROL_PLANE_BINDINGS", "").strip()
+    if not raw:
+        return None
+    try:
+        bindings = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(bindings, dict):
+        return None
+    header = headers.get("Authorization") or headers.get("authorization") or ""
+    scheme, _, credential = header.partition(" ")
+    if scheme.lower() != "bearer" or not credential:
+        return None
+    for instance_id, token in bindings.items():
+        if isinstance(instance_id, str) and isinstance(token, str) and secrets.compare_digest(credential, token):
+            return instance_id
     return None

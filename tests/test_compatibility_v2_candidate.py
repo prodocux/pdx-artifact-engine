@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import tomllib
 from pathlib import Path
 
 import pdx_artifact_core
 import pdx_artifact_engine
-import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "compatibility" / "pdx_prodocux_compatibility_v2.json"
@@ -69,7 +69,7 @@ def test_compatibility_v2_release_candidate_remains_unpublished() -> None:
     assert "No public pin exists" in manifest["integration"]["publication_gate"]
 
 
-def test_release_candidate_versions_are_coherent() -> None:
+def test_engine_a5_candidate_preserves_bundled_core_a4_version() -> None:
     engine_metadata = tomllib.loads(
         (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     )
@@ -79,11 +79,10 @@ def test_release_candidate_versions_are_coherent() -> None:
         )
     )
     frozen_surface_version = _manifest()["pdx_artifact_core"]["version"]
-    package_versions = {
-        engine_metadata["project"]["version"],
-        core_metadata["project"]["version"],
-        pdx_artifact_engine.__version__,
-        pdx_artifact_core.__version__,
-    }
     assert frozen_surface_version == "0.3.0a1"
-    assert package_versions == {"0.3.0a4"}
+    assert {
+        engine_metadata["project"]["version"], pdx_artifact_engine.__version__
+    } == {"0.3.0a5"}
+    assert {
+        core_metadata["project"]["version"], pdx_artifact_core.__version__
+    } == {"0.3.0a4"}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-claim-v1.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "workflow_job_id", "workflow_step_id", "step_kind", "task_id", "run_id", "claim_id", "lease_token", "lease_expires_at", "attempt_number", "check_definition_digest", "execution_constraints_digest", "idempotency_key", "workspace_ref"],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_runtime_check_claim_v1"}, "workflow_job_id": {"$ref": "#/$defs/id"}, "workflow_step_id": {"$ref": "#/$defs/id"}, "step_kind": {"const": "check"},
+    "task_id": {"$ref": "#/$defs/id"}, "run_id": {"$ref": "#/$defs/id"}, "claim_id": {"$ref": "#/$defs/id"}, "lease_token": {"type": "string", "minLength": 32, "maxLength": 256}, "lease_expires_at": {"type": "string", "format": "date-time"},
+    "attempt_number": {"type": "integer", "minimum": 1, "maximum": 1000}, "check_definition_digest": {"$ref": "#/$defs/digest"}, "execution_constraints_digest": {"$ref": "#/$defs/digest"},
+    "idempotency_key": {"type": "string", "minLength": 16, "maxLength": 128}, "workspace_ref": {"$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/workspaceRef"}
+  },
+  "$defs": {"id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"}, "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}
+}

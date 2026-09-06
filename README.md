@@ -15,6 +15,10 @@ commit `2acdebf73134ed106a636ed38e1ecce6596eb751`. Media adapter remains
 [`compatibility/pdx_prodocux_release_rc4_a4.json`](compatibility/pdx_prodocux_release_rc4_a4.json);
 it does not rewrite the frozen rc2/a2 or rc3/a3 records.
 
+The current working tree is the unpublished **`0.3.0a5` implementation
+candidate** for `runtime_provider_workflow_v1`. It must not be confused with or
+republished as the immutable a4 release.
+
 This coordinated security
 cut keeps runtime behavior and frozen contracts unchanged; its image omits
 pip/setuptools and pins the reviewed base digest. Media stays `0.2.0a2`.
@@ -36,6 +40,7 @@ python -m pip install "pdx-artifact-engine==0.3.0a4"
 | Replay-safe pending-only snapshot resume | **Available (engine)** |
 | External-operation pending/unknown/reconcile lifecycle | **Available (core)** |
 | Execution context, cooperative cancellation, receipts, ordered events | **Available (core)** |
+| Durable runtime-provider workflow v1 (23 packaged schemas, SQLite CAS, authenticated activation, HMAC leases, receipts) | **Implemented in the post-a4 release candidate; not yet published** |
 | Validate `plan.json` against v0 schema | Available |
 | Load skill registry + dispatch skills | Available (v0 kinds) |
 | Deterministic fixture staging | Available |

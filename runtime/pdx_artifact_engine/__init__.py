@@ -1,6 +1,7 @@
 """PDX Artifact Engine runtime package.
 
-Release candidate ``0.3.0a4`` re-exports Core contracts. Dispatcher normalizes
+Unpublished candidate ``0.3.0a5`` adds the durable runtime-provider workflow
+while preserving the Core contract façade. Dispatcher normalizes
 ``pdx_plan_v0`` → ``pdx_execution_plan_v1`` (tool / approval / transform /
 verify). Legacy ``expert`` has no Core equivalent (D3): blocked unless
 ``--mock`` demo rewrite. Stable façade: ``ArtifactRuntime.execute_plan``.
@@ -25,7 +26,7 @@ from pdx_artifact_core import (
 
 from .runtime import ArtifactRuntime
 
-__version__ = "0.3.0a4"
+__version__ = "0.3.0a5"
 
 __all__ = [
     "ArtifactRuntime",
