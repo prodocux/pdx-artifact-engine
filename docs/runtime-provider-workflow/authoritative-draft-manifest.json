@@ -18,11 +18,11 @@
     "pdx_runtime_provider_common_v1.schema.json": "9691a6ed6441dfb7bab706f518b0749aa381cb4ee5ea7b59a84a503a6d8e4f5d",
     "pdx_runtime_provider_lease_renew_v1.schema.json": "ea7de6307323cbc963120ac56385e9e08b55e3f18d5e703bf493d89b6f31f75a",
     "pdx_runtime_provider_record_v1.schema.json": "da40f210b0973c62847effb485c62ae742b00be3a3100a91cce12bec50de0a64",
-    "pdx_runtime_provider_route_mapping_v1.schema.json": "f8d2a640ed5ff5e4076b715cc8b4f432786306c5947806541ed8dd60460e132d",
+    "pdx_runtime_provider_route_mapping_v1.schema.json": "4000d6d632982afd40531fa3225fc97943cbf899d7067aafccf883e2bd2313dc",
     "pdx_runtime_provider_update_v1.schema.json": "c7bec844e5e5c069d2f8345361e0410bc29c0ced4e79471ca510dd7a8b9393cb",
     "pdx_runtime_provider_workflow_create_request_v1.schema.json": "f3e50f66ab3a8454d89424842e77274e1a9c7e9a00cf7069508711d1bbfc6804",
     "pdx_runtime_provider_workflow_create_response_v1.schema.json": "e06f3b21c6531c7c0a2352701b97f7afd869202e6e925a5e14eb3f9d3203354d",
-    "pdx_runtime_provider_workflow_error_v1.schema.json": "13fc069f490e2de8f5a6a67d2a26f3e7ed3bed9f2e666dd10ef18f28eef8ee88",
+    "pdx_runtime_provider_workflow_error_v1.schema.json": "ace710cce1b604644b11aeb3426c68b92f5e6ef255c21280ea48235779ec1bb3",
     "pdx_runtime_provider_workflow_plan_v1.schema.json": "87da14f07b1d86cfa8ade1fd24a7dc9db487772ce850693e997374314ae37a64",
     "pdx_runtime_provider_workflow_receipt_v1.schema.json": "12e9c03ac36ac964d87fc39f3ba5111bad73b16051df180446a620e92d699484",
     "pdx_runtime_provider_workflow_state_v1.schema.json": "1ef8068ef3a9bf1856e585231410b91e12def485425a4317f086b82f6241d21a",
@@ -30,8 +30,8 @@
     "pdx_runtime_workflow_reconcile_v1.schema.json": "2f75c3d18f3c713df0b838751c3cefb9bf65b6ba5b5365c4b7edcd2cc727635c"
   },
   "evidence": {
-    "route-mapping.json": "43a96456bb7ecfbbd249772cfbbf18badb4236ca2d9ea0100c1fe4806d8b08ca",
-    "semantic_validator.py": "c39776d0ddfbb16b2b670e131810d93456a1659524b33ad7481f84f37d80d0a9",
+    "route-mapping.json": "f79ffb93043b5b47965e5f560a5ddee4e179bd496522d0c43000db9a5315bb8c",
+    "semantic_validator.py": "9a00409ed7d69ebf2f5cfd811b6ef0ebdc7fe1651e07729710f4afa221d8182a",
     "canonicalization-vectors.v1.json": "f56823a99f6472be6daa5b62d6c308f23825d6ba97cf1a6a7a84fe07921f12d3",
     "canonicalization-invalid-vectors.v1.json": "7dad5b85b207713719f56848fd6fd9fa5f839a89d323ddbb3acdf0dc601137da",
     "verify-ajv-strict.mjs": "ef79b5aaa77f62900ec061ec2154af291dc8d0046bde99e792e84b0bbb5162c3",
@@ -48,7 +48,7 @@
     "ajv_2020_12_strict": "PASS 23 schemas",
     "canonical_vectors": "PASS 3 positive + 2 negative; bytes match Farpals source vectors",
     "consumer_mapping": "PASS 2 complete source/target envelopes with canonical payload digests",
-    "claim_activation_erratum": "PASS authenticated control-plane binding, atomic rejection and single-attempt token rotation evidence",
+    "claim_activation_erratum": "PASS complete material binding, transport-principal match, atomic rejection and concurrent-safe deterministic token recovery evidence",
     "production_implementation_authorized": false
   },
   "published_engine_version": "0.3.0a4",

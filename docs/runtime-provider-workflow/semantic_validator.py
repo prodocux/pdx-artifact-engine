@@ -6,6 +6,7 @@ This module is contract evidence. It is not imported by the packaged runtime.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 from typing import Any
 
@@ -185,17 +186,17 @@ def validate_route_mapping_semantics(mapping: dict[str, Any]) -> list[str]:
 
 def activation_binding(request: dict[str, Any], kind: str) -> tuple[Any, ...]:
     """Return the immutable authority binding behind an idempotency key."""
-    fields = [
-        "workflow_step_id", "execution_constraints_digest", "workspace_ref",
-    ]
-    if kind == "provider":
-        fields += ["invocation_id", "provider_id", "provider_instance_id"]
-    return tuple(request.get(field) for field in fields)
+    material = {
+        key: value for key, value in request.items()
+        if key not in {"schema_version", "request_id"}
+    }
+    return (kind, _canonical_bytes(material))
 
 
 def validate_activation(
     plan: dict[str, Any], workflow_state: str, request: dict[str, Any], kind: str,
     *, authenticated: bool, authorized: bool = True,
+    authenticated_instance_id: str | None = None,
     step_state: str = "ready", existing: dict[str, Any] | None = None,
 ) -> list[str]:
     """Validate the preconditions that the implementation must check atomically."""
@@ -203,6 +204,8 @@ def validate_activation(
         return ["ACTIVATION_AUTH_REQUIRED"]
     if not authorized:
         return ["ACTIVATION_AUTH_FORBIDDEN"]
+    if authenticated_instance_id != request.get("control_plane_instance_id"):
+        return ["ACTIVATION_PRINCIPAL_MISMATCH"]
     if workflow_state not in {"pending", "running"}:
         return ["WORKFLOW_NOT_ACTIVE"]
     step = next(
@@ -225,19 +228,37 @@ def validate_activation(
     return []
 
 
+def derive_activation_token(
+    server_secret: bytes, claim_id: str, attempt_number: int,
+    binding: tuple[Any, ...],
+) -> str:
+    """Deterministically recover one token without persisting its plaintext."""
+    message = _canonical_bytes({
+        "claim_id": claim_id,
+        "attempt_number": attempt_number,
+        "kind": binding[0],
+        "binding_hex": binding[1].hex(),
+    })
+    return hmac.new(server_secret, message, hashlib.sha256).hexdigest()
+
+
 def activation_transition(
     counters: dict[str, int], existing: dict[str, Any] | None,
-    request: dict[str, Any], kind: str, new_token_digest: str,
+    request: dict[str, Any], kind: str, *, server_secret: bytes, claim_id: str,
 ) -> dict[str, Any]:
-    """Evidence model: create once, or rotate the one lease for an exact retry."""
-    result = {"counters": dict(counters), "invalidated_token_digest": None}
+    """Evidence model: create once; exact retries recover the identical token."""
+    result = {"counters": dict(counters)}
     if existing is None:
         counter = "check_attempts" if kind == "check" else "provider_attempts"
         result["counters"][counter] += 1
         result["attempt_number"] = result["counters"][counter]
     else:
         result["attempt_number"] = existing["attempt_number"]
-        result["invalidated_token_digest"] = existing["lease_token_digest"]
-    result["lease_token_digest"] = new_token_digest
     result["binding"] = activation_binding(request, kind)
+    result["lease_token"] = derive_activation_token(
+        server_secret, claim_id, result["attempt_number"], result["binding"]
+    )
+    result["lease_token_digest"] = hashlib.sha256(
+        result["lease_token"].encode("ascii")
+    ).hexdigest()
     return result

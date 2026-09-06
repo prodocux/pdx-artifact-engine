@@ -410,44 +410,70 @@ def test_activation_rejections_are_atomic_and_check_cannot_select_provider() -> 
     assert _errors("pdx_runtime_check_claim_request_v2.schema.json", polluted_check)
 
     baseline = {"provider_attempts": 0, "check_attempts": 0}
+    instance_id = provider["control_plane_instance_id"]
     rejected = (
         semantics.validate_activation(plan, "running", provider, "provider", authenticated=False),
-        semantics.validate_activation(plan, "running", provider, "provider", authenticated=True, authorized=False),
-        semantics.validate_activation(plan, "failed", provider, "provider", authenticated=True),
-        semantics.validate_activation(plan, "running", provider, "provider", authenticated=True, step_state="running"),
-        semantics.validate_activation(plan, "running", provider, "check", authenticated=True),
+        semantics.validate_activation(plan, "running", provider, "provider", authenticated=True, authorized=False, authenticated_instance_id=instance_id),
+        semantics.validate_activation(plan, "failed", provider, "provider", authenticated=True, authenticated_instance_id=instance_id),
+        semantics.validate_activation(plan, "running", provider, "provider", authenticated=True, authenticated_instance_id=instance_id, step_state="running"),
+        semantics.validate_activation(plan, "running", provider, "check", authenticated=True, authenticated_instance_id=instance_id),
+        semantics.validate_activation(plan, "running", provider, "provider", authenticated=True, authenticated_instance_id="other_control_001"),
     )
     assert rejected == (
         ["ACTIVATION_AUTH_REQUIRED"], ["ACTIVATION_AUTH_FORBIDDEN"],
         ["WORKFLOW_NOT_ACTIVE"], ["STEP_NOT_READY"], ["STEP_KIND_MISMATCH"],
+        ["ACTIVATION_PRINCIPAL_MISMATCH"],
     )
     assert baseline == {"provider_attempts": 0, "check_attempts": 0}
 
 
-def test_activation_idempotency_binding_and_token_rotation() -> None:
+def test_activation_idempotency_binding_and_concurrent_token_recovery() -> None:
     semantics = _semantic_module()
     plan = _read("examples", "workflow-plan.valid.json")
     request = _read("examples", "provider-activation.valid.json")["request"]
     counters = {"provider_attempts": 0, "check_attempts": 0}
-    first = semantics.activation_transition(counters, None, request, "provider", "1" * 64)
+    secret = b"contract-evidence-server-secret"
+    first = semantics.activation_transition(
+        counters, None, request, "provider", server_secret=secret,
+        claim_id="claim_provider_001",
+    )
     existing = {
         "kind": "provider", "binding": first["binding"], "attempt_number": 1,
-        "invocation_id": request["invocation_id"], "lease_token_digest": "1" * 64,
+        "invocation_id": request["invocation_id"],
+        "lease_token_digest": first["lease_token_digest"],
     }
-    assert semantics.validate_activation(plan, "running", request, "provider", authenticated=True, existing=existing) == []
-    retry = semantics.activation_transition(first["counters"], existing, request, "provider", "2" * 64)
-    assert retry["counters"]["provider_attempts"] == 1
-    assert retry["attempt_number"] == 1
-    assert retry["invalidated_token_digest"] == "1" * 64
-    assert retry["lease_token_digest"] == "2" * 64
+    auth = {"authenticated": True, "authenticated_instance_id": request["control_plane_instance_id"]}
+    assert semantics.validate_activation(
+        plan, "running", request, "provider", existing=existing, **auth
+    ) == []
+    retry_a = semantics.activation_transition(
+        first["counters"], existing, request, "provider", server_secret=secret,
+        claim_id="claim_provider_001",
+    )
+    retry_b = semantics.activation_transition(
+        first["counters"], existing, request, "provider", server_secret=secret,
+        claim_id="claim_provider_001",
+    )
+    assert retry_a == retry_b
+    assert retry_a["lease_token"] == first["lease_token"]
+    assert retry_a["lease_token_digest"] == first["lease_token_digest"]
+    assert retry_a["counters"]["provider_attempts"] == 1
+    assert retry_a["attempt_number"] == 1
 
     for field, value in (
         ("workflow_step_id", "step_reviewer"), ("provider_id", "other.provider"),
         ("provider_instance_id", "provider_instance_002"),
+        ("control_plane_instance_id", "hub_control_002"),
+        ("correlation_id", "correlation_002"),
+        ("lease_seconds", 120),
         ("workspace_ref", "workspace://root/other"),
         ("execution_constraints_digest", "f" * 64),
     ):
         changed = {**request, field: value}
         assert semantics.validate_activation(
-            plan, "running", changed, "provider", authenticated=True, existing=existing
+            plan, "running", changed, "provider", existing=existing,
+            authenticated=True, authenticated_instance_id=changed["control_plane_instance_id"],
         ) == ["ACTIVATION_BINDING_CONFLICT"]
+
+    new_request_id = {**request, "request_id": "request_provider_002"}
+    assert semantics.activation_binding(new_request_id, "provider") == first["binding"]

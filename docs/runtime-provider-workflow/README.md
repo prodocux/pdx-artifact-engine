@@ -3,8 +3,8 @@
 Status: the `77a6a1b15619ca133c664a938014fdfd3393f29c` bilateral freeze remains
 historical provenance, but its claim-request v1 surface is superseded for
 implementation by this additive v2 erratum candidate. Production implementation
-is paused until Farpals accepts and freezes the erratum; production implementation
-is not authorized during this erratum review.
+is paused until Farpals accepts and freezes the erratum;
+production implementation is not authorized during this erratum review.
 
 This additive contract answers the application-neutral workflow capability request.
 It does not modify the published `0.3.0a4` contracts, the frozen compatibility
@@ -66,10 +66,15 @@ must additionally provide these atomic invariants:
    the frozen operation/check digest, conflicts and budgets in the transaction
    that creates the attempt, claim and lease. Failure changes no counter and
    creates no lease.
-8. An exact idempotent activation retry atomically rotates the lease token for
-   the same attempt. The previous token becomes invalid in that transaction,
-   the attempt counter does not increase, and only token digests are persisted.
-   A changed step, provider instance, workspace or constraints binding conflicts.
+8. An exact idempotent activation retry deterministically recovers the same lease
+   token using a server-secret HMAC over claim identity, attempt number and the
+   complete material request binding. Concurrent retries and response reordering
+   therefore cannot invalidate a successful response. Only the token digest is
+   persisted and the attempt counter does not increase.
+9. Every request field except `schema_version` and transport-unique `request_id`
+   is immutable under an idempotency key, including correlation, control-plane
+   instance and lease duration. The body instance must equal the instance
+   registered to the authenticated transport principal.
 
 ## Stable errors
 
@@ -78,6 +83,7 @@ The contract freezes these codes:
 - `WORKFLOW_BUDGET_EXHAUSTED`
 - `ACTIVATION_AUTH_REQUIRED`
 - `ACTIVATION_AUTH_FORBIDDEN`
+- `ACTIVATION_PRINCIPAL_MISMATCH`
 - `ACTIVATION_BINDING_CONFLICT`
 - `STEP_NOT_READY`
 - `STEP_KIND_MISMATCH`
