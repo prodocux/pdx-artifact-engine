@@ -1,0 +1,33 @@
+{
+  "schema_version": "pdx_artifact_engine_release_record_v1",
+  "status": "published",
+  "published_on": "2026-09-06",
+  "distribution": "pdx-artifact-engine",
+  "version": "0.3.0a5",
+  "tag": "v0.3.0a5",
+  "release_commit": "49c53ac674dbcfda7735f022ff3f38a07b8090f2",
+  "github_release": "https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a5",
+  "pypi_release": "https://pypi.org/project/pdx-artifact-engine/0.3.0a5/",
+  "workflow_run": "https://github.com/prodocux/pdx-artifact-engine/actions/runs/34022592639",
+  "files": {
+    "pdx_artifact_engine-0.3.0a5-py3-none-any.whl": "75e7a180d0f7f4638e276612a336e26d0595aa15092a8ab538a0af68276d4854",
+    "pdx_artifact_engine-0.3.0a5.tar.gz": "5bcb63b281893dae11abbd7fa219dc4f162cf4e33aa2baa4809f695d00d21bca"
+  },
+  "contract_provenance": {
+    "historical_freeze": "77a6a1b15619ca133c664a938014fdfd3393f29c",
+    "accepted_erratum": "f5f05ce39246712c8e9c4e3121bafaa9a4df6b54",
+    "authoritative_manifest_sha256": "8350ebb0fb83c2b99ab2b07734543aecea3fc398592751893fb2a460f0e6127a",
+    "packaged_schema_count": 23
+  },
+  "qualification": {
+    "farpals_evidence_commit": "280eae3",
+    "scope": "HTTP workflow, concurrent exact retry, lease and stale fencing, cancel, HMAC readiness/rotation/restart, and a5-a4-a5 volume rollback passed before publication.",
+    "formal_pin_promotion": "Farpals-owned and intentionally separate from Engine publication."
+  },
+  "verification": {
+    "github_actions": "verify and publish-engine succeeded; publish-media was skipped",
+    "pypi_file_count": 2,
+    "clean_install": "Installed pdx-artifact-engine==0.3.0a5 from PyPI and loaded all 23 packaged workflow schemas.",
+    "media": "pdx-adapter-media remains 0.2.0a2 and was not attached or republished."
+  }
+}

@@ -9,38 +9,34 @@ checksummed manifests.
 > provider. PDX-5B-1B+ experts are an optional future bundle, not a v0.1.0
 > requirement.
 
-**Current PyPI prerelease: `0.3.0a4`**, published from tag **`v0.3.0a4`** at
-commit `2acdebf73134ed106a636ed38e1ecce6596eb751`. Media adapter remains
-**`0.2.0a2`** and was not republished with Engine a4. The published rc4/a4 overlay is
-[`compatibility/pdx_prodocux_release_rc4_a4.json`](compatibility/pdx_prodocux_release_rc4_a4.json);
-it does not rewrite the frozen rc2/a2 or rc3/a3 records.
+**Current PyPI prerelease: `0.3.0a5`**, published from tag **`v0.3.0a5`** at
+commit `49c53ac674dbcfda7735f022ff3f38a07b8090f2`. Media adapter remains
+**`0.2.0a2`** and was not republished with Engine a5. Publication evidence is
+recorded in
+[`compatibility/pdx_artifact_engine_release_a5.json`](compatibility/pdx_artifact_engine_release_a5.json);
+it does not rewrite the frozen coordinated release records.
 
-The current working tree is the unpublished **`0.3.0a5` implementation
-candidate** for `runtime_provider_workflow_v1`. It must not be confused with or
-republished as the immutable a4 release.
-
-This coordinated security
-cut keeps runtime behavior and frozen contracts unchanged; its image omits
-pip/setuptools and pins the reviewed base digest. Media stays `0.2.0a2`.
-See [rc4/a4 publication and security boundary](docs/RELEASE_RC4_A4.md).
+The prior coordinated security cut and its accepted OS boundary remain recorded
+in [the rc4/a4 publication record](docs/RELEASE_RC4_A4.md). Engine a5 adds the
+runtime-provider workflow without changing those frozen historical records.
 
 ```powershell
-python -m pip install "pdx-artifact-engine==0.3.0a4"
+python -m pip install "pdx-artifact-engine==0.3.0a5"
 ```
 
 ## Positioning
 
 | Claim | Status |
 |---|---|
-| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (0.3.0a4; introduced in 0.3.0a1)** |
+| `pdx_execution_plan_v1` + ToolRequest/Result schemas | **Available (0.3.0a5; introduced in 0.3.0a1)** |
 | v0→v1 plan translator (rejects unresolved `expert`) | **Available (core)** |
 | Run state machine (`awaiting_*` → `running`) | **Available (core)** |
-| Bounded run snapshot + step receipt contracts | **Available (0.3.0a4; introduced in 0.3.0a1)** |
+| Bounded run snapshot + step receipt contracts | **Available (0.3.0a5; introduced in 0.3.0a1)** |
 | Checkpoint CAS + decision record-once repository ports | **Available (core)** |
 | Replay-safe pending-only snapshot resume | **Available (engine)** |
 | External-operation pending/unknown/reconcile lifecycle | **Available (core)** |
 | Execution context, cooperative cancellation, receipts, ordered events | **Available (core)** |
-| Durable runtime-provider workflow v1 (23 packaged schemas, SQLite CAS, authenticated activation, HMAC leases, receipts) | **Implemented in the post-a4 release candidate; not yet published** |
+| Durable runtime-provider workflow v1 (23 packaged schemas, SQLite CAS, authenticated activation, HMAC leases, receipts) | **Available (`0.3.0a5`)** |
 | Validate `plan.json` against v0 schema | Available |
 | Load skill registry + dispatch skills | Available (v0 kinds) |
 | Deterministic fixture staging | Available |
@@ -77,16 +73,16 @@ first.
 pip install -e ".[dev]"
 ```
 
-Install the ProDocuX deterministic extract/render adapter prerelease from PyPI:
+Install the current Engine prerelease from PyPI:
 
 ```bash
-pip install "pdx-artifact-engine==0.3.0a2"
+pip install "pdx-artifact-engine==0.3.0a5"
 ```
 
 See the
-[`pdx-artifact-engine` PyPI `0.3.0a2` release](https://pypi.org/project/pdx-artifact-engine/0.3.0a2/)
+[`pdx-artifact-engine` PyPI `0.3.0a5` release](https://pypi.org/project/pdx-artifact-engine/0.3.0a5/)
 and
-[GitHub prerelease](https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a2).
+[GitHub prerelease](https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a5).
 
 The older published wheel
 [`pdx-artifact-engine` PyPI `0.3.0a1`](https://pypi.org/project/pdx-artifact-engine/0.3.0a1/)
@@ -164,7 +160,7 @@ to document the future shape. Without `--mock`, that plan **blocks**. With
 | `ManualPlanner` (`--plan`) | Yes |
 | `RulePlanner` (`--rule-request`) | Yes |
 | `ExternalPlanner` | Stub (raises) |
-| `LlamaCppPlanner` | Stub (raises; planned, not implemented in `0.3.0a4`) |
+| `LlamaCppPlanner` | Stub (raises; planned, not implemented in `0.3.0a5`) |
 | Future `PDXCorePlanner` | Not started |
 
 ## Schemas

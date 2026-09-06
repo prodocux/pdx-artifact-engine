@@ -15,7 +15,7 @@ hard dependency.
 This separation keeps the runtime local, low-RAM, auditable, and easier to
 commercialize.
 
-## Durable control plane (current `0.3.0a4`; introduced in `0.3.0a1`)
+## Durable control plane (current `0.3.0a5`; introduced in `0.3.0a1`)
 
 PDX Core defines product-neutral, bounded contracts for step receipts, run
 snapshots, checkpoint/decision repository ports, external-operation
@@ -39,7 +39,7 @@ credential injection remain host responsibilities.
 
 The authoritative contract and transactional invariants are documented in
 [`runtime-provider-workflow/README.md`](runtime-provider-workflow/README.md).
-The bilateral erratum is now implemented as an unpublished candidate under
+The bilateral erratum is implemented and published in `0.3.0a5` under
 `runtime/pdx_artifact_engine/runtime_workflows`. The 23 authoritative schemas are
 packaged, while provider execution, credentials, network/process isolation and
 approval authority remain outside Engine. See

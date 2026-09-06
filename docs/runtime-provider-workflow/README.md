@@ -1,14 +1,15 @@
-# Runtime provider workflow v1 — claim-source erratum candidate
+# Runtime provider workflow v1 — published claim-source erratum
 
 Status: the `77a6a1b15619ca133c664a938014fdfd3393f29c` bilateral freeze remains
 historical provenance, but its claim-request v1 surface is superseded for
-implementation by this additive v2 erratum candidate. Production implementation
+implementation by this additive frozen v2 erratum. Production implementation
 was accepted by Farpals and frozen as `891f837013251e70755c4eb0eac14df3be9bb87b`.
-Production implementation was separately authorized after that bilateral freeze;
-the unpublished implementation candidate is tracked in `IMPLEMENTATION.md`.
+Production implementation was separately authorized after that bilateral freeze
+and published as Engine `0.3.0a5` from tag `v0.3.0a5`. Implementation details
+are tracked in `IMPLEMENTATION.md`.
 
 This additive contract answers the application-neutral workflow capability request.
-It does not modify the published `0.3.0a4` contracts, the frozen compatibility
+It does not modify the previously published `0.3.0a4` contracts, the frozen compatibility
 records, or the six consumer-owned provider/check handshake envelopes.
 
 ## Authority and boundaries
