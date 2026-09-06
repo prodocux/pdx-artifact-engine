@@ -181,3 +181,63 @@ def validate_route_mapping_semantics(mapping: dict[str, Any]) -> list[str]:
     if set(operations) != required or len(operations) != len(required):
         errors.append("ROUTE_OPERATION_SET_INVALID")
     return errors
+
+
+def activation_binding(request: dict[str, Any], kind: str) -> tuple[Any, ...]:
+    """Return the immutable authority binding behind an idempotency key."""
+    fields = [
+        "workflow_step_id", "execution_constraints_digest", "workspace_ref",
+    ]
+    if kind == "provider":
+        fields += ["invocation_id", "provider_id", "provider_instance_id"]
+    return tuple(request.get(field) for field in fields)
+
+
+def validate_activation(
+    plan: dict[str, Any], workflow_state: str, request: dict[str, Any], kind: str,
+    *, authenticated: bool, authorized: bool = True,
+    step_state: str = "ready", existing: dict[str, Any] | None = None,
+) -> list[str]:
+    """Validate the preconditions that the implementation must check atomically."""
+    if not authenticated:
+        return ["ACTIVATION_AUTH_REQUIRED"]
+    if not authorized:
+        return ["ACTIVATION_AUTH_FORBIDDEN"]
+    if workflow_state not in {"pending", "running"}:
+        return ["WORKFLOW_NOT_ACTIVE"]
+    step = next(
+        (item for item in plan.get("steps", [])
+         if item.get("workflow_step_id") == request.get("workflow_step_id")),
+        None,
+    )
+    if step is None or step_state != "ready":
+        return ["STEP_NOT_READY"]
+    actual_kind = step.get("step_kind")
+    if (kind == "check") != (actual_kind == "check"):
+        return ["STEP_KIND_MISMATCH"]
+    if existing is not None:
+        if existing.get("kind") != kind or existing.get("binding") != activation_binding(
+            request, kind
+        ):
+            return ["ACTIVATION_BINDING_CONFLICT"]
+        if existing.get("invocation_id") not in {None, request.get("invocation_id")}:
+            return ["ACTIVATION_BINDING_CONFLICT"]
+    return []
+
+
+def activation_transition(
+    counters: dict[str, int], existing: dict[str, Any] | None,
+    request: dict[str, Any], kind: str, new_token_digest: str,
+) -> dict[str, Any]:
+    """Evidence model: create once, or rotate the one lease for an exact retry."""
+    result = {"counters": dict(counters), "invalidated_token_digest": None}
+    if existing is None:
+        counter = "check_attempts" if kind == "check" else "provider_attempts"
+        result["counters"][counter] += 1
+        result["attempt_number"] = result["counters"][counter]
+    else:
+        result["attempt_number"] = existing["attempt_number"]
+        result["invalidated_token_digest"] = existing["lease_token_digest"]
+    result["lease_token_digest"] = new_token_digest
+    result["binding"] = activation_binding(request, kind)
+    return result

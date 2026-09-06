@@ -223,9 +223,11 @@ def test_pdx_owned_wire_surface_is_complete_and_credential_free() -> None:
         "pdx_runtime_provider_workflow_create_request_v1.schema.json",
         "pdx_runtime_provider_workflow_create_response_v1.schema.json",
         "pdx_runtime_provider_claim_request_v1.schema.json",
+        "pdx_runtime_provider_claim_request_v2.schema.json",
         "pdx_runtime_provider_claim_v1.schema.json",
         "pdx_runtime_provider_update_v1.schema.json",
         "pdx_runtime_check_claim_request_v1.schema.json",
+        "pdx_runtime_check_claim_request_v2.schema.json",
         "pdx_runtime_check_claim_v1.schema.json",
         "pdx_runtime_check_update_v1.schema.json",
         "pdx_runtime_provider_record_v1.schema.json",
@@ -288,7 +290,7 @@ def test_route_error_codes_are_serializable_by_error_schema() -> None:
     mapping = json.loads((CONTRACT / "route-mapping.json").read_text(encoding="utf-8"))
     codes = {
         code
-        for key in ("conflict_codes", "gone_codes", "too_large_codes")
+        for key in ("authorization_codes", "conflict_codes", "gone_codes", "too_large_codes")
         for code in mapping["http_semantics"][key]
     }
     for code in codes:
@@ -366,7 +368,86 @@ def test_authoritative_draft_manifest_matches_schema_bytes() -> None:
         for path in manifest["evidence"]
     }
     assert manifest["evidence"] == evidence
-    assert manifest["status"] == "bilateral_contract_frozen_implementation_unauthorized"
+    assert manifest["status"] == "claim_source_erratum_candidate_implementation_paused"
     assert manifest["verification"]["production_implementation_authorized"] is False
     assert manifest["published_contracts_modified"] is False
     assert manifest["runtime_route_enabled"] is False
+
+
+def test_trusted_activation_requests_and_authority_echo() -> None:
+    mapping = json.loads((CONTRACT / "route-mapping.json").read_text(encoding="utf-8"))
+    assert mapping["claim_activation_authority"] == {
+        "principal_source": "authenticated_transport",
+        "required_capability": "runtime_workflow:activate",
+        "request_body_principal_authoritative": False,
+        "worker_pull_authoritative": False,
+    }
+    cases = (
+        ("provider-activation.valid.json", "pdx_runtime_provider_claim_request_v2.schema.json", "pdx_runtime_provider_claim_v1.schema.json"),
+        ("check-activation.valid.json", "pdx_runtime_check_claim_request_v2.schema.json", "pdx_runtime_check_claim_v1.schema.json"),
+    )
+    for fixture_name, request_schema, response_schema in cases:
+        fixture = _read("examples", fixture_name)
+        assert _errors(request_schema, fixture["request"]) == []
+        assert _errors(response_schema, fixture["response"]) == []
+        for field in ("workflow_step_id", "execution_constraints_digest", "idempotency_key", "workspace_ref"):
+            assert fixture["request"][field] == fixture["response"][field]
+    provider = _read("examples", "provider-activation.valid.json")
+    for field in ("invocation_id", "provider_id", "provider_instance_id"):
+        assert provider["request"][field] == provider["response"][field]
+    plan = _read("examples", "workflow-plan.valid.json")
+    assert provider["response"]["operation_digest"] == plan["steps"][0]["operation_digest"]
+    check = _read("examples", "check-activation.valid.json")
+    assert check["response"]["check_definition_digest"] == plan["steps"][1]["check_definition_digest"]
+
+
+def test_activation_rejections_are_atomic_and_check_cannot_select_provider() -> None:
+    semantics = _semantic_module()
+    plan = _read("examples", "workflow-plan.valid.json")
+    provider = _read("examples", "provider-activation.valid.json")["request"]
+    check = _read("examples", "check-activation.valid.json")["request"]
+    polluted_check = {**check, "provider_id": "generic.cli"}
+    assert _errors("pdx_runtime_check_claim_request_v2.schema.json", polluted_check)
+
+    baseline = {"provider_attempts": 0, "check_attempts": 0}
+    rejected = (
+        semantics.validate_activation(plan, "running", provider, "provider", authenticated=False),
+        semantics.validate_activation(plan, "running", provider, "provider", authenticated=True, authorized=False),
+        semantics.validate_activation(plan, "failed", provider, "provider", authenticated=True),
+        semantics.validate_activation(plan, "running", provider, "provider", authenticated=True, step_state="running"),
+        semantics.validate_activation(plan, "running", provider, "check", authenticated=True),
+    )
+    assert rejected == (
+        ["ACTIVATION_AUTH_REQUIRED"], ["ACTIVATION_AUTH_FORBIDDEN"],
+        ["WORKFLOW_NOT_ACTIVE"], ["STEP_NOT_READY"], ["STEP_KIND_MISMATCH"],
+    )
+    assert baseline == {"provider_attempts": 0, "check_attempts": 0}
+
+
+def test_activation_idempotency_binding_and_token_rotation() -> None:
+    semantics = _semantic_module()
+    plan = _read("examples", "workflow-plan.valid.json")
+    request = _read("examples", "provider-activation.valid.json")["request"]
+    counters = {"provider_attempts": 0, "check_attempts": 0}
+    first = semantics.activation_transition(counters, None, request, "provider", "1" * 64)
+    existing = {
+        "kind": "provider", "binding": first["binding"], "attempt_number": 1,
+        "invocation_id": request["invocation_id"], "lease_token_digest": "1" * 64,
+    }
+    assert semantics.validate_activation(plan, "running", request, "provider", authenticated=True, existing=existing) == []
+    retry = semantics.activation_transition(first["counters"], existing, request, "provider", "2" * 64)
+    assert retry["counters"]["provider_attempts"] == 1
+    assert retry["attempt_number"] == 1
+    assert retry["invalidated_token_digest"] == "1" * 64
+    assert retry["lease_token_digest"] == "2" * 64
+
+    for field, value in (
+        ("workflow_step_id", "step_reviewer"), ("provider_id", "other.provider"),
+        ("provider_instance_id", "provider_instance_002"),
+        ("workspace_ref", "workspace://root/other"),
+        ("execution_constraints_digest", "f" * 64),
+    ):
+        changed = {**request, field: value}
+        assert semantics.validate_activation(
+            plan, "running", changed, "provider", authenticated=True, existing=existing
+        ) == ["ACTIVATION_BINDING_CONFLICT"]

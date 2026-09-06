@@ -1,0 +1,22 @@
+{
+  "request": {
+    "schema_version": "pdx_internal_runtime_provider_claim_request_v2",
+    "request_id": "request_provider_001", "correlation_id": "correlation_001",
+    "control_plane_instance_id": "hub_control_001", "workflow_step_id": "step_builder",
+    "invocation_id": "invocation_001", "provider_id": "generic.cli",
+    "provider_instance_id": "provider_instance_001",
+    "execution_constraints_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "idempotency_key": "activate-provider-001", "workspace_ref": "workspace://root/project",
+    "lease_seconds": 60
+  },
+  "response": {
+    "schema_version": "pdx_internal_runtime_provider_claim_v1",
+    "workflow_job_id": "workflow_job_001", "workflow_step_id": "step_builder", "step_kind": "builder",
+    "task_id": "task_001", "run_id": "run_001", "claim_id": "claim_provider_001",
+    "lease_token": "provider-lease-token-000000000000001", "lease_expires_at": "2026-09-06T10:01:00Z",
+    "invocation_id": "invocation_001", "provider_id": "generic.cli", "provider_instance_id": "provider_instance_001",
+    "attempt_number": 1, "operation_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "execution_constraints_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "idempotency_key": "activate-provider-001", "workspace_ref": "workspace://root/project"
+  }
+}

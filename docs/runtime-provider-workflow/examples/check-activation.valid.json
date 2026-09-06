@@ -1,0 +1,19 @@
+{
+  "request": {
+    "schema_version": "pdx_internal_runtime_check_claim_request_v2",
+    "request_id": "request_check_001", "correlation_id": "correlation_001",
+    "control_plane_instance_id": "hub_control_001", "workflow_step_id": "step_check",
+    "execution_constraints_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "idempotency_key": "activate-check-0001", "workspace_ref": "workspace://root/project",
+    "lease_seconds": 60
+  },
+  "response": {
+    "schema_version": "pdx_internal_runtime_check_claim_v1",
+    "workflow_job_id": "workflow_job_001", "workflow_step_id": "step_check", "step_kind": "check",
+    "task_id": "task_001", "run_id": "run_001", "claim_id": "claim_check_001",
+    "lease_token": "check-lease-token-00000000000000001", "lease_expires_at": "2026-09-06T10:01:00Z",
+    "attempt_number": 1, "check_definition_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "execution_constraints_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "idempotency_key": "activate-check-0001", "workspace_ref": "workspace://root/project"
+  }
+}

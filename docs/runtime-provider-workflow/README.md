@@ -1,6 +1,10 @@
-# Runtime provider workflow v1 — bilateral contract freeze
+# Runtime provider workflow v1 — claim-source erratum candidate
 
-Status: bilateral contract content frozen; production implementation is not authorized.
+Status: the `77a6a1b15619ca133c664a938014fdfd3393f29c` bilateral freeze remains
+historical provenance, but its claim-request v1 surface is superseded for
+implementation by this additive v2 erratum candidate. Production implementation
+is paused until Farpals accepts and freezes the erratum; production implementation
+is not authorized during this erratum review.
 
 This additive contract answers the application-neutral workflow capability request.
 It does not modify the published `0.3.0a4` contracts, the frozen compatibility
@@ -14,6 +18,12 @@ reviewer, peer message or artifact is untrusted evidence and never grants
 approval, credentials, policy exceptions or capabilities. Application/runtime
 layers retain provider selection, workspace policy, approval and process/network
 isolation. Engine never persists a credential reference or plaintext lease token.
+
+Provider/check claim requests are attempt-activation commands issued only by an
+authenticated Farpals host/control-plane principal with
+`runtime_workflow:activate`; they are not worker/runner pull requests. Principal
+authority comes from the verified transport/authentication context, never from
+request-body identity. Engine echoes accepted authority fields unchanged.
 
 The authoritative frozen documents are:
 
@@ -52,12 +62,25 @@ must additionally provide these atomic invariants:
    evidence and never advance workflow state.
 6. Reconcile derives state from durable records and cannot let an expired attempt
    update a replacement claim. `reconcile_required` is Engine-derived.
+7. Claim activation validates authentication, workflow/step readiness and kind,
+   the frozen operation/check digest, conflicts and budgets in the transaction
+   that creates the attempt, claim and lease. Failure changes no counter and
+   creates no lease.
+8. An exact idempotent activation retry atomically rotates the lease token for
+   the same attempt. The previous token becomes invalid in that transaction,
+   the attempt counter does not increase, and only token digests are persisted.
+   A changed step, provider instance, workspace or constraints binding conflicts.
 
 ## Stable errors
 
 The contract freezes these codes:
 
 - `WORKFLOW_BUDGET_EXHAUSTED`
+- `ACTIVATION_AUTH_REQUIRED`
+- `ACTIVATION_AUTH_FORBIDDEN`
+- `ACTIVATION_BINDING_CONFLICT`
+- `STEP_NOT_READY`
+- `STEP_KIND_MISMATCH`
 - `ARTIFACT_REFERENCE_UNAUTHORIZED`
 - `ARTIFACT_EDGE_UNPLANNED`
 - `ARTIFACT_RECORD_CONFLICT`
@@ -79,7 +102,7 @@ Budget exhaustion uses the existing `failed` machine state with
 
 ## Authoritative wire surface
 
-The frozen contract assigns PDX-owned wire IDs for workflow create request/response,
+The historical freeze assigns PDX-owned wire IDs for workflow create request/response,
 provider claim request/claim/update, check claim request/claim/update, typed
 event/outcome records, provider/check lease renewal, cancel, reconcile,
 state/receipt/error documents and route mapping. Check events/outcomes use a
@@ -87,6 +110,12 @@ dedicated record so their agreed payloads map without synthetic fields. The
 mapping freezes 202/200 success, 409 CAS/idempotency conflicts, 410 inactive or
 post-terminal claims, and 413 size rejection. These schemas map the agreed
 consumer envelopes without republishing or modifying them.
+
+This erratum preserves the v1 request schemas as historical evidence and routes
+new activation calls to `pdx_internal_runtime_provider_claim_request_v2` and
+`pdx_internal_runtime_check_claim_request_v2`. The provider request binds step,
+invocation, provider/instance, constraints, idempotency and workspace. The check
+request binds the same non-provider authorities and rejects provider fields.
 
 ## Semantic validation
 
@@ -121,5 +150,5 @@ node .\docs\runtime-provider-workflow\verify-consumer-mappings.mjs
 node .\docs\runtime-provider-workflow\verify-canonical-parity.mjs
 ```
 
-Expected output is `AJV_STRICT_PASS 21`, `CONSUMER_MAPPING_PASS 2` and
+Expected output is `AJV_STRICT_PASS 23`, `CONSUMER_MAPPING_PASS 2` and
 `CANONICAL_PARITY_PASS 3+2`.

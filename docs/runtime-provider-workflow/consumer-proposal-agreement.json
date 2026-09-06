@@ -1,6 +1,6 @@
 {
   "schema_version": "pdx_runtime_provider_workflow_consumer_proposal_agreement_v1",
-  "status": "bilateral_contract_frozen",
+  "status": "historical_freeze_superseded_for_implementation_by_claim_source_erratum_candidate",
   "recorded_on": "2026-09-03",
   "scope": "Digest record only. These six consumer-owned envelopes are unchanged and are not republished as PDX contracts.",
   "consumer_proposals": {
