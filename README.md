@@ -16,6 +16,10 @@ recorded in
 [`compatibility/pdx_artifact_engine_release_a5.json`](compatibility/pdx_artifact_engine_release_a5.json);
 it does not rewrite the frozen coordinated release records.
 
+The current working tree is the unpublished **`0.3.0a6` additive candidate**.
+It adds an authenticated, read-only per-step recovery projection without
+modifying the a5 workflow contracts or durable authority model.
+
 The prior coordinated security cut and its accepted OS boundary remain recorded
 in [the rc4/a4 publication record](docs/RELEASE_RC4_A4.md). Engine a5 adds the
 runtime-provider workflow without changing those frozen historical records.
@@ -37,6 +41,7 @@ python -m pip install "pdx-artifact-engine==0.3.0a5"
 | External-operation pending/unknown/reconcile lifecycle | **Available (core)** |
 | Execution context, cooperative cancellation, receipts, ordered events | **Available (core)** |
 | Durable runtime-provider workflow v1 (23 packaged schemas, SQLite CAS, authenticated activation, HMAC leases, receipts) | **Available (`0.3.0a5`)** |
+| Read-only workflow step recovery projection | **Implemented in the unpublished `0.3.0a6` candidate** |
 | Validate `plan.json` against v0 schema | Available |
 | Load skill registry + dispatch skills | Available (v0 kinds) |
 | Deterministic fixture staging | Available |

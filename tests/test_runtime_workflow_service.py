@@ -414,3 +414,246 @@ def test_private_http_requires_registered_control_plane_for_activation(
         server.shutdown()
         server.server_close()
         thread.join(timeout=2)
+
+
+def test_step_projection_tracks_attempt_terminal_identity_and_reconcile(
+    tmp_path: Path,
+) -> None:
+    service = _service(tmp_path)
+    _create(service)
+    pristine = service.get_step_projection(
+        "workflow_job_001", authenticated_instance_id="hub_control_001"
+    )
+    validate("pdx_runtime_provider_step_projection_v1.schema.json", pristine)
+    assert [step["workflow_step_id"] for step in pristine["steps"]] == [
+        "step_builder", "step_check", "step_reviewer", "step_repair_1"
+    ]
+    assert pristine["steps"][0] == {
+        "workflow_step_id": "step_builder",
+        "step_kind": "builder",
+        "state": "pending",
+        "latest_attempt_number": None,
+        "active_claim": False,
+        "terminal_record_identity": None,
+    }
+
+    claim = service.activate_provider(
+        "workflow_job_001",
+        _provider_activation(),
+        authenticated_instance_id="hub_control_001",
+    )
+    active = service.get_step_projection(
+        "workflow_job_001", authenticated_instance_id="hub_control_001"
+    )["steps"][0]
+    assert active["latest_attempt_number"] == 1
+    assert active["active_claim"] is True
+    assert "lease_token" not in json.dumps(active)
+    assert "lease_token_digest" not in json.dumps(active)
+
+    service.update(
+        "workflow_job_001", _provider_update(claim, 0, "outcome"), "provider"
+    )
+    completed = service.get_step_projection(
+        "workflow_job_001", authenticated_instance_id="hub_control_001"
+    )["steps"][0]
+    assert completed["state"] == "succeeded"
+    assert completed["active_claim"] is False
+    assert completed["terminal_record_identity"] == {
+        "record_id": "provider_record_000",
+        "record_schema_id": "pdx_runtime_provider_record_v1",
+        "payload_digest": _provider_update(claim, 0, "outcome")["record"][
+            "payload_digest"
+        ],
+    }
+
+    check = service.activate_check(
+        "workflow_job_001",
+        deepcopy(_load("check-activation.valid.json")["request"]),
+        authenticated_instance_id="hub_control_001",
+    )
+    with service.store.transaction() as connection:
+        connection.execute(
+            "UPDATE runtime_workflow_claims SET lease_expires_unix = 1 WHERE claim_id = ?",
+            (check["claim_id"],),
+        )
+    reconcile = {
+        "schema_version": "pdx_internal_runtime_workflow_reconcile_v1",
+        "request_id": "request_reconcile_001",
+        "correlation_id": "correlation_001",
+        "workflow_job_id": "workflow_job_001",
+    }
+    service.reconcile("workflow_job_001", reconcile, now=2)
+    recovered = service.get_step_projection(
+        "workflow_job_001", authenticated_instance_id="hub_control_001"
+    )["steps"][1]
+    assert recovered["state"] == "pending"
+    assert recovered["latest_attempt_number"] == 1
+    assert recovered["active_claim"] is False
+    assert recovered["terminal_record_identity"] is None
+
+    cancel = {
+        "schema_version": "pdx_internal_runtime_workflow_cancel_v1",
+        "request_id": "request_cancel_001",
+        "correlation_id": "correlation_001",
+        "workflow_job_id": "workflow_job_001",
+        "reason": "projection terminal-read test",
+    }
+    service.cancel("workflow_job_001", cancel)
+    terminal = service.get_step_projection(
+        "workflow_job_001", authenticated_instance_id="hub_control_001"
+    )
+    assert terminal["workflow_state"] == "cancelled"
+    assert terminal["steps"][0]["terminal_record_identity"] is not None
+
+
+def test_step_projection_requires_registered_control_plane_and_known_workflow(
+    tmp_path: Path,
+) -> None:
+    service = _service(tmp_path)
+    _create(service)
+    with pytest.raises(RuntimeWorkflowError) as forbidden:
+        service.get_step_projection(
+            "workflow_job_001", authenticated_instance_id=""
+        )
+    assert (forbidden.value.status, forbidden.value.code) == (
+        403,
+        "ACTIVATION_AUTH_FORBIDDEN",
+    )
+    with pytest.raises(RuntimeWorkflowError) as missing:
+        service.get_step_projection(
+            "workflow_job_missing", authenticated_instance_id="hub_control_001"
+        )
+    assert missing.value.status == 404
+
+
+def test_step_projection_http_route_is_control_plane_only(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    token = "control-plane-test-token"
+    monkeypatch.setenv("PDX_ENGINE_AUTH_PROFILE", "self_hosted")
+    monkeypatch.setenv("PDX_ENGINE_BEARER_TOKENS", token)
+    monkeypatch.setenv(
+        "PDX_ENGINE_CONTROL_PLANE_BINDINGS",
+        json.dumps({"hub_control_001": token}),
+    )
+    monkeypatch.setenv("PDX_ENGINE_WORKFLOW_HMAC_SECRET", "h" * 32)
+    server = make_server(
+        host="127.0.0.1",
+        port=0,
+        db_path=tmp_path / "http-projection.sqlite3",
+        staging_root=tmp_path / "staging",
+    )
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{server.server_address[1]}"
+
+    def request(method: str, path: str, body: dict | None = None) -> tuple[int, dict]:
+        headers = {"Authorization": f"Bearer {token}"}
+        data = None
+        if body is not None:
+            data = json.dumps(body).encode()
+            headers["Content-Type"] = "application/json"
+        value = urllib.request.Request(
+            base + path, data=data, method=method, headers=headers
+        )
+        try:
+            with urllib.request.urlopen(value) as response:
+                return response.status, json.loads(response.read())
+        except urllib.error.HTTPError as error:
+            return error.code, json.loads(error.read())
+
+    try:
+        plan = _load("workflow-plan.valid.json")
+        create = {
+            "schema_version": "pdx_internal_runtime_provider_workflow_create_request_v1",
+            "request_id": "request_create_001",
+            "correlation_id": "correlation_001",
+            "idempotency_key": "workflow-create-0001",
+            "operation_digest": "a" * 64,
+            "plan": plan,
+        }
+        assert request("POST", "/internal/v1/runtime-provider-workflows", create)[0] == 202
+        status, projection = request(
+            "GET", "/internal/v1/runtime-provider-workflows/workflow_job_001/steps"
+        )
+        assert status == 200
+        validate("pdx_runtime_provider_step_projection_v1.schema.json", projection)
+
+        monkeypatch.setenv("PDX_ENGINE_CONTROL_PLANE_BINDINGS", "{}")
+        status, error = request(
+            "GET", "/internal/v1/runtime-provider-workflows/workflow_job_001/steps"
+        )
+        assert (status, error["code"]) == (403, "ACTIVATION_AUTH_FORBIDDEN")
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
+
+
+def test_additive_projection_schema_is_packaged_byte_identical() -> None:
+    packaged = (
+        ROOT
+        / "runtime"
+        / "pdx_artifact_engine"
+        / "contracts"
+        / "runtime_provider_workflow"
+        / "pdx_runtime_provider_step_projection_v1.schema.json"
+    )
+    documented = (
+        CONTRACT
+        / "additive"
+        / "pdx_runtime_provider_step_projection_v1.schema.json"
+    )
+    assert packaged.read_bytes() == documented.read_bytes()
+    manifest = json.loads(
+        (CONTRACT / "additive" / "step-projection-manifest.v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert manifest["schema"]["sha256"] == hashlib.sha256(
+        packaged.read_bytes()
+    ).hexdigest()
+    assert manifest["base_release"]["frozen_schemas_modified"] is False
+
+
+def test_step_projection_schema_rejects_authority_leaks_and_invalid_binding(
+    tmp_path: Path,
+) -> None:
+    service = _service(tmp_path)
+    _create(service)
+    projection = service.get_step_projection(
+        "workflow_job_001", authenticated_instance_id="hub_control_001"
+    )
+    leaked = deepcopy(projection)
+    leaked["steps"][0]["lease_token"] = "secret"
+    with pytest.raises(ValueError):
+        validate("pdx_runtime_provider_step_projection_v1.schema.json", leaked)
+    impossible = deepcopy(projection)
+    impossible["steps"][0]["active_claim"] = True
+    with pytest.raises(ValueError):
+        validate("pdx_runtime_provider_step_projection_v1.schema.json", impossible)
+
+
+def test_step_projection_read_does_not_mutate_durable_workflow(tmp_path: Path) -> None:
+    service = _service(tmp_path)
+    _create(service)
+    with service.store.read_transaction() as connection:
+        before = tuple(
+            connection.execute(
+                """SELECT state, counters_json, updated_at, receipt_json
+                   FROM runtime_workflows WHERE workflow_job_id = ?""",
+                ("workflow_job_001",),
+            ).fetchone()
+        )
+    service.get_step_projection(
+        "workflow_job_001", authenticated_instance_id="hub_control_001"
+    )
+    with service.store.read_transaction() as connection:
+        after = tuple(
+            connection.execute(
+                """SELECT state, counters_json, updated_at, receipt_json
+                   FROM runtime_workflows WHERE workflow_job_id = ?""",
+                ("workflow_job_001",),
+            ).fetchone()
+        )
+    assert after == before

@@ -144,6 +144,19 @@ class RuntimeWorkflowStore:
             else:
                 self._conn.commit()
 
+    @contextmanager
+    def read_transaction(self) -> Iterator[sqlite3.Connection]:
+        """Provide one consistent read snapshot without taking a write reservation."""
+        with self._lock:
+            self._conn.execute("BEGIN")
+            try:
+                yield self._conn
+            except BaseException:
+                self._conn.rollback()
+                raise
+            else:
+                self._conn.commit()
+
     def close(self) -> None:
         with self._lock:
             self._conn.close()

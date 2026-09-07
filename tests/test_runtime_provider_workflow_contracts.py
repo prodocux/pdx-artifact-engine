@@ -160,12 +160,17 @@ def test_frozen_schemas_are_packaged_without_modifying_published_contracts() -> 
     runtime_contracts = ROOT / "runtime" / "pdx_artifact_engine" / "contracts"
     packaged = runtime_contracts / "runtime_provider_workflow"
     assert packaged.is_dir()
-    assert {
+    frozen = {
         path.name: hashlib.sha256(path.read_bytes()).hexdigest()
         for path in SCHEMAS.glob("*.json")
-    } == {
+    }
+    packaged_hashes = {
         path.name: hashlib.sha256(path.read_bytes()).hexdigest()
         for path in packaged.glob("*.json")
+    }
+    assert {name: packaged_hashes[name] for name in frozen} == frozen
+    assert set(packaged_hashes) - set(frozen) == {
+        "pdx_runtime_provider_step_projection_v1.schema.json"
     }
     text = (CONTRACT / "README.md").read_text(encoding="utf-8")
     assert "Production implementation was separately authorized" in text

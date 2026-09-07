@@ -1,7 +1,8 @@
-# Runtime provider workflow implementation candidate
+# Runtime provider workflow implementation
 
-Status: implemented locally after bilateral erratum freeze; not released or
-published. Contract authority remains the 23-schema manifest frozen through PDX
+Status: the bilateral workflow implementation was published as Engine
+`0.3.0a5`. The current `0.3.0a6` candidate adds only the read-only step
+projection described in `STEP_PROJECTION.md`. Contract authority remains the 23-schema manifest frozen through PDX
 `f5f05ce39246712c8e9c4e3121bafaa9a4df6b54` and Farpals
 `891f837013251e70755c4eb0eac14df3be9bb87b`.
 
@@ -19,6 +20,8 @@ published. Contract authority remains the 23-schema manifest frozen through PDX
 - Per-attempt sequence CAS, payload digest verification, lease expiry/staleness
   fencing, check-report identity registration and terminal claim invalidation.
 - Packaged copies of all 23 authoritative schemas with byte-parity tests.
+- Additive control-plane-only step projection for restart recovery; it exposes
+  no lease token, token digest, credential, provider payload or new authority.
 
 ## HMAC configuration and rotation
 
@@ -37,4 +40,4 @@ JSON object mapping control-plane instance IDs to bearer credentials.
 
 Engine never executes providers, stores `credential_ref`, interprets agent text
 as authority, or enforces host network/process policy. No existing E-05 job table,
-published a4 contract or Kernel interface was changed.
+published a4/a5 contract or Kernel interface was changed.

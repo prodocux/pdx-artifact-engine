@@ -198,6 +198,96 @@ class RuntimeWorkflowService:
         with self.store.transaction() as connection:
             return json.loads(self._workflow(connection, workflow_job_id)["plan_json"])
 
+    def get_step_projection(
+        self, workflow_job_id: str, *, authenticated_instance_id: str
+    ) -> dict[str, Any]:
+        """Return a bounded, non-authorizing projection for safe host recovery."""
+        if not authenticated_instance_id:
+            raise RuntimeWorkflowError(
+                "ACTIVATION_AUTH_FORBIDDEN",
+                "registered control-plane identity required",
+                403,
+            )
+        with self.store.read_transaction() as connection:
+            workflow = self._workflow(connection, workflow_job_id)
+            plan = json.loads(workflow["plan_json"])
+            rows = connection.execute(
+                """SELECT * FROM runtime_workflow_claims
+                   WHERE workflow_job_id = ?
+                   ORDER BY workflow_step_id, attempt_number""",
+                (workflow_job_id,),
+            ).fetchall()
+            latest_claims = {row["workflow_step_id"]: row for row in rows}
+            step_rows = {
+                row["workflow_step_id"]: row
+                for row in connection.execute(
+                    """SELECT * FROM runtime_workflow_steps
+                       WHERE workflow_job_id = ?""",
+                    (workflow_job_id,),
+                ).fetchall()
+            }
+            steps: list[dict[str, Any]] = []
+            for planned_step in plan["steps"]:
+                step_id = planned_step["workflow_step_id"]
+                step_row = step_rows.get(step_id)
+                if step_row is None:
+                    raise RuntimeWorkflowError(
+                        "PAYLOAD_DIGEST_INVALID",
+                        "durable workflow step is missing",
+                        500,
+                    )
+                claim = latest_claims.get(step_id)
+                item: dict[str, Any] = {
+                    "workflow_step_id": step_id,
+                    "step_kind": step_row["step_kind"],
+                    "state": step_row["state"],
+                    "latest_attempt_number": (
+                        claim["attempt_number"] if claim is not None else None
+                    ),
+                    "active_claim": bool(
+                        claim is not None and claim["status"] == "active"
+                    ),
+                    "terminal_record_identity": None,
+                }
+                if claim is not None and claim["terminal_record_json"] is not None:
+                    terminal = connection.execute(
+                        """SELECT record_id, payload_digest, record_json
+                           FROM runtime_workflow_records
+                           WHERE claim_id = ? ORDER BY sequence DESC LIMIT 1""",
+                        (claim["claim_id"],),
+                    ).fetchone()
+                    if terminal is None:
+                        raise RuntimeWorkflowError(
+                            "PAYLOAD_DIGEST_INVALID",
+                            "terminal record identity is unavailable",
+                            500,
+                        )
+                    record = json.loads(terminal["record_json"])
+                    if record.get("record_kind") != "outcome":
+                        raise RuntimeWorkflowError(
+                            "PAYLOAD_DIGEST_INVALID",
+                            "terminal record is not an outcome",
+                            500,
+                        )
+                    item["terminal_record_identity"] = {
+                        "record_id": terminal["record_id"],
+                        "record_schema_id": record["schema_version"],
+                        "payload_digest": terminal["payload_digest"],
+                    }
+                steps.append(item)
+            result = {
+                "schema_version": "pdx_runtime_provider_step_projection_v1",
+                "workflow_job_id": workflow_job_id,
+                "plan_digest": workflow["plan_digest"],
+                "workflow_state": workflow["state"],
+                "recorded_at": _now_iso(),
+                "steps": steps,
+            }
+            self._validate(
+                "pdx_runtime_provider_step_projection_v1.schema.json", result
+            )
+            return result
+
     def _token(self, claim_id: str, attempt: int, binding: dict[str, Any], key_id: str) -> str:
         message = _dump({"claim_id": claim_id, "attempt_number": attempt, "binding": binding}).encode()
         return hmac.new(self.hmac_keys[key_id], message, hashlib.sha256).hexdigest()

@@ -1,0 +1,28 @@
+{
+  "schema_version": "pdx_runtime_provider_step_projection_manifest_v1",
+  "status": "unpublished_candidate",
+  "base_release": {
+    "version": "0.3.0a5",
+    "release_commit": "49c53ac674dbcfda7735f022ff3f38a07b8090f2",
+    "frozen_schema_count": 23,
+    "frozen_schemas_modified": false
+  },
+  "candidate_version": "0.3.0a6",
+  "route": {
+    "operation": "get_step_projection",
+    "method": "GET",
+    "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/steps",
+    "authentication": "registered_control_plane_bearer",
+    "side_effects": "none"
+  },
+  "schema": {
+    "name": "pdx_runtime_provider_step_projection_v1.schema.json",
+    "sha256": "cadc8cd37efda06d9e0a2c8dec4a511533681cbd63ffef3a65823b29abed384f"
+  },
+  "evidence": {
+    "ajv_strict_verifier": "verify-step-projection-ajv-strict.mjs",
+    "ajv_strict_verifier_sha256": "743cc424c8a9dea63f5e68898de822ed90f0bd938c15e181cda737386e6f99bf",
+    "python_jsonschema": "covered by Engine tests",
+    "ajv_2020_12_strict": "PASS 1 additive schema"
+  }
+}

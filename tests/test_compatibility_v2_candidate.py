@@ -69,7 +69,7 @@ def test_compatibility_v2_release_candidate_remains_unpublished() -> None:
     assert "No public pin exists" in manifest["integration"]["publication_gate"]
 
 
-def test_engine_a5_candidate_preserves_bundled_core_a4_version() -> None:
+def test_engine_a6_candidate_preserves_bundled_core_a4_version() -> None:
     engine_metadata = tomllib.loads(
         (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     )
@@ -82,7 +82,7 @@ def test_engine_a5_candidate_preserves_bundled_core_a4_version() -> None:
     assert frozen_surface_version == "0.3.0a1"
     assert {
         engine_metadata["project"]["version"], pdx_artifact_engine.__version__
-    } == {"0.3.0a5"}
+    } == {"0.3.0a6"}
     assert {
         core_metadata["project"]["version"], pdx_artifact_core.__version__
     } == {"0.3.0a4"}

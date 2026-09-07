@@ -190,6 +190,22 @@ class InternalJobHandler(BaseHTTPRequestHandler):
                 return
             self._send(200, doc)
             return
+        workflow_steps = re.fullmatch(
+            r"/internal/v1/runtime-provider-workflows/([^/]+)/steps", path
+        )
+        if workflow_steps:
+            try:
+                doc = self._workflow().get_step_projection(
+                    workflow_steps.group(1),
+                    authenticated_instance_id=(
+                        authenticated_control_plane_instance(self.headers) or ""
+                    ),
+                )
+            except RuntimeWorkflowError as exc:
+                self._send_workflow_error(exc)
+                return
+            self._send(200, doc)
+            return
         workflow_receipt = re.fullmatch(r"/internal/v1/runtime-provider-workflows/([^/]+)/receipt", path)
         if workflow_receipt:
             try:
