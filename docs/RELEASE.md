@@ -157,6 +157,16 @@ unchanged Engine files through the protected `pypi` environment. The Media job
 was skipped. Exact hashes and the Farpals qualification boundary are recorded
 in [`pdx_artifact_engine_release_a5.json`](../compatibility/pdx_artifact_engine_release_a5.json).
 
+## Published Engine a6
+
+Engine `0.3.0a6` was published from tag `v0.3.0a6` at release commit
+`1f29a792b9b86cef1c54706ab154ad4c50cbfc6a`. GitHub Actions run
+`34088944449` promoted the verified Engine-only assets through the protected
+`pypi` environment; Media was skipped. This additive release adds the read-only
+step recovery projection while preserving all 23 a5 frozen schema bytes. Exact
+hashes and qualification pins are recorded in
+[`pdx_artifact_engine_release_a6.json`](../compatibility/pdx_artifact_engine_release_a6.json).
+
 ## Published a3 overlay
 
 `0.3.0a3` is published from tag `v0.3.0a3` at release commit

@@ -1,6 +1,6 @@
 """PDX Artifact Engine runtime package.
 
-Unpublished candidate ``0.3.0a6`` adds the read-only workflow step projection
+Release ``0.3.0a6`` adds the read-only workflow step projection
 while preserving the Core contract façade. Dispatcher normalizes
 ``pdx_plan_v0`` → ``pdx_execution_plan_v1`` (tool / approval / transform /
 verify). Legacy ``expert`` has no Core equivalent (D3): blocked unless

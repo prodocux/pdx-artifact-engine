@@ -1,0 +1,35 @@
+{
+  "schema_version": "pdx_artifact_engine_release_record_v1",
+  "status": "published",
+  "published_on": "2026-09-07",
+  "distribution": "pdx-artifact-engine",
+  "version": "0.3.0a6",
+  "tag": "v0.3.0a6",
+  "release_commit": "1f29a792b9b86cef1c54706ab154ad4c50cbfc6a",
+  "github_release": "https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a6",
+  "pypi_release": "https://pypi.org/project/pdx-artifact-engine/0.3.0a6/",
+  "workflow_run": "https://github.com/prodocux/pdx-artifact-engine/actions/runs/34088944449",
+  "files": {
+    "pdx_artifact_engine-0.3.0a6-py3-none-any.whl": "6956d16c15126835528094a944c03f283cb2182c2cec2c8d0a1ba7dc8a9f13fa",
+    "pdx_artifact_engine-0.3.0a6.tar.gz": "68afb9d5d698aa40f0a8ca2f6d2d5532e83373d1e8c04175272a9998a096e59c"
+  },
+  "additive_contract": {
+    "schema": "pdx_runtime_provider_step_projection_v1.schema.json",
+    "schema_sha256": "cadc8cd37efda06d9e0a2c8dec4a511533681cbd63ffef3a65823b29abed384f",
+    "packaged_workflow_schema_count": 24,
+    "a5_frozen_schema_count": 23,
+    "a5_frozen_schemas_modified": false
+  },
+  "qualification": {
+    "farpals_evidence_commit": "78d2b9db2340a7fe09f42447f7711477f2613d15",
+    "scope": "restart, reconcile, step projection and concurrent activation CAS Docker E2E passed before publication",
+    "formal_pin_promotion": "Farpals-owned and separate from Engine publication"
+  },
+  "verification": {
+    "engine_tests": "246 passed with 4 existing deprecation warnings",
+    "github_actions": "verify and publish-engine succeeded; publish-media was skipped",
+    "pypi_file_count": 2,
+    "clean_install": "Installed pdx-artifact-engine==0.3.0a6 from PyPI and loaded all 24 packaged workflow schemas",
+    "media": "pdx-adapter-media remains 0.2.0a2 and was not attached or republished"
+  }
+}

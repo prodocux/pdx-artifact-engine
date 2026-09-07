@@ -1,6 +1,6 @@
-# Runtime workflow step projection — additive a6 candidate
+# Runtime workflow step projection — published additive a6
 
-Status: implemented locally for Farpals Phase B restart recovery. This is an
+Status: published as Engine `0.3.0a6` for Farpals Phase B restart recovery. This is an
 additive Engine-owned read model; it does not modify the 23 schemas frozen and
 published with Engine `0.3.0a5`.
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "pdx_runtime_provider_step_projection_manifest_v1",
-  "status": "unpublished_candidate",
+  "status": "published",
   "base_release": {
     "version": "0.3.0a5",
     "release_commit": "49c53ac674dbcfda7735f022ff3f38a07b8090f2",
@@ -8,6 +8,7 @@
     "frozen_schemas_modified": false
   },
   "candidate_version": "0.3.0a6",
+  "release_commit": "1f29a792b9b86cef1c54706ab154ad4c50cbfc6a",
   "route": {
     "operation": "get_step_projection",
     "method": "GET",
