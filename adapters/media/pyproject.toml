@@ -16,6 +16,10 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
 ]
 requires-python = ">=3.11"
+dependencies = [
+  "jsonschema>=4.22.0",
+  "referencing>=0.35.1",
+]
 
 [project.urls]
 Homepage = "https://github.com/prodocux/pdx-artifact-engine"

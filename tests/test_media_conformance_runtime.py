@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import tomllib
 from pathlib import Path
 
 from pdx_adapter_media import (
@@ -9,6 +10,16 @@ from pdx_adapter_media import (
     evaluate_media_conformance,
     not_evaluated_result,
 )
+
+
+def test_media_distribution_declares_conformance_runtime_dependencies() -> None:
+    root = Path(__file__).resolve().parents[1]
+    metadata = tomllib.loads(
+        (root / "adapters" / "media" / "pyproject.toml").read_text(encoding="utf-8")
+    )
+    dependencies = metadata["project"]["dependencies"]
+    assert any(item.startswith("jsonschema>=") for item in dependencies)
+    assert any(item.startswith("referencing>=") for item in dependencies)
 
 
 class CompleteProbe:
