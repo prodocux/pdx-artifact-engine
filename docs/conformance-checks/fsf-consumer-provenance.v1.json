@@ -1,16 +1,21 @@
 {
   "schema_version": "pdx_fsf_consumer_provenance_v1",
-  "status": "fsf_handoff_received_pending_verification",
+  "status": "ready_for_contract_seal",
   "received_at": "2026-09-11",
   "implementation_authorized": false,
   "implementation_release_pin": null,
+  "publication": {
+    "github_org": "deferred",
+    "push_required_for_seal": false
+  },
   "fsf": {
     "home": "D:\\FreeStudioFlow\\free-studio-flow",
     "branch": "main",
     "not_broll": true,
+    "seal_tag": "pdx-contract-seal-v1",
+    "seal_commit": "cf21332fb0764e1b5b19efb1d68b0e1771b5c8d9",
     "provenance_commit": "b2ea7fd2fcfd816d07f71bdfc77f5192ffec9ffb",
-    "handoff_commit": "f8b5eb2606e82a547b802175544485cf4fc490ae",
-    "handoff": "docs/PDX_HANDOFF.md",
-    "record": "compatibility/pdx_conformance_freeze_v1.json"
+    "seal_input": "compatibility/pdx_contract_seal_input_v1.json",
+    "seal_doc": "docs/PDX_CONTRACT_SEAL.md"
   }
 }

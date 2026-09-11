@@ -3,9 +3,10 @@
 Status: bilaterally frozen with FSF. This is not a runtime implementation or
 an implementation release.
 
-FSF consumer provenance (pending PDX verification, not a pin):
+FSF consumer provenance (ready for PDX contract seal, not a pin, GitHub not required):
 `docs/conformance-checks/fsf-consumer-provenance.v1.json`.
-Home is `D:\FreeStudioFlow\free-studio-flow`, not B-roll.
+Home is `D:\FreeStudioFlow\free-studio-flow` tag `pdx-contract-seal-v1`
+(`cf21332fb0764e1b5b19efb1d68b0e1771b5c8d9`), not B-roll.
 
 Kernel owns template-conformance schemas. The media adapter package owns media
 technical/conformance schemas. Engine does not copy either schema family. It
