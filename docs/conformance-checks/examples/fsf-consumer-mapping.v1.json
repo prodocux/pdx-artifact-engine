@@ -1,0 +1,10 @@
+{
+  "schema_version": "pdx_fsf_conformance_consumer_mapping_v1",
+  "cases": [
+    {"evaluation_status": "not_evaluated", "create_binding": false, "check_terminal_outcome": null, "host_action": "continue_without_technical_check"},
+    {"evaluation_status": "evaluation_failed", "create_binding": true, "check_terminal_outcome": "failed", "host_action": "fail_block_or_retry"},
+    {"evaluation_status": "does_not_conform", "create_binding": true, "check_terminal_outcome": "succeeded", "host_action": "block_next_product_step"},
+    {"evaluation_status": "conforms", "create_binding": true, "check_terminal_outcome": "succeeded", "host_action": "permit_next_step"}
+  ],
+  "completed_with_review_allowed": false
+}

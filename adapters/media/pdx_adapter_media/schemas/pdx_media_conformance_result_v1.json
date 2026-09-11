@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/media/conformance-result-v1.json",
+  "title": "PDX media conformance result v1 (proposal)",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "profile_digest", "evaluation_status", "issues", "interpretation"],
+  "properties": {
+    "schema_version": {"const": "pdx_media_conformance_result_v1"},
+    "request_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"},
+    "profile_digest": {"$ref": "#/$defs/digest"}, "expected_digest": {"$ref": "#/$defs/digest"},
+    "evaluation_status": {"enum": ["conforms", "does_not_conform", "evaluation_failed", "not_evaluated"]},
+    "issues": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/$defs/issue"}},
+    "interpretation": {"const": "none"}
+  },
+  "allOf": [
+    {"if": {"properties": {"evaluation_status": {"enum": ["conforms", "does_not_conform", "evaluation_failed"]}}, "required": ["evaluation_status"]}, "then": {"type": "object", "required": ["request_id", "expected_digest"], "properties": {"request_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"}, "expected_digest": {"$ref": "#/$defs/digest"}}}},
+    {"if": {"properties": {"evaluation_status": {"const": "conforms"}}, "required": ["evaluation_status"]}, "then": {"properties": {"issues": {"type": "array", "maxItems": 0}}}},
+    {"if": {"properties": {"evaluation_status": {"enum": ["does_not_conform", "evaluation_failed"]}}, "required": ["evaluation_status"]}, "then": {"properties": {"issues": {"type": "array", "minItems": 1}}}},
+    {"if": {"properties": {"evaluation_status": {"const": "not_evaluated"}}, "required": ["evaluation_status"]}, "then": {"properties": {"issues": {"type": "array", "maxItems": 0}, "request_id": false, "expected_digest": false}}}
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "issue": {"type": "object", "additionalProperties": false, "required": ["code", "location", "message", "retryable"], "properties": {
+      "code": {"enum": ["MEDIA_ANALYZER_UNAVAILABLE", "MEDIA_DECODE_FAILED", "MEDIA_CONTAINER_MISMATCH", "MEDIA_CODEC_MISMATCH", "MEDIA_DIMENSIONS_MISMATCH", "MEDIA_FPS_MISMATCH", "MEDIA_DURATION_MISMATCH", "MEDIA_AUDIO_POLICY_MISMATCH", "MEDIA_BLACK_FRAME_LIMIT_EXCEEDED", "MEDIA_FREEZE_LIMIT_EXCEEDED", "MEDIA_LOUDNESS_MISMATCH", "MEDIA_SILENCE_LIMIT_EXCEEDED", "MEDIA_CLIPPING_LIMIT_EXCEEDED", "MEDIA_IDENTITY_MISMATCH", "MEDIA_CONFORMANCE_FAILED"]},
+      "location": {"type": "string", "maxLength": 1024}, "message": {"type": "string", "maxLength": 1024}, "retryable": {"type": "boolean"}
+    }}
+  }
+}

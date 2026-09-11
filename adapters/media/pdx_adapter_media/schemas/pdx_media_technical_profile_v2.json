@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/media/technical-profile-v2.json",
+  "title": "PDX media technical profile v2 (proposal)",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "identity", "probe_status", "streams", "interpretation"],
+  "properties": {
+    "schema_version": {"const": "pdx_media_technical_profile_v2"},
+    "identity": {"$ref": "#/$defs/identity"},
+    "probe_status": {"enum": ["measured", "analyzer_unavailable", "proxy_required"]},
+    "container": {"type": "string", "maxLength": 128},
+    "duration_seconds": {"type": "number", "minimum": 0},
+    "streams": {"type": "array", "maxItems": 128, "items": {"$ref": "#/$defs/stream"}},
+    "black_frame_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+    "freeze_ranges": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/$defs/range"}},
+    "analysis_error": {"type": "string", "maxLength": 1024},
+    "interpretation": {"const": "none"}
+  },
+  "allOf": [
+    {"if": {"properties": {"probe_status": {"const": "measured"}}, "required": ["probe_status"]}, "then": {"type": "object", "required": ["container", "duration_seconds"], "properties": {"container": {"type": "string", "maxLength": 128}, "duration_seconds": {"type": "number", "minimum": 0}, "analysis_error": false}}},
+    {"if": {"properties": {"probe_status": {"enum": ["analyzer_unavailable", "proxy_required"]}}, "required": ["probe_status"]}, "then": {"type": "object", "required": ["analysis_error"], "properties": {"analysis_error": {"type": "string", "maxLength": 1024}}}}
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "identity": {"type": "object", "additionalProperties": false, "required": ["name", "extension", "size_bytes", "sha256", "media_type"], "properties": {"name": {"type": "string", "minLength": 1, "maxLength": 512}, "extension": {"type": "string", "pattern": "^\\.[a-z0-9]{1,15}$"}, "size_bytes": {"type": "integer", "minimum": 0}, "sha256": {"$ref": "#/$defs/digest"}, "media_type": {"type": "string", "pattern": "^[a-z0-9.+-]+/[a-z0-9.+-]+$"}}},
+    "stream": {"type": "object", "additionalProperties": false, "required": ["index", "kind", "codec"], "properties": {"index": {"type": "integer", "minimum": 0}, "kind": {"enum": ["video", "audio", "subtitle", "data", "attachment", "unknown"]}, "codec": {"type": "string", "maxLength": 128}, "width": {"type": "integer", "minimum": 1}, "height": {"type": "integer", "minimum": 1}, "fps": {"type": "number", "exclusiveMinimum": 0}, "frame_count": {"type": "integer", "minimum": 0}, "sample_rate_hz": {"type": "integer", "minimum": 1}, "channels": {"type": "integer", "minimum": 1}, "loudness_lufs": {"type": "number"}, "silence_ratio": {"type": "number", "minimum": 0, "maximum": 1}, "clipping_ratio": {"type": "number", "minimum": 0, "maximum": 1}}},
+    "range": {"type": "object", "additionalProperties": false, "required": ["start_seconds", "duration_seconds"], "properties": {"start_seconds": {"type": "number", "minimum": 0}, "duration_seconds": {"type": "number", "minimum": 0}}}
+  }
+}

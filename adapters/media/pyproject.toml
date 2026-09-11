@@ -25,3 +25,6 @@ Issues = "https://github.com/prodocux/pdx-artifact-engine/issues"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pdx_adapter_media*"]
+
+[tool.setuptools.package-data]
+pdx_adapter_media = ["schemas/*.json"]

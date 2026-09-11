@@ -1,0 +1,16 @@
+{
+  "source": "b-roll-library-generator output contract and recipe",
+  "expected": {
+    "containers": ["mp4"],
+    "video_codecs": ["h264"],
+    "width": 1024,
+    "height": 576,
+    "fps": 24,
+    "fps_tolerance": 0.01,
+    "duration_seconds": 5,
+    "duration_tolerance_seconds": 0.25,
+    "audio": "forbidden",
+    "max_black_frame_ratio": 0.01,
+    "max_freeze_duration_seconds": 0.5
+  }
+}

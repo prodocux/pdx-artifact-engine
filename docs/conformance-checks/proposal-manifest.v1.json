@@ -1,0 +1,23 @@
+{
+  "schema_version": "pdx_conformance_checks_proposal_manifest_v1",
+  "status": "frozen_bilateral_contract",
+  "base_engine_release": "0.3.0a6",
+  "base_media_release": "0.2.0a2",
+  "implementation_authorized": false,
+  "ownership": {
+    "pdx_media_technical_profile_v2.json": "media_package",
+    "pdx_media_conformance_request_v1.json": "media_package",
+    "pdx_media_conformance_result_v1.json": "media_package",
+    "pdx_conformance_check_binding_v1.schema.json": "engine"
+  },
+  "schemas": {
+    "pdx_media_technical_profile_v2.json": "06b9e0f1c9d5d7e6073aaa6f1e9adf94694fd30458b80c068e62c828fe4123eb",
+    "pdx_media_conformance_request_v1.json": "3d2a3f93dec2946996c31d85889d4fb45e5595409353251979b30d16554f1b6f",
+    "pdx_media_conformance_result_v1.json": "e83131e56838cf35b025a7d2dc1710fe00819b8031ffecf67b804c2a969130be",
+    "pdx_conformance_check_binding_v1.schema.json": "5f5acd6937601553f6a86ce2dd2ad390442f4e026a4ae3ef60e38867816314be"
+  },
+  "evidence": {
+    "fsf_broll_expected.v1.json": "9fb4936a32df26e2ca23f960bff1ad671c682423b56ee0c357292efc50d911ba",
+    "fsf-consumer-mapping.v1.json": "65d3a50052b7a34797c9305d67bfbcccd8ec1f65953b0ab8755496d304419836"
+  }
+}

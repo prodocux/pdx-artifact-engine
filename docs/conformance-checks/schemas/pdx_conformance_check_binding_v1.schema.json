@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/conformance-check-binding-v1.json",
+  "title": "PDX generic conformance check binding v1 (proposal)",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "check_schema_id", "payload_digest", "report_schema_id", "report_digest", "report_artifact", "execution_result"],
+  "properties": {
+    "schema_version": {"const": "pdx_conformance_check_binding_v1"},
+    "check_schema_id": {"type": "string", "format": "uri", "maxLength": 512},
+    "payload_digest": {"$ref": "#/$defs/digest"},
+    "report_schema_id": {"type": "string", "format": "uri", "maxLength": 512},
+    "report_digest": {"$ref": "#/$defs/digest"},
+    "report_artifact": {"$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"},
+    "execution_result": {"enum": ["succeeded", "failed", "cancelled", "timed_out"]},
+    "safe_error": {"$ref": "#/$defs/safeError"}
+  },
+  "allOf": [
+    {"if": {"properties": {"execution_result": {"const": "succeeded"}}, "required": ["execution_result"]}, "then": {"properties": {"safe_error": false}}, "else": {"type": "object", "required": ["safe_error"], "properties": {"safe_error": {"$ref": "#/$defs/safeError"}}}}
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "safeError": {"type": "object", "additionalProperties": false, "required": ["code", "message", "retryable"], "properties": {"code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "message": {"type": "string", "maxLength": 1024}, "retryable": {"type": "boolean"}}}
+  }
+}
