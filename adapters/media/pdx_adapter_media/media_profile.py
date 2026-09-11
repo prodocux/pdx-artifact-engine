@@ -6,8 +6,9 @@ import hashlib
 import json
 import shutil
 import subprocess
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Protocol
+from typing import Any, Protocol
 
 TOOL_ID = "media.technical_profile"
 MEDIA_EXTENSIONS = {".mp4", ".mov", ".mxf", ".r3d"}

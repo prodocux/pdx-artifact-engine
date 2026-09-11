@@ -498,7 +498,10 @@ class RuntimeWorkflowService:
         return claim
 
     def update(self, workflow_job_id: str, body: dict[str, Any], kind: str, *, now: int | None = None) -> dict[str, Any]:
-        schema = "pdx_runtime_check_update_v1.schema.json" if kind == "check" else "pdx_runtime_provider_update_v1.schema.json"
+        if kind == "check" and body.get("schema_version") == "pdx_internal_runtime_check_update_v2":
+            schema = "pdx_runtime_check_update_v2.schema.json"
+        else:
+            schema = "pdx_runtime_check_update_v1.schema.json" if kind == "check" else "pdx_runtime_provider_update_v1.schema.json"
         self._validate(schema, body)
         now_unix = int(time.time() if now is None else now)
         with self.store.transaction() as connection:
@@ -509,6 +512,8 @@ class RuntimeWorkflowService:
             self._meter_runtime(connection, workflow, claim, counters, now_unix)
             if _digest(record["payload"]) != record["payload_digest"]:
                 raise RuntimeWorkflowError("PAYLOAD_DIGEST_INVALID", "payload digest mismatch", 409)
+            if "conformance_binding" in body:
+                self._validate_conformance_binding(claim, body)
             prior = connection.execute(
                 "SELECT * FROM runtime_workflow_records WHERE claim_id = ? AND record_id = ?",
                 (claim["claim_id"], record["record_id"]),
@@ -538,9 +543,9 @@ class RuntimeWorkflowService:
                             "external operation budget exhausted", now_unix,
                         )
                     counters["external_operations"] += 1
-            if (
-                kind == "check" and record["record_kind"] == "outcome"
-                and record["payload"]["terminal_outcome"] == "succeeded"
+            if kind == "check" and record["record_kind"] == "outcome" and (
+                record["payload"]["terminal_outcome"] == "succeeded"
+                or "conformance_binding" in body
             ):
                 self._preflight_check_artifact(
                     connection, workflow, claim, body, counters, now_unix
@@ -559,6 +564,40 @@ class RuntimeWorkflowService:
                                    (_dump(counters), _now_iso(now_unix), workflow_job_id))
             return self._state(self._workflow(connection, workflow_job_id))
 
+    def _validate_conformance_binding(self, claim: Any, body: dict[str, Any]) -> None:
+        record = body["record"]
+        binding = body["conformance_binding"]
+        if record["record_kind"] != "outcome":
+            raise RuntimeWorkflowError(
+                "PAYLOAD_DIGEST_INVALID", "conformance binding requires a terminal outcome", 400
+            )
+        if binding["payload_digest"] != claim["check_definition_digest"]:
+            raise RuntimeWorkflowError(
+                "PAYLOAD_DIGEST_INVALID", "conformance request digest mismatch", 409
+            )
+        if binding["execution_result"] != record["payload"]["terminal_outcome"]:
+            raise RuntimeWorkflowError(
+                "PAYLOAD_DIGEST_INVALID", "conformance execution result mismatch", 409
+            )
+        artifact = body["verified_report_artifact"]
+        if binding["report_artifact"] != artifact or binding["report_digest"] != artifact["sha256"]:
+            raise RuntimeWorkflowError(
+                "CHECK_REPORT_UNVERIFIED", "conformance report identity mismatch", 409
+            )
+        outcome_error = record["payload"].get("safe_error")
+        binding_error = binding.get("safe_error")
+        if outcome_error is None:
+            if binding_error is not None:
+                raise RuntimeWorkflowError(
+                    "PAYLOAD_DIGEST_INVALID", "unexpected conformance safe error", 409
+                )
+        elif binding_error != {
+            key: outcome_error[key] for key in ("code", "message", "retryable")
+        }:
+            raise RuntimeWorkflowError(
+                "PAYLOAD_DIGEST_INVALID", "conformance safe error mismatch", 409
+            )
+
     def _complete_attempt(self, connection: Any, workflow: Any, claim: Any, body: dict[str, Any], counters: dict[str, int], now_unix: int) -> None:
         outcome = body["record"]["payload"]
         status = outcome["terminal_outcome"]
@@ -569,12 +608,21 @@ class RuntimeWorkflowService:
                    "execution_constraints_digest": claim["execution_constraints_digest"]}
         if safe_error:
             receipt["safe_error"] = {**safe_error, "reconcile_required": False}
-        if claim["step_kind"] == "check" and status == "succeeded":
+        if claim["step_kind"] == "check" and (
+            status == "succeeded" or "conformance_binding" in body
+        ):
             artifact = body["verified_report_artifact"]
             receipt["verified_check_report_artifact"] = artifact
             counters["total_artifact_bytes"] += artifact["size_bytes"]
             self._record_check_edge(
                 connection, workflow, claim, artifact, counters
+            )
+        if claim["step_kind"] == "check" and "conformance_binding" in body:
+            connection.execute(
+                "INSERT INTO runtime_conformance_bindings VALUES (?, ?, ?, ?, ?, ?)",
+                (workflow["workflow_job_id"], claim["workflow_step_id"],
+                 claim["attempt_number"], claim["claim_id"],
+                 _dump(body["conformance_binding"]), _now_iso(now_unix)),
             )
         connection.execute("UPDATE runtime_workflow_claims SET status = ?, next_sequence = next_sequence + 1, terminal_record_json = ?, updated_at = ? WHERE claim_id = ?",
                            (status, _dump(receipt), _now_iso(now_unix), claim["claim_id"]))
@@ -708,6 +756,23 @@ class RuntimeWorkflowService:
             if not workflow["receipt_json"]:
                 raise RuntimeWorkflowError("WORKFLOW_NOT_ACTIVE", "receipt is available only after terminal state", 410)
             return json.loads(workflow["receipt_json"])
+
+    def get_conformance_binding(
+        self, workflow_job_id: str, workflow_step_id: str
+    ) -> dict[str, Any]:
+        with self.store.transaction() as connection:
+            self._workflow(connection, workflow_job_id)
+            row = connection.execute(
+                "SELECT binding_json FROM runtime_conformance_bindings "
+                "WHERE workflow_job_id = ? AND workflow_step_id = ? "
+                "ORDER BY attempt_number DESC LIMIT 1",
+                (workflow_job_id, workflow_step_id),
+            ).fetchone()
+            if row is None:
+                raise RuntimeWorkflowError(
+                    "WORKFLOW_NOT_ACTIVE", "conformance binding not found", 404
+                )
+            return json.loads(row["binding_json"])
 
     def _freeze_receipt(self, connection: Any, workflow_job_id: str, now_unix: int) -> None:
         workflow = self._workflow(connection, workflow_job_id)

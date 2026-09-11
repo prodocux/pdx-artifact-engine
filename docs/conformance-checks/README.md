@@ -1,7 +1,8 @@
 # Generic conformance check binding proposal
 
-Status: bilaterally frozen with FSF. This is not a runtime implementation or
-an implementation release.
+Status: bilaterally frozen with FSF. The unpublished Engine ``0.3.0a7``
+candidate implements this binding additively; it is not yet an implementation
+release.
 
 FSF consumer provenance (ready for PDX contract seal, not a pin, GitHub not required):
 `docs/conformance-checks/fsf-consumer-provenance.v1.json`.
@@ -35,3 +36,11 @@ technical conformance was not requested.
 Scope is P0b template conformance, P1 media conformance, and the P2 generic
 binding only. It does not close P0a prompt-sheet intake or FSF-M1 and does not
 authorize removing B-roll's current parser.
+
+Engine accepts the binding through
+``pdx_internal_runtime_check_update_v2`` while retaining the a5/a6 v1 update
+wire. It verifies the frozen check-definition digest, terminal execution
+result, safe error, report digest, and full immutable artifact identity in one
+transaction. The binding is stored separately from the frozen v1 workflow
+receipt and is available read-only at
+``GET /internal/v1/runtime-provider-workflows/{workflow_job_id}/steps/{workflow_step_id}/conformance-binding``.

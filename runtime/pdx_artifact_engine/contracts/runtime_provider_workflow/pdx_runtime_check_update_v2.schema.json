@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-update-v2.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "workflow_job_id", "workflow_step_id", "step_kind", "claim_id", "lease_token", "attempt_number", "check_definition_digest", "execution_constraints_digest", "idempotency_key", "record"],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_runtime_check_update_v2"},
+    "workflow_job_id": {"$ref": "#/$defs/id"}, "workflow_step_id": {"$ref": "#/$defs/id"}, "step_kind": {"const": "check"},
+    "claim_id": {"$ref": "#/$defs/id"}, "lease_token": {"type": "string", "minLength": 32, "maxLength": 256}, "attempt_number": {"type": "integer", "minimum": 1, "maximum": 1000},
+    "check_definition_digest": {"$ref": "#/$defs/digest"}, "execution_constraints_digest": {"$ref": "#/$defs/digest"}, "idempotency_key": {"type": "string", "minLength": 16, "maxLength": 128},
+    "record": {"$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-record-v1.json"},
+    "verified_report_artifact": {"$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"},
+    "conformance_binding": {"$ref": "https://prodocux.dev/schemas/pdx/conformance-check-binding-v1.json"}
+  },
+  "allOf": [{
+    "if": {"properties": {"record": {"type": "object", "properties": {"record_kind": {"const": "outcome"}}, "required": ["record_kind"]}}, "required": ["record"]},
+    "then": {"required": ["verified_report_artifact", "conformance_binding"]},
+    "else": {"properties": {"verified_report_artifact": false, "conformance_binding": false}}
+  }],
+  "$defs": {"id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"}, "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}
+}

@@ -102,6 +102,22 @@ def _check_update(claim: dict, sequence: int, kind: str = "event") -> dict:
     return result
 
 
+def _conformance_check_update(claim: dict, sequence: int = 0) -> dict:
+    result = _check_update(claim, sequence, "outcome")
+    artifact = result["verified_report_artifact"]
+    result["schema_version"] = "pdx_internal_runtime_check_update_v2"
+    result["conformance_binding"] = {
+        "schema_version": "pdx_conformance_check_binding_v1",
+        "check_schema_id": "https://prodocux.dev/schemas/pdx/media/conformance-request-v1.json",
+        "payload_digest": claim["check_definition_digest"],
+        "report_schema_id": "https://prodocux.dev/schemas/pdx/media/conformance-result-v1.json",
+        "report_digest": artifact["sha256"],
+        "report_artifact": artifact,
+        "execution_result": "succeeded",
+    }
+    return result
+
+
 def test_create_activation_retry_is_durable_and_concurrent_safe(tmp_path: Path) -> None:
     service = _service(tmp_path)
     create = _create(service)
@@ -356,6 +372,44 @@ def test_provider_then_verified_check_persists_relationship_receipt(tmp_path: Pa
     assert receipt["artifact_edges"][0]["artifact"]["artifact_id"] == "artifact_check_report_001"
     assert receipt["step_receipts"][1]["verified_check_report_artifact"]["size_bytes"] == 256
     validate("pdx_runtime_provider_workflow_receipt_v1.schema.json", receipt)
+
+
+def test_conformance_check_v2_persists_verified_generic_binding(tmp_path: Path) -> None:
+    service = _service(tmp_path)
+    _create(service)
+    provider = service.activate_provider(
+        "workflow_job_001", _provider_activation(),
+        authenticated_instance_id="hub_control_001",
+    )
+    service.update("workflow_job_001", _provider_update(provider, 0, "outcome"), "provider")
+    check = service.activate_check(
+        "workflow_job_001", deepcopy(_load("check-activation.valid.json"))["request"],
+        authenticated_instance_id="hub_control_001",
+    )
+    update = _conformance_check_update(check)
+    service.update("workflow_job_001", update, "check")
+    assert service.get_conformance_binding(
+        "workflow_job_001", check["workflow_step_id"]
+    ) == update["conformance_binding"]
+
+
+def test_conformance_check_v2_rejects_mismatched_binding(tmp_path: Path) -> None:
+    service = _service(tmp_path)
+    _create(service)
+    provider = service.activate_provider(
+        "workflow_job_001", _provider_activation(),
+        authenticated_instance_id="hub_control_001",
+    )
+    service.update("workflow_job_001", _provider_update(provider, 0, "outcome"), "provider")
+    check = service.activate_check(
+        "workflow_job_001", deepcopy(_load("check-activation.valid.json"))["request"],
+        authenticated_instance_id="hub_control_001",
+    )
+    update = _conformance_check_update(check)
+    update["conformance_binding"]["payload_digest"] = "f" * 64
+    with pytest.raises(RuntimeWorkflowError) as rejected:
+        service.update("workflow_job_001", update, "check")
+    assert rejected.value.code == "PAYLOAD_DIGEST_INVALID"
 
 
 def test_private_http_requires_registered_control_plane_for_activation(

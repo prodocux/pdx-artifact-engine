@@ -215,6 +215,18 @@ class InternalJobHandler(BaseHTTPRequestHandler):
                 return
             self._send(200, doc)
             return
+        workflow_binding = re.fullmatch(
+            r"/internal/v1/runtime-provider-workflows/([^/]+)/steps/([^/]+)/conformance-binding",
+            path,
+        )
+        if workflow_binding:
+            try:
+                doc = self._workflow().get_conformance_binding(*workflow_binding.groups())
+            except RuntimeWorkflowError as exc:
+                self._send_workflow_error(exc)
+                return
+            self._send(200, doc)
+            return
         match = re.fullmatch(r"/internal/v1/jobs/([^/]+)", path)
         if match:
             job_id = match.group(1)

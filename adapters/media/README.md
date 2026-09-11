@@ -14,9 +14,9 @@ The package does not upload, proxy, decode R3D, or claim analysis readiness.
 ## Conformance contract proposal
 
 `pdx_adapter_media/schemas` contains the bilaterally frozen v2
-technical-profile and v1 conformance request/result contracts. The freeze does
-not authorize implementation, and the current executor does not yet claim to
-implement them.
+technical-profile and v1 conformance request/result contracts. The unpublished
+``0.2.0a3`` candidate now implements deterministic profile construction and
+conformance evaluation without changing the frozen schema bytes.
 `not_evaluated` is a report disposition only; it is never an Engine RunState.
 Analyzer or decode failure is `evaluation_failed`, distinct from a measured
 `does_not_conform` result.

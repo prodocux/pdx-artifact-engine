@@ -170,7 +170,9 @@ def test_frozen_schemas_are_packaged_without_modifying_published_contracts() -> 
     }
     assert {name: packaged_hashes[name] for name in frozen} == frozen
     assert set(packaged_hashes) - set(frozen) == {
-        "pdx_runtime_provider_step_projection_v1.schema.json"
+        "pdx_conformance_check_binding_v1.schema.json",
+        "pdx_runtime_check_update_v2.schema.json",
+        "pdx_runtime_provider_step_projection_v1.schema.json",
     }
     text = (CONTRACT / "README.md").read_text(encoding="utf-8")
     assert "Production implementation was separately authorized" in text

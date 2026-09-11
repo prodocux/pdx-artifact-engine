@@ -1,6 +1,6 @@
 """PDX Artifact Engine runtime package.
 
-Release ``0.3.0a6`` adds the read-only workflow step projection
+Candidate ``0.3.0a7`` adds the generic conformance-check binding
 while preserving the Core contract façade. Dispatcher normalizes
 ``pdx_plan_v0`` → ``pdx_execution_plan_v1`` (tool / approval / transform /
 verify). Legacy ``expert`` has no Core equivalent (D3): blocked unless
@@ -26,7 +26,7 @@ from pdx_artifact_core import (
 
 from .runtime import ArtifactRuntime
 
-__version__ = "0.3.0a6"
+__version__ = "0.3.0a7"
 
 __all__ = [
     "ArtifactRuntime",

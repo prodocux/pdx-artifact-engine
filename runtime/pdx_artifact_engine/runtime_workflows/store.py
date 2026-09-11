@@ -95,6 +95,16 @@ class RuntimeWorkflowStore:
                     PRIMARY KEY (claim_id, record_id),
                     UNIQUE (claim_id, sequence)
                 );
+                CREATE TABLE IF NOT EXISTS runtime_conformance_bindings (
+                    workflow_job_id TEXT NOT NULL,
+                    workflow_step_id TEXT NOT NULL,
+                    attempt_number INTEGER NOT NULL,
+                    claim_id TEXT NOT NULL,
+                    binding_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY (workflow_job_id, workflow_step_id, attempt_number),
+                    UNIQUE (claim_id)
+                );
                 CREATE TABLE IF NOT EXISTS runtime_artifact_edges (
                     workflow_job_id TEXT NOT NULL,
                     edge_id TEXT NOT NULL,
