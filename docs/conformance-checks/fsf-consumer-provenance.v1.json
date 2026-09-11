@@ -1,0 +1,16 @@
+{
+  "schema_version": "pdx_fsf_consumer_provenance_v1",
+  "status": "fsf_handoff_received_pending_verification",
+  "received_at": "2026-09-11",
+  "implementation_authorized": false,
+  "implementation_release_pin": null,
+  "fsf": {
+    "home": "D:\\FreeStudioFlow\\free-studio-flow",
+    "branch": "main",
+    "not_broll": true,
+    "provenance_commit": "b2ea7fd2fcfd816d07f71bdfc77f5192ffec9ffb",
+    "handoff_commit": "f8b5eb2606e82a547b802175544485cf4fc490ae",
+    "handoff": "docs/PDX_HANDOFF.md",
+    "record": "compatibility/pdx_conformance_freeze_v1.json"
+  }
+}

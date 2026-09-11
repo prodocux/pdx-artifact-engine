@@ -3,6 +3,10 @@
 Status: bilaterally frozen with FSF. This is not a runtime implementation or
 an implementation release.
 
+FSF consumer provenance (pending PDX verification, not a pin):
+`docs/conformance-checks/fsf-consumer-provenance.v1.json`.
+Home is `D:\FreeStudioFlow\free-studio-flow`, not B-roll.
+
 Kernel owns template-conformance schemas. The media adapter package owns media
 technical/conformance schemas. Engine does not copy either schema family. It
 only binds a schema id, canonical payload/report digests, immutable report
