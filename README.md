@@ -16,6 +16,11 @@ recorded in
 [`compatibility/pdx_artifact_engine_release_a6.json`](compatibility/pdx_artifact_engine_release_a6.json);
 it does not rewrite the frozen coordinated release records.
 
+The next unpublished candidates are Engine **`0.3.0a8`** and Media
+**`0.2.0a3`**. Public tag **`v0.3.0a7`** did not pass the release workflow and
+is retained only as an audit record; it is not a PyPI release or consumer pin.
+See [the a8/a3 release candidate record](docs/RELEASE_A8_MEDIA_A3.md).
+
 Engine a6 adds an authenticated, read-only per-step recovery projection without
 modifying the a5 workflow contracts or durable authority model.
 
@@ -41,6 +46,8 @@ python -m pip install "pdx-artifact-engine==0.3.0a6"
 | Execution context, cooperative cancellation, receipts, ordered events | **Available (core)** |
 | Durable runtime-provider workflow v1 (23 packaged schemas, SQLite CAS, authenticated activation, HMAC leases, receipts) | **Available (`0.3.0a5`)** |
 | Read-only workflow step recovery projection | **Available (`0.3.0a6`)** |
+| Generic conformance-check binding | **Unpublished candidate (`0.3.0a8`)** |
+| Media technical conformance evaluator | **Unpublished standalone candidate (`0.2.0a3`)** |
 | Validate `plan.json` against v0 schema | Available |
 | Load skill registry + dispatch skills | Available (v0 kinds) |
 | Deterministic fixture staging | Available |

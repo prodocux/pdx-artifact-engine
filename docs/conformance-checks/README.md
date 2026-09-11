@@ -1,6 +1,6 @@
 # Generic conformance check binding proposal
 
-Status: bilaterally frozen with FSF. The unpublished Engine ``0.3.0a7``
+Status: bilaterally frozen with FSF. The unpublished Engine ``0.3.0a8``
 candidate implements this binding additively; it is not yet an implementation
 release.
 
