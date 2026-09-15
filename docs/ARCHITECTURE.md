@@ -12,8 +12,8 @@ v0.1.0 is **model-optional**: the framework must run with hand-authored or
 rule-generated plans. Small models are a later acceleration layer, not a
 hard dependency.
 
-This separation keeps the runtime local, low-RAM, auditable, and easier to
-commercialize.
+This separation keeps the runtime local, low-RAM, auditable, and independently
+deployable.
 
 ## Durable control plane (current `0.3.0a5`; introduced in `0.3.0a1`)
 

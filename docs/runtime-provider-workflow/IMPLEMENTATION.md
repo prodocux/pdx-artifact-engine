@@ -2,9 +2,8 @@
 
 Status: the bilateral workflow implementation was published as Engine
 `0.3.0a5`. Release `0.3.0a6` adds only the read-only step
-projection described in `STEP_PROJECTION.md`. Contract authority remains the 23-schema manifest frozen through PDX
-`f5f05ce39246712c8e9c4e3121bafaa9a4df6b54` and Farpals
-`891f837013251e70755c4eb0eac14df3be9bb87b`.
+projection described in `STEP_PROJECTION.md`. Contract authority remains the
+packaged 23-schema manifest and its recorded digests.
 
 ## Implemented Engine ownership
 

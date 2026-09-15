@@ -231,8 +231,9 @@ Apache License 2.0. See [LICENSE](LICENSE).
 
 ## Near-term roadmap
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for the M0-M8 milestone definitions.
-Phase 0 private-job paper freeze: [`docs/PHASE0_DECISIONS.md`](docs/PHASE0_DECISIONS.md).
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the supported runtime
+boundaries and [docs/PUBLIC_DOCUMENTATION_POLICY.md](docs/PUBLIC_DOCUMENTATION_POLICY.md)
+for the public/private documentation boundary.
 
 1. Integrate the available ProDocuX HTTP adapter tools into product-owned skill
    registries and executors (M1).
@@ -240,9 +241,3 @@ Phase 0 private-job paper freeze: [`docs/PHASE0_DECISIONS.md`](docs/PHASE0_DECIS
 3. Train and publish `PDX-Core-1B` out of band; wire `LlamaCppPlanner` in a
    future version.
 4. Low-RAM hot-swap runtime (M7).
-
-## Acknowledgments
-
-Codex and Cursor contributed implementation support, contract hardening, and
-cross-review during the v0.3 prerelease upgrade. Final design and release decisions remain
-with the project maintainers.

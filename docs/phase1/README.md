@@ -29,4 +29,5 @@ Phase 0 schemas (including `pdx_internal_job_status_v1`).
 6. Opaque identity only — verified byte retrieval / Media Library ingestion
    remains **Phase 3** (not claimed ready in Phase 1).
 
-`GET …/result` prefers `materialized_source` when present (Farpals-stable).
+`GET …/result` prefers `materialized_source` when present (stable host-consumer
+behavior).

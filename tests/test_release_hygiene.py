@@ -10,7 +10,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 PUBLIC_FILES = [
     ROOT / "README.md",
-    ROOT / "BACKLOG.md",
     ROOT / "THIRD_PARTY_NOTICES.md",
     ROOT / "pyproject.toml",
 ]
@@ -59,6 +58,47 @@ def test_private_incubator_files_are_absent_from_release_tree() -> None:
         ROOT / "docs" / "DUAL_TRACK_ADDENDUM_A.md",
     ]
     assert [path.as_posix() for path in denied if path.exists()] == []
+
+
+def test_internal_document_classes_are_absent_from_public_tree() -> None:
+    denied_names = {
+        "BACKLOG.md",
+        "COMMERCIALIZATION.md",
+        "FARPALS_REALIGNMENT_BACKLOG.md",
+        "GITHUB_REPO_PLAN.md",
+        "HOST_GATE_BACKLOG.md",
+        "IMPLEMENTATION_PLAN.md",
+        "KAGGLE_PLAN.md",
+        "PHASE0_DECISIONS.md",
+        "PHASE1_FARPALS_DOCK.md",
+        "PHASE1_STATUS.md",
+        "PHASE3_STATUS.md",
+        "RELEASE_A9.md",
+        "ROADSTAR_SCHEDULING_BACKLOG.md",
+        "SECURITY_RUNTIME.md",
+    }
+    found = sorted(
+        path.relative_to(ROOT).as_posix()
+        for path in ROOT.rglob("*.md")
+        if path.name in denied_names
+        and not any(part.startswith(".") for part in path.relative_to(ROOT).parts)
+        and path.relative_to(ROOT).parts[0] not in {"build", "dist"}
+    )
+    assert found == []
+
+
+def test_public_markdown_has_no_windows_checkout_paths() -> None:
+    windows_path = re.compile(r"(?i)\b[A-Z]:\\")
+    found = []
+    for path in ROOT.rglob("*.md"):
+        relative = path.relative_to(ROOT)
+        if any(part.startswith(".") for part in relative.parts):
+            continue
+        if relative.parts[0] in {"build", "dist"}:
+            continue
+        if windows_path.search(path.read_text(encoding="utf-8")):
+            found.append(relative.as_posix())
+    assert found == []
 
 
 def test_main_and_media_packages_are_separate() -> None:

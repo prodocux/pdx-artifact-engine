@@ -5,8 +5,8 @@ Engine→Kernel `artifact://` identity profile. They are **not** a public API,
 **not** listed in frozen compatibility v1/v2/v3, and **not** implemented by
 this directory.
 
-See `docs/adr/ADR-0002-phase0-private-job-staging-profile.md` and
-`docs/PHASE0_DECISIONS.md`.
+See `docs/adr/ADR-0002-phase0-private-job-staging-profile.md` for the durable
+design decision retained in the public repository.
 
 | Path | Authority |
 | --- | --- |

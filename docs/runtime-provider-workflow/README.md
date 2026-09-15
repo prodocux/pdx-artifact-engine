@@ -1,12 +1,10 @@
 # Runtime provider workflow v1 — published claim-source erratum
 
-Status: the `77a6a1b15619ca133c664a938014fdfd3393f29c` bilateral freeze remains
-historical provenance, but its claim-request v1 surface is superseded for
-implementation by this additive frozen v2 erratum. Production implementation
-was accepted by Farpals and frozen as `891f837013251e70755c4eb0eac14df3be9bb87b`.
-Production implementation was separately authorized after that bilateral freeze
-and published as Engine `0.3.0a5` from tag `v0.3.0a5`. Implementation details
-are tracked in `IMPLEMENTATION.md`.
+Status: the claim-request v1 surface is retained as historical provenance and
+superseded for implementation by the additive frozen v2 erratum.
+Production implementation was separately authorized and published as Engine
+`0.3.0a5` from tag `v0.3.0a5`.
+Implementation details are tracked in `IMPLEMENTATION.md`.
 
 This additive contract answers the application-neutral workflow capability request.
 It does not modify the previously published `0.3.0a4` contracts, the frozen compatibility
@@ -22,7 +20,7 @@ layers retain provider selection, workspace policy, approval and process/network
 isolation. Engine never persists a credential reference or plaintext lease token.
 
 Provider/check claim requests are attempt-activation commands issued only by an
-authenticated Farpals host/control-plane principal with
+authenticated host control-plane principal with
 `runtime_workflow:activate`; they are not worker/runner pull requests. Principal
 authority comes from the verified transport/authentication context, never from
 request-body identity. Engine echoes accepted authority fields unchanged.
@@ -133,28 +131,30 @@ code. It rejects duplicate step/edge IDs, missing dependencies, cycles, unknown
 edge endpoints, self-edges, invalid role/producer combinations, aggregate/step
 budget contradictions, invalid repair iteration/parent relationships and an
 invalid plan digest. A concurrency ceiling larger than the step count is valid;
-it is merely unused capacity. Fixed Hub topology remains a Farpals profile.
+it is merely unused capacity. A fixed application topology remains a host
+profile.
 `repair_iterations` is the
 ninth durable counter and is atomically incremented when a repair step is
 created. Runtime implementation must use the agreed RFC 8785 authority.
 
 All schema files must compile under both Python Draft 2020-12 validation and AJV
 2020-12 with `strict: true`. The evidence manifest pins the route mapping,
-semantic validator, AJV verifier, canonical parity verifier, exact Farpals
+semantic validator, AJV verifier, canonical parity verifier, consumer
 positive/negative vectors and lossless check mapping fixtures.
 
 ### Reproduce the JavaScript gates
 
 The recorded run used Node `22.18.0`, AJV `8.20.0` and `ajv-formats` `3.0.1`.
 `PDX_AJV_MODULE_ROOT` must point to an npm project containing those dependencies;
-mapping verification additionally needs `FARPALS_HUB_CONTRACT_ROOT` pointing to
-the Hub contract package whose six proposal digests are recorded in
+Mapping verification retains the historical environment variable
+`FARPALS_HUB_CONTRACT_ROOT`; it points to the consumer contract package whose
+proposal digests are recorded in
 `consumer-proposal-agreement.json`.
 
 ```powershell
-$env:PDX_AJV_MODULE_ROOT = 'D:\path\to\farpals\contracts\farpals-hub'
+$env:PDX_AJV_MODULE_ROOT = '<npm-project-with-ajv>'
 node .\docs\runtime-provider-workflow\verify-ajv-strict.mjs
-$env:FARPALS_HUB_CONTRACT_ROOT = $env:PDX_AJV_MODULE_ROOT
+$env:FARPALS_HUB_CONTRACT_ROOT = '<consumer-contract-root>'
 node .\docs\runtime-provider-workflow\verify-consumer-mappings.mjs
 node .\docs\runtime-provider-workflow\verify-canonical-parity.mjs
 ```

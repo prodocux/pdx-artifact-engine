@@ -1,7 +1,7 @@
 # Coordinated rc4 / a4 published prerelease
 
 Published: 2026-08-30. Status: GitHub and PyPI publication completed.
-Farpals official pin promotion and production approval remain separate gates.
+Consumer pin promotion and production approval remain separate gates.
 
 ## Versions and scope
 
@@ -41,17 +41,14 @@ Later documentation/evidence commits do not replace these source pins.
 
 ## Security and verification
 
-The earlier scoped OS acceptance is in Kernel
-`docs/SECURITY_OS_ACCEPTANCE.md`. Its recorded candidates are historical;
-this versioned cut verified the same base/OS package inventory and runtime
-conditions, preserving applicability of that scoped risk decision. Remaining
-OS advisories are not a clean-OS certification. A changed dependency inventory
-requires a new application scan; changed OS packages require reassessment.
+This versioned cut verified the reviewed base/OS package inventory and runtime
+conditions. Remaining OS advisories are not a clean-OS certification. A changed
+dependency inventory requires a new application scan; changed OS packages
+require reassessment.
 
 The release gates passed: exact-source Kernel tests (231 passed, 10 skipped),
 Engine tests (197 passed), clean wheel installs, package checks, exact-source
-builds, external application inventory/advisory checks, and final Farpals
-candidate integration at `6acf2a6851fb5b815248594dc65ce9eddfb579f8`.
+builds, and external application inventory/advisory checks.
 The ten Kernel skips are optional private/historical fixtures, not new skips.
 Never reinstall pip into the runtime to prepare audit or test tooling.
 
@@ -63,9 +60,8 @@ OS scan: 79 advisory matches / 14 unique HIGH or CRITICAL remain conditionally
 accepted. The recorded HTTP/non-QUIC, no-FTS5, non-root and no-TTY conditions
 still apply.
 
-Farpals must use a separate final-candidate pins file, then verify source
-revisions, upstream suites, scans and PHP/Docker E2E. Its Core, WordPress,
-plugin and operational risk decisions remain Farpals-owned.
+Consumers must use their own reviewed pins and verify source revisions,
+integration suites, scans, deployment behavior, and operational risks.
 
 ## Publication boundary
 
@@ -88,6 +84,5 @@ describe the follow-up tree, not a rebuilt or retagged release artifact.
 
 Do not move release tags, rebuild public assets, or rewrite historical records.
 The new published overlay is byte-identical across both repositories.
-Farpals official pins/compose were not changed by this publication. Its remaining
-WordPress risk, plugin review, alert-delivery and full-storage disaster-recovery
-gates are not waived by upstream publication.
+Consumer pins and deployment configuration are not changed by an upstream
+publication. Downstream security, alerting, and recovery gates are not waived.

@@ -154,7 +154,7 @@ Engine `0.3.0a5` was published from tag `v0.3.0a5` at release commit
 `49c53ac674dbcfda7735f022ff3f38a07b8090f2`. GitHub Actions run
 `34022592639` verified the tagged source and approved assets, then promoted the
 unchanged Engine files through the protected `pypi` environment. The Media job
-was skipped. Exact hashes and the Farpals qualification boundary are recorded
+was skipped. Exact hashes and the consumer qualification boundary are recorded
 in [`pdx_artifact_engine_release_a5.json`](../compatibility/pdx_artifact_engine_release_a5.json).
 
 ## Published Engine a6

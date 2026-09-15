@@ -1,13 +1,8 @@
 # Generic conformance check binding proposal
 
-Status: bilaterally frozen with FSF. The unpublished Engine ``0.3.0a8``
-candidate implements this binding additively; it is not yet an implementation
-release.
-
-FSF consumer provenance (ready for PDX contract seal, not a pin, GitHub not required):
-`docs/conformance-checks/fsf-consumer-provenance.v1.json`.
-Home is `D:\FreeStudioFlow\free-studio-flow` tag `pdx-contract-seal-v1`
-(`cf21332fb0764e1b5b19efb1d68b0e1771b5c8d9`), not B-roll.
+Status: frozen product-neutral binding implemented additively by the current
+Engine line. Consumer provenance is recorded by the accompanying machine-readable
+manifest rather than a local checkout path.
 
 Kernel owns template-conformance schemas. The media adapter package owns media
 technical/conformance schemas. Engine does not copy either schema family. It

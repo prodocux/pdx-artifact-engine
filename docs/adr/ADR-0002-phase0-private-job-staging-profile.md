@@ -48,11 +48,11 @@ before Phase 1 runtime work.
    deterministic tests.
 6. Frozen compatibility manifests v1, v2, and v3 remain byte-identical.
 7. Host consumer drafts are not a second Engine wire format. They must map
-   onto `pdx_internal_job_*` as specified in `docs/PHASE0_DECISIONS.md`.
+   onto the authoritative `pdx_internal_job_*` schemas in `docs/phase0/`.
 
 ## Consequences
 
 - Phase 1 may implement SQLite repositories, worker lifecycle, TTL staging,
   adapter hardening, and the private HTTP façade against these documents.
-- Hosts that speak WordPress keep those bindings on the Farpals side. Engine
-  subjects stay opaque (`binding_id` + `revision`).
+- Hosts keep application-specific bindings outside Engine. Engine subjects
+  stay opaque (`binding_id` + `revision`).

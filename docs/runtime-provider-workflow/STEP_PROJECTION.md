@@ -1,6 +1,6 @@
 # Runtime workflow step projection — published additive a6
 
-Status: published as Engine `0.3.0a6` for Farpals Phase B restart recovery. This is an
+Status: published as Engine `0.3.0a6` for host restart recovery. This is an
 additive Engine-owned read model; it does not modify the 23 schemas frozen and
 published with Engine `0.3.0a5`.
 
@@ -34,7 +34,7 @@ lease-token digests are excluded.
   false.
 - Terminal workflows remain readable. The workflow state/receipt remains the
   authority for terminal handling.
-- The snapshot is informational. Farpals may use it to choose a candidate next
+- The snapshot is informational. A host may use it to choose a candidate next
   step, but activation CAS remains the final readiness authority.
 - `recorded_at` identifies the observation time; it is not a monotonic mutation
   revision and must not be used as a compare-and-swap token.
@@ -48,7 +48,7 @@ The additive manifest pins the schema and its dedicated AJV verifier without
 changing the a5 authoritative manifest. Reproduce the cross-runtime compile with:
 
 ```powershell
-$env:PDX_AJV_MODULE_ROOT = 'D:\path\to\npm-project-with-ajv'
+$env:PDX_AJV_MODULE_ROOT = '<npm-project-with-ajv>'
 node .\docs\runtime-provider-workflow\additive\verify-step-projection-ajv-strict.mjs
 ```
 
