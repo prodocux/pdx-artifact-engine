@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/provenance_bundle.v1.schema.json",
+  "title": "PDX provenance bundle v1",
+  "type": "object",
+  "required": ["schema_version", "bundle_id", "source_run_id", "generated_at", "entities", "activities", "agents", "relations", "bundle_digest"],
+  "properties": {
+    "schema_version": {"const": "pdx_provenance_bundle_v1"},
+    "bundle_id": {"$ref": "#/$defs/id"},
+    "source_run_id": {"$ref": "#/$defs/id"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "entities": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/$defs/node"}},
+    "activities": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/$defs/node"}},
+    "agents": {"type": "array", "maxItems": 1000, "items": {"$ref": "#/$defs/node"}},
+    "relations": {"type": "array", "maxItems": 30000, "items": {"$ref": "#/$defs/relation"}},
+    "bundle_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 256, "pattern": "^[A-Za-z0-9][A-Za-z0-9:._/-]*$"},
+    "scalar": {"oneOf": [{"type": "string", "maxLength": 2048}, {"type": "number"}, {"type": "boolean"}, {"type": "null"}]},
+    "attributes": {"type": "object", "maxProperties": 32, "additionalProperties": {"$ref": "#/$defs/scalar"}},
+    "node": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "type": {"type": "string", "minLength": 1, "maxLength": 128},
+        "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "attributes": {"$ref": "#/$defs/attributes"}
+      },
+      "additionalProperties": false
+    },
+    "relation": {
+      "type": "object",
+      "required": ["type", "subject_id", "object_id"],
+      "properties": {
+        "type": {"enum": ["used", "wasGeneratedBy", "wasAssociatedWith", "wasDerivedFrom", "wasRevisionOf", "wasInformedBy", "wasAttributedTo"]},
+        "subject_id": {"$ref": "#/$defs/id"},
+        "object_id": {"$ref": "#/$defs/id"},
+        "attributes": {"$ref": "#/$defs/attributes"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

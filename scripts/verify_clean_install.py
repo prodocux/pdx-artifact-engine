@@ -20,6 +20,7 @@ PACKAGED_SCHEMAS = (
     "execution_context.v1.schema.json",
     "publication_receipt.v1.schema.json",
     "run_event.v1.schema.json",
+    "provenance_bundle.v1.schema.json",
 )
 
 

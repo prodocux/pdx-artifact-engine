@@ -9,17 +9,12 @@ checksummed manifests.
 > provider. PDX-5B-1B+ experts are an optional future bundle, not a v0.1.0
 > requirement.
 
-**Current PyPI prerelease: `0.3.0a6`**, published from tag **`v0.3.0a6`** at
-commit `1f29a792b9b86cef1c54706ab154ad4c50cbfc6a`. Media adapter remains
-**`0.2.0a2`** and was not republished with Engine a6. Publication evidence is
-recorded in
-[`compatibility/pdx_artifact_engine_release_a6.json`](compatibility/pdx_artifact_engine_release_a6.json);
-it does not rewrite the frozen coordinated release records.
+**Current PyPI prerelease: `0.3.0a8`**, published from tag **`v0.3.0a8`** at
+commit `df33f0cdb9777234b709bd342ef9e6cf39f2e524`. Media adapter
+**`0.2.0a3`** was published with that release.
 
-The next unpublished candidates are Engine **`0.3.0a8`** and Media
-**`0.2.0a3`**. Public tag **`v0.3.0a7`** did not pass the release workflow and
-is retained only as an audit record; it is not a PyPI release or consumer pin.
-See [the a8/a3 release candidate record](docs/RELEASE_A8_MEDIA_A3.md).
+The next unpublished candidates are Engine **`0.3.0a9`** and the separately
+packaged OfficeCLI adapter prototype **`0.1.0a1`**.
 
 Engine a6 adds an authenticated, read-only per-step recovery projection without
 modifying the a5 workflow contracts or durable authority model.
@@ -29,7 +24,7 @@ in [the rc4/a4 publication record](docs/RELEASE_RC4_A4.md). Engine a5 adds the
 runtime-provider workflow without changing those frozen historical records.
 
 ```powershell
-python -m pip install "pdx-artifact-engine==0.3.0a6"
+python -m pip install "pdx-artifact-engine==0.3.0a8"
 ```
 
 ## Positioning
@@ -46,8 +41,10 @@ python -m pip install "pdx-artifact-engine==0.3.0a6"
 | Execution context, cooperative cancellation, receipts, ordered events | **Available (core)** |
 | Durable runtime-provider workflow v1 (23 packaged schemas, SQLite CAS, authenticated activation, HMAC leases, receipts) | **Available (`0.3.0a5`)** |
 | Read-only workflow step recovery projection | **Available (`0.3.0a6`)** |
-| Generic conformance-check binding | **Unpublished candidate (`0.3.0a8`)** |
-| Media technical conformance evaluator | **Unpublished standalone candidate (`0.2.0a3`)** |
+| Generic conformance-check binding | **Published (`0.3.0a8`)** |
+| Media technical conformance evaluator | **Published standalone (`0.2.0a3`)** |
+| Product-neutral provenance export | **Unpublished candidate (`0.3.0a9`)** |
+| Optional OfficeCLI executor adapter | **Prototype; disabled and separately packaged** |
 | Validate `plan.json` against v0 schema | Available |
 | Load skill registry + dispatch skills | Available (v0 kinds) |
 | Deterministic fixture staging | Available |

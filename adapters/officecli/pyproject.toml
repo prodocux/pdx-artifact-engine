@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdx-adapter-officecli"
+version = "0.1.0a1"
+description = "Optional, disabled-by-default OfficeCLI executor adapter for PDX"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pdx_adapter_officecli*"]

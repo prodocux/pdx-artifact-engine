@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pdx-artifact-engine"
-version = "0.3.0a8"
+version = "0.3.0a9"
 description = "Model-optional deterministic artifact orchestration framework for PDX skills"
 readme = "README.md"
 license = "Apache-2.0"
@@ -49,4 +49,4 @@ pdx_artifact_engine = ["contracts/**/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["runtime", "packages/pdx_artifact_core/src", "adapters/prodocux", "adapters/media"]
+pythonpath = ["runtime", "packages/pdx_artifact_core/src", "adapters/prodocux", "adapters/media", "adapters/officecli"]

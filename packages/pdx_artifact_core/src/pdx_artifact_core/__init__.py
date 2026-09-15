@@ -49,6 +49,11 @@ from pdx_artifact_core.protocols import (
     ToolExecutor,
     Verifier,
 )
+from pdx_artifact_core.provenance import (
+    ProvenanceError,
+    create_provenance_bundle,
+    validate_provenance_bundle,
+)
 from pdx_artifact_core.receipts import (
     PublicationReceiptError,
     create_publication_receipt,
@@ -94,6 +99,7 @@ __all__ = [
     "InMemoryDecisionRepository",
     "InMemoryEventSink",
     "ManualCancellationSignal",
+    "ProvenanceError",
     "PublicationReceiptError",
     "RunEventError",
     "RunState",
@@ -111,6 +117,7 @@ __all__ = [
     "create_checkpoint",
     "create_execution_context",
     "create_external_operation",
+    "create_provenance_bundle",
     "create_publication_receipt",
     "create_run_snapshot",
     "decode_run_snapshot",
@@ -132,6 +139,7 @@ __all__ = [
     "validate_external_operation",
     "validate_instance",
     "validate_ordered_run_events",
+    "validate_provenance_bundle",
     "validate_publication_receipt",
     "validate_run_event_v1",
     "validate_run_snapshot",
