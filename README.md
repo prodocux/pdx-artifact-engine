@@ -9,8 +9,19 @@ checksummed manifests.
 > provider. PDX-5B-1B+ experts are an optional future bundle, not a v0.1.0
 > requirement.
 
-**Current PyPI prerelease: `0.3.0a9`**, published from tag **`v0.3.0a9`** at
-commit `629f641fe3f3e108c08e1ceb51622c524c6cb57e`. Media adapter
+<!-- pypi-release-status:start -->
+Source version in this branch: **`0.3.0a9`**.
+
+Latest verified PyPI release: **[`0.3.0a9`](https://pypi.org/project/pdx-artifact-engine/0.3.0a9/)**,
+published from tag **[`v0.3.0a9`](https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a9)**
+at commit `629f641fe3f3e108c08e1ceb51622c524c6cb57e`.
+
+```powershell
+python -m pip install "pdx-artifact-engine==0.3.0a9"
+```
+<!-- pypi-release-status:end -->
+
+Media adapter
 **`0.2.0a3`** remains the current standalone release and was not republished
 with Engine a9.
 
@@ -23,10 +34,6 @@ modifying the a5 workflow contracts or durable authority model.
 The prior coordinated security cut and its accepted OS boundary remain recorded
 in [the rc4/a4 publication record](docs/RELEASE_RC4_A4.md). Engine a5 adds the
 runtime-provider workflow without changing those frozen historical records.
-
-```powershell
-python -m pip install "pdx-artifact-engine==0.3.0a9"
-```
 
 ## Positioning
 
@@ -82,16 +89,8 @@ first.
 pip install -e ".[dev]"
 ```
 
-Install the current Engine prerelease from PyPI:
-
-```bash
-pip install "pdx-artifact-engine==0.3.0a9"
-```
-
-See the
-[`pdx-artifact-engine` PyPI `0.3.0a9` release](https://pypi.org/project/pdx-artifact-engine/0.3.0a9/)
-and
-[GitHub prerelease](https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a9).
+Install the current Engine prerelease using the verified PyPI command at the top
+of this README.
 
 The older published wheel
 [`pdx-artifact-engine` PyPI `0.3.0a1`](https://pypi.org/project/pdx-artifact-engine/0.3.0a1/)
