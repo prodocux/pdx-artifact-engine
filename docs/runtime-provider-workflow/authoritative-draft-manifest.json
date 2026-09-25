@@ -36,18 +36,13 @@
     "canonicalization-invalid-vectors.v1.json": "7dad5b85b207713719f56848fd6fd9fa5f839a89d323ddbb3acdf0dc601137da",
     "verify-ajv-strict.mjs": "ef79b5aaa77f62900ec061ec2154af291dc8d0046bde99e792e84b0bbb5162c3",
     "verify-canonical-parity.mjs": "5014305b5b36bc1f04549116e349f3f56da9d828a7104698c58be0a49b05de6d",
-    "verify-consumer-mappings.mjs": "0a78a23cbde92fada597d8ae407949c4d82451e02f44566d53f70dfb0dacd81d",
-    "consumer-proposal-agreement.json": "16390715fca13fb7d20aa5146be8f375fad30b199a9bf7972ac3f5c4861b818a",
-    "examples/check-event-mapping.valid.json": "771947081683ad51ca547ead8c415810b3d7856430c8f79d0d0329ab5e8e1ef8",
-    "examples/check-outcome-mapping.valid.json": "0baa7f5e6a43e6c6a919ea716f73dfc673083501fd59719e50851c7d1a82bc9d",
     "examples/provider-activation.valid.json": "baabaadfd32b475ed24b83b44b41d83f565a916524f7badae4d76e2249f6d41c",
     "examples/check-activation.valid.json": "fed6bb8d13a1c5d8ecb5e1280b609e0031e6247cd1a11fec05cef990c72c5015"
   },
   "verification": {
     "python_jsonschema": "PASS 23 schemas",
     "ajv_2020_12_strict": "PASS 23 schemas",
-    "canonical_vectors": "PASS 3 positive + 2 negative; bytes match Farpals source vectors",
-    "consumer_mapping": "PASS 2 complete source/target envelopes with canonical payload digests",
+    "canonical_vectors": "PASS 3 positive + 2 negative",
     "claim_activation_erratum": "PASS complete material binding, transport-principal match, atomic rejection and concurrent-safe deterministic token recovery evidence",
     "production_implementation_authorized": false
   },

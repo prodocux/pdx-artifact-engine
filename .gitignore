@@ -8,6 +8,7 @@ dist/
 build/
 *.egg-info/
 .tmp/
+.tmp_release*/
 .venv-v010/
 outputs/
 artifacts/

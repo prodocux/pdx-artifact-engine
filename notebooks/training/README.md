@@ -1,4 +1,4 @@
-# Kaggle Notebooks
+# Training Notebooks
 
 Planned notebook sequence:
 

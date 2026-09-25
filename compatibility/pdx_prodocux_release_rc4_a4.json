@@ -52,6 +52,6 @@
     "application_inventory": "Final exact-source images: Kernel 35 packages, Engine 8; zero advisory matches and zero skipped packages in the recorded scan.",
     "os_inventory_sha256": "87cf43e01449a03647b3ce853ca35b531fc336bef7b7572993983bcfbe49d69f",
     "os_acceptance": "Inventory matches the previously accepted baseline: 79 advisory matches / 14 unique HIGH or CRITICAL. Conditional acceptance only; not zero OS advisories or a new OS scan.",
-    "farpals": "Final candidate integration passed at 6acf2a6851fb5b815248594dc65ce9eddfb579f8. Official pins/compose promotion and WordPress, plugin, alert-delivery and full-storage recovery gates remain Farpals-owned."
+    "downstream_boundary": "Product-specific pin promotion, application dependencies, alert delivery and storage-recovery gates remain downstream responsibilities."
   }
 }

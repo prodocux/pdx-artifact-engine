@@ -39,11 +39,11 @@ class MissingProbe:
 
 def _expected() -> dict:
     root = Path(__file__).resolve().parents[1]
-    value = json.loads((root / "adapters" / "media" / "examples" / "fsf_broll_expected.v1.json").read_text(encoding="utf-8"))
+    value = json.loads((root / "adapters" / "media" / "examples" / "media_conformance_expected.v1.json").read_text(encoding="utf-8"))
     return value["expected"]
 
 
-def test_broll_profile_conforms_to_frozen_expected(tmp_path: Path) -> None:
+def test_video_profile_conforms_to_frozen_expected(tmp_path: Path) -> None:
     source = tmp_path / "shot.mp4"
     source.write_bytes(b"fixture")
     profile = build_technical_profile_v2(source, CompleteProbe())

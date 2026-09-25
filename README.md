@@ -204,7 +204,7 @@ packages/             Packaged Core source and schemas
 adapters/             Product-neutral optional integration packages
 schemas/              JSON contracts
 examples/             Plans, fixtures, rule requests, model manifests
-notebooks/kaggle/     Training plans (no weights)
+notebooks/training/   Training plans (no weights)
 runtime/              Python package `pdx_artifact_engine`
 skills/               Sample skill registry
 evals/                Eval notes

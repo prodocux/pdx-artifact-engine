@@ -43,7 +43,7 @@ before Phase 1 runtime work.
    only after replacing the payload with a handle plus digest, size, and media
    type. Durable rows, checkpoints, events, receipts, and logs never contain
    bytes or base64. Request-body logging is forbidden.
-5. Engine source staging does not share a writable volume with WordPress or
+5. Engine source staging does not share a writable volume with an external CMS or
    with the Kernel output sink. Direct Kernel calls remain limited to
    deterministic tests.
 6. Frozen compatibility manifests v1, v2, and v3 remain byte-identical.

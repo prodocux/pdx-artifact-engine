@@ -3,7 +3,7 @@
   "job_id": "job-example-1",
   "operation": "intake_document",
   "subject": {
-    "type": "wordpress_attachment",
+    "type": "cms_attachment",
     "binding_id": "subject-example-1",
     "revision": "rev-1"
   },

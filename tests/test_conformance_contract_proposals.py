@@ -38,7 +38,7 @@ def test_media_proposal_compiles_and_keeps_not_evaluated_out_of_runstate() -> No
     assert "not_evaluated" not in json.dumps(workflow_state)
 
 
-def test_media_request_accepts_fsf_expected_and_rejects_empty_expected() -> None:
+def test_media_request_accepts_generic_expected_and_rejects_empty_expected() -> None:
     profile = {
         "schema_version": "pdx_media_technical_profile_v2",
         "identity": {"name": "shot.mp4", "extension": ".mp4", "size_bytes": 42, "sha256": "a" * 64, "media_type": "video/mp4"},
@@ -52,8 +52,8 @@ def test_media_request_accepts_fsf_expected_and_rejects_empty_expected() -> None
     assert not list(validator.iter_errors({**base, "expected": {"width": 1024, "height": 576, "fps": 24, "duration_seconds": 5, "duration_tolerance_seconds": 0.25, "audio": "forbidden"}}))
     assert list(validator.iter_errors({**base, "expected": {}}))
 
-    fixture = _load(ROOT / "adapters" / "media" / "examples" / "fsf_broll_expected.v1.json")
-    assert fixture["source"] == "b-roll-library-generator output contract and recipe"
+    fixture = _load(ROOT / "adapters" / "media" / "examples" / "media_conformance_expected.v1.json")
+    assert fixture["source"] == "generic video output contract"
     assert not list(validator.iter_errors({**base, "expected": fixture["expected"]}))
 
 
@@ -91,8 +91,8 @@ def test_engine_binding_is_generic_and_digest_bound() -> None:
     assert list(Draft202012Validator(schema, registry=registry).iter_errors(unsafe))
 
 
-def test_fsf_consumer_mapping_preserves_successful_nonconformance_report() -> None:
-    mapping = _load(ROOT / "docs" / "conformance-checks" / "examples" / "fsf-consumer-mapping.v1.json")
+def test_generic_consumer_mapping_preserves_successful_nonconformance_report() -> None:
+    mapping = _load(ROOT / "docs" / "conformance-checks" / "examples" / "generic-consumer-mapping.v1.json")
     cases = {item["evaluation_status"]: item for item in mapping["cases"]}
     assert cases["not_evaluated"]["create_binding"] is False
     assert cases["not_evaluated"]["check_terminal_outcome"] is None
@@ -116,8 +116,8 @@ def test_manifest_locks_owned_schema_bytes_without_authorizing_runtime() -> None
         for name in manifest["schemas"]
     }
     evidence_paths = {
-        "fsf_broll_expected.v1.json": ROOT / "adapters" / "media" / "examples" / "fsf_broll_expected.v1.json",
-        "fsf-consumer-mapping.v1.json": ROOT / "docs" / "conformance-checks" / "examples" / "fsf-consumer-mapping.v1.json",
+        "media_conformance_expected.v1.json": ROOT / "adapters" / "media" / "examples" / "media_conformance_expected.v1.json",
+        "generic-consumer-mapping.v1.json": ROOT / "docs" / "conformance-checks" / "examples" / "generic-consumer-mapping.v1.json",
     }
     assert manifest["evidence"] == {
         name: hashlib.sha256(evidence_paths[name].read_bytes()).hexdigest()

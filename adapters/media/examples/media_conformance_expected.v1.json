@@ -1,5 +1,5 @@
 {
-  "source": "b-roll-library-generator output contract and recipe",
+  "source": "generic video output contract",
   "expected": {
     "containers": ["mp4"],
     "video_codecs": ["h264"],

@@ -24,6 +24,7 @@ def test_published_a5_exact_source_and_asset_hashes() -> None:
 def test_published_a5_preserves_release_boundaries() -> None:
     record = json.loads(RECORD.read_text(encoding="utf-8"))
     assert record["contract_provenance"]["packaged_schema_count"] == 23
-    assert "Farpals-owned" in record["qualification"]["formal_pin_promotion"]
+    assert record["qualification"]["consumer_evidence"] == "retained outside the public repository"
+    assert "Consumer-owned" in record["qualification"]["formal_pin_promotion"]
     assert "0.2.0a2" in record["verification"]["media"]
     assert "skipped" in record["verification"]["github_actions"]

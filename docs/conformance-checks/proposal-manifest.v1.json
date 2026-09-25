@@ -17,7 +17,7 @@
     "pdx_conformance_check_binding_v1.schema.json": "5f5acd6937601553f6a86ce2dd2ad390442f4e026a4ae3ef60e38867816314be"
   },
   "evidence": {
-    "fsf_broll_expected.v1.json": "9fb4936a32df26e2ca23f960bff1ad671c682423b56ee0c357292efc50d911ba",
-    "fsf-consumer-mapping.v1.json": "65d3a50052b7a34797c9305d67bfbcccd8ec1f65953b0ab8755496d304419836"
+    "media_conformance_expected.v1.json": "21f05481405ca52365e87745611c3c9d5985c95ca52fada709e32ed1c9f11d14",
+    "generic-consumer-mapping.v1.json": "592615b1f4df331c3834549b2e126e5fffd9654ee25de859da35d2c4fadf025e"
   }
 }

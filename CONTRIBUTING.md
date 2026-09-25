@@ -9,7 +9,7 @@ Good first contributions:
 - add skill metadata
 - add mock skill executors
 - add evaluation cases
-- document Kaggle training runs
+- document reproducible training runs
 
 Before contributing customer-derived examples, remove confidential information
 and regulated source documents.

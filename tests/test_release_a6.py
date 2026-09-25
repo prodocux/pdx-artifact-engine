@@ -36,6 +36,7 @@ def test_published_a6_exact_source_assets_and_additive_schema() -> None:
 def test_published_a6_preserves_boundaries() -> None:
     record = json.loads(RECORD.read_text(encoding="utf-8"))
     assert record["additive_contract"]["a5_frozen_schemas_modified"] is False
-    assert "Farpals-owned" in record["qualification"]["formal_pin_promotion"]
+    assert record["qualification"]["consumer_evidence"] == "retained outside the public repository"
+    assert "Consumer-owned" in record["qualification"]["formal_pin_promotion"]
     assert "0.2.0a2" in record["verification"]["media"]
     assert "skipped" in record["verification"]["github_actions"]

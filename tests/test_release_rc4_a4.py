@@ -47,7 +47,7 @@ def test_published_rc4_a4_exact_source_pins_and_asset_hashes() -> None:
 def test_rc4_a4_overlay_preserves_security_scope() -> None:
     record = json.loads(RECORD.read_text(encoding="utf-8"))
     assert "not zero OS advisories" in record["security_boundary"]["os_acceptance"]
-    assert "Farpals-owned" in record["security_boundary"]["farpals"]
+    assert "downstream responsibilities" in record["security_boundary"]["downstream_boundary"]
     assert "not independent Sigstore" in record["verification"]["provenance"]
 
 

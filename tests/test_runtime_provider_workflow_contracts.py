@@ -261,34 +261,6 @@ def test_pdx_owned_wire_surface_is_complete_and_credential_free() -> None:
         assert "credential_value" not in text
 
 
-def test_check_event_mapping_is_lossless() -> None:
-    semantics = _semantic_module()
-    binding_fields = {
-        "workflow_job_id", "workflow_step_id", "step_kind", "claim_id",
-        "lease_token", "attempt_number", "check_definition_digest",
-        "execution_constraints_digest", "idempotency_key",
-    }
-    for name in (
-        "check-event-mapping.valid.json",
-        "check-outcome-mapping.valid.json",
-    ):
-        fixture = _read("examples", name)
-        source = fixture["source"]
-        target = fixture["target"]
-        record = target["record"]
-        assert source["payload"] == record["payload"]
-        assert all(source[field] == target[field] for field in binding_fields)
-        assert source["sequence"] == record["sequence"]
-        assert source["payload_record_id"] == record["record_id"]
-        assert source["payload_digest"] == record["payload_digest"]
-        assert source["payload_digest"] == hashlib.sha256(
-            semantics._canonical_bytes(source["payload"])
-        ).hexdigest()
-        assert _errors(
-            "pdx_runtime_check_update_v1.schema.json", target
-        ) == []
-
-
 def test_opaque_uri_dot_segments_are_rejected() -> None:
     common = _load("pdx_runtime_provider_common_v1.schema.json")
     workspace = common["$defs"]["workspaceRef"]
@@ -354,19 +326,6 @@ def test_canonical_vectors_and_unpaired_surrogates() -> None:
             assert str(error) == vector["code"]
         else:
             raise AssertionError(vector["name"])
-
-
-def test_consumer_proposal_agreement_is_digest_only_and_non_authorizing() -> None:
-    agreement = json.loads(
-        (CONTRACT / "consumer-proposal-agreement.json").read_text(encoding="utf-8")
-    )
-    assert len(agreement["consumer_proposals"]) == 6
-    assert all(
-        len(digest) == 64 for digest in agreement["consumer_proposals"].values()
-    )
-    assert agreement["kernel_change_required"] is False
-    assert agreement["engine_route_enabled"] is False
-    assert agreement["engine_implementation_authorized"] is False
 
 
 def test_authoritative_draft_manifest_matches_schema_bytes() -> None:

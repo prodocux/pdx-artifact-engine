@@ -14,38 +14,57 @@ PUBLIC_FILES = [
     ROOT / "pyproject.toml",
 ]
 PUBLIC_TREES = [
+    ROOT / "compatibility",
     ROOT / "docs",
     ROOT / "packages",
     ROOT / "runtime",
     ROOT / "adapters" / "prodocux",
     ROOT / "adapters" / "media",
 ]
-TEXT_SUFFIXES = {".md", ".py", ".toml", ".json"}
+TEXT_SUFFIXES = {
+    ".md", ".py", ".toml", ".json", ".yml", ".yaml", ".mjs",
+    ".ipynb", ".ps1",
+}
+PUBLIC_EXCLUDED_PARTS = {
+    ".git",
+    ".venv",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".tmp",
+    "build",
+    "dist",
+    "node_modules",
+    "tests",
+}
+HISTORICAL_PRODUCT_PATTERN = (
+    r"case[-_ ]?memory|cinema|fortified[-_ ]?enterprise[-_ ]?fleet|"
+    r"\bfleet\b|handcheck|crdb[-_ ]?agent[-_ ]?memory|datahub[-_ ]?gate|"
+    r"evidence[-_ ]?gate|local[-_ ]?ai|reviewdesk|roadstar|shelfready|"
+    r"studio.?tower|\bfarpals\b|free[-_ ]?studio[-_ ]?flow|\bfsf\b|"
+    r"b-?roll|wordpress|woocommerce|kaggle|devpost|opencv|connectome|tlorder"
+)
 FORBIDDEN_PUBLIC_TERMS = re.compile(
-    r"cinema|studio.?tower|devpost|agentic|grafana|"
-    r"\bcursor\b|\bcodex\b|dual-track|track [ab]",
+    HISTORICAL_PRODUCT_PATTERN
+    + r"|agentic|grafana|\bcursor\b|\bcodex\b|dual[- ]track",
     re.IGNORECASE,
 )
 
 
 def _public_text_files() -> list[Path]:
-    files = list(PUBLIC_FILES)
-    for tree in PUBLIC_TREES:
-        files.extend(
-            path
-            for path in tree.rglob("*")
-            if path.is_file() and path.suffix.casefold() in TEXT_SUFFIXES
-        )
-    return files
+    return [
+        path
+        for path in ROOT.rglob("*")
+        if path.is_file()
+        and path.suffix.casefold() in TEXT_SUFFIXES
+        and not (set(path.relative_to(ROOT).parts) & PUBLIC_EXCLUDED_PARTS)
+    ]
 
 
 def test_public_release_surface_has_no_product_or_agent_attribution() -> None:
     matches = []
     for path in _public_text_files():
         text = path.read_text(encoding="utf-8")
-        if path == ROOT / "README.md":
-            text = text.split("\n## Acknowledgments\n", 1)[0]
-        if FORBIDDEN_PUBLIC_TERMS.search(text):
+        if FORBIDDEN_PUBLIC_TERMS.search(path.name) or FORBIDDEN_PUBLIC_TERMS.search(text):
             matches.append(path.relative_to(ROOT).as_posix())
     assert matches == []
 
@@ -87,17 +106,46 @@ def test_internal_document_classes_are_absent_from_public_tree() -> None:
     assert found == []
 
 
-def test_public_markdown_has_no_windows_checkout_paths() -> None:
+def test_public_release_surface_has_no_windows_checkout_paths() -> None:
     windows_path = re.compile(r"(?i)\b[A-Z]:\\")
+    found = [
+        path.relative_to(ROOT).as_posix()
+        for path in _public_text_files()
+        if windows_path.search(path.read_text(encoding="utf-8"))
+    ]
+    assert found == []
+
+
+def test_consumer_provenance_is_not_stored_in_public_docs() -> None:
+    found = sorted(
+        path.relative_to(ROOT).as_posix()
+        for path in ROOT.rglob("*")
+        if path.is_file()
+        and "consumer-provenance" in path.name.casefold()
+        and not (set(path.relative_to(ROOT).parts) & PUBLIC_EXCLUDED_PARTS)
+    )
+    assert found == []
+
+
+def test_release_records_and_conformance_evidence_are_product_neutral() -> None:
+    consumer_attribution = re.compile(HISTORICAL_PRODUCT_PATTERN, re.IGNORECASE)
+    trees = [
+        ROOT / "compatibility",
+        ROOT / "docs" / "conformance-checks",
+        ROOT / "adapters" / "media" / "examples",
+    ]
     found = []
-    for path in ROOT.rglob("*.md"):
-        relative = path.relative_to(ROOT)
-        if any(part.startswith(".") for part in relative.parts):
-            continue
-        if relative.parts[0] in {"build", "dist"}:
-            continue
-        if windows_path.search(path.read_text(encoding="utf-8")):
-            found.append(relative.as_posix())
+    for tree in trees:
+        for path in tree.rglob("*"):
+            if (
+                path.is_file()
+                and path.suffix.casefold() in TEXT_SUFFIXES
+                and (
+                    consumer_attribution.search(path.name)
+                    or consumer_attribution.search(path.read_text(encoding="utf-8"))
+                )
+            ):
+                found.append(path.relative_to(ROOT).as_posix())
     assert found == []
 
 

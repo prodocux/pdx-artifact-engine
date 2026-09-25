@@ -21,9 +21,9 @@
     "a5_frozen_schemas_modified": false
   },
   "qualification": {
-    "farpals_evidence_commit": "78d2b9db2340a7fe09f42447f7711477f2613d15",
+    "consumer_evidence": "retained outside the public repository",
     "scope": "restart, reconcile, step projection and concurrent activation CAS Docker E2E passed before publication",
-    "formal_pin_promotion": "Farpals-owned and separate from Engine publication"
+    "formal_pin_promotion": "Consumer-owned and separate from Engine publication"
   },
   "verification": {
     "engine_tests": "246 passed with 4 existing deprecation warnings",

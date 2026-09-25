@@ -138,26 +138,20 @@ ninth durable counter and is atomically incremented when a repair step is
 created. Runtime implementation must use the agreed RFC 8785 authority.
 
 All schema files must compile under both Python Draft 2020-12 validation and AJV
-2020-12 with `strict: true`. The evidence manifest pins the route mapping,
-semantic validator, AJV verifier, canonical parity verifier, consumer
-positive/negative vectors and lossless check mapping fixtures.
+2020-12 with `strict: true`. The public evidence manifest pins the route
+mapping, semantic validator, AJV verifier and canonical parity verifier.
+Consumer-owned proposal agreements and mapping fixtures are maintained outside
+this public repository.
 
 ### Reproduce the JavaScript gates
 
 The recorded run used Node `22.18.0`, AJV `8.20.0` and `ajv-formats` `3.0.1`.
-`PDX_AJV_MODULE_ROOT` must point to an npm project containing those dependencies;
-Mapping verification retains the historical environment variable
-`FARPALS_HUB_CONTRACT_ROOT`; it points to the consumer contract package whose
-proposal digests are recorded in
-`consumer-proposal-agreement.json`.
+`PDX_AJV_MODULE_ROOT` must point to an npm project containing those dependencies.
 
 ```powershell
 $env:PDX_AJV_MODULE_ROOT = '<npm-project-with-ajv>'
 node .\docs\runtime-provider-workflow\verify-ajv-strict.mjs
-$env:FARPALS_HUB_CONTRACT_ROOT = '<consumer-contract-root>'
-node .\docs\runtime-provider-workflow\verify-consumer-mappings.mjs
 node .\docs\runtime-provider-workflow\verify-canonical-parity.mjs
 ```
 
-Expected output is `AJV_STRICT_PASS 23`, `CONSUMER_MAPPING_PASS 2` and
-`CANONICAL_PARITY_PASS 3+2`.
+Expected output is `AJV_STRICT_PASS 23` and `CANONICAL_PARITY_PASS 3+2`.

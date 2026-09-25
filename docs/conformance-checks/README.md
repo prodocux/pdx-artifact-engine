@@ -1,8 +1,8 @@
 # Generic conformance check binding proposal
 
 Status: frozen product-neutral binding implemented additively by the current
-Engine line. Consumer provenance is recorded by the accompanying machine-readable
-manifest rather than a local checkout path.
+Engine line. Consumer-specific provenance is maintained outside this public
+repository.
 
 Kernel owns template-conformance schemas. The media adapter package owns media
 technical/conformance schemas. Engine does not copy either schema family. It
@@ -28,9 +28,9 @@ failure. No row maps to `completed_with_review`.
 `RunState`; it is solely a disposition inside a media conformance report when
 technical conformance was not requested.
 
-Scope is P0b template conformance, P1 media conformance, and the P2 generic
-binding only. It does not close P0a prompt-sheet intake or FSF-M1 and does not
-authorize removing B-roll's current parser.
+Scope is template conformance, media conformance, and the generic Engine
+binding only. It does not provide product-specific prompt-sheet intake or
+authorize removal of a consumer-owned parser.
 
 Engine accepts the binding through
 ``pdx_internal_runtime_check_update_v2`` while retaining the a5/a6 v1 update

@@ -20,9 +20,9 @@
     "packaged_schema_count": 23
   },
   "qualification": {
-    "farpals_evidence_commit": "280eae3",
+    "consumer_evidence": "retained outside the public repository",
     "scope": "HTTP workflow, concurrent exact retry, lease and stale fencing, cancel, HMAC readiness/rotation/restart, and a5-a4-a5 volume rollback passed before publication.",
-    "formal_pin_promotion": "Farpals-owned and intentionally separate from Engine publication."
+    "formal_pin_promotion": "Consumer-owned and intentionally separate from Engine publication."
   },
   "verification": {
     "github_actions": "verify and publish-engine succeeded; publish-media was skipped",
