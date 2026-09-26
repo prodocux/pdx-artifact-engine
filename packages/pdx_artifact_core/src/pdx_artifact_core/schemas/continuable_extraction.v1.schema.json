@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/continuable_extraction.v1.schema.json",
+  "title": "PDX continuable extraction state v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "operation_id", "source_artifact_digest", "source_sha256", "media_type", "parser_contract", "capability_digest", "capability_authority", "capability_verified", "state", "revision", "next_range_descriptor", "next_range_digest", "accepted_ranges", "aggregate_artifact_digest", "coverage_accumulator", "terminal_coverage", "consumed", "limits"],
+  "properties": {
+    "schema_version": {"const": "pdx_continuable_extraction_v1"},
+    "operation_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "source_artifact_digest": {"$ref": "#/$defs/sha256"},
+    "source_sha256": {"$ref": "#/$defs/sha256"},
+    "media_type": {"type": "string", "minLength": 1, "maxLength": 255},
+    "parser_contract": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 128},
+        "version": {"type": "string", "minLength": 1, "maxLength": 64}
+      }
+    },
+    "capability_digest": {"$ref": "#/$defs/sha256"},
+    "capability_authority": {"enum": ["kernel_adapter", "caller_assertion"]},
+    "capability_verified": {"type": "boolean"},
+    "state": {"enum": ["pending", "completed", "failed", "cancelled", "timed_out"]},
+    "revision": {"type": "integer", "minimum": 0},
+    "next_range_descriptor": {"type": ["object", "null"]},
+    "next_range_digest": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "accepted_ranges": {
+      "type": "array", "maxItems": 10000,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["sequence", "idempotency_key", "request_range_digest", "result_artifact_digest", "result_payload_digest", "response_range_digest", "coverage_disposition", "omissions", "semantic_validation_digest", "ocr_disposition", "returned_blocks", "returned_bytes", "next_range_digest", "terminal"],
+        "properties": {
+          "sequence": {"type": "integer", "minimum": 1},
+          "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 256},
+          "request_range_digest": {"$ref": "#/$defs/sha256"},
+          "result_artifact_digest": {"$ref": "#/$defs/sha256"},
+          "result_payload_digest": {"$ref": "#/$defs/sha256"},
+          "response_range_digest": {"$ref": "#/$defs/sha256"},
+          "coverage_disposition": {"enum": ["complete", "partial_known", "partial_unknown", "unsupported"]},
+          "omissions": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "semantic_validation_digest": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+          "ocr_disposition": {"type": ["string", "null"]},
+          "returned_blocks": {"type": "integer", "minimum": 0},
+          "returned_bytes": {"type": "integer", "minimum": 0},
+          "next_range_digest": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+          "terminal": {"type": "boolean"}
+        }
+      }
+    },
+    "aggregate_artifact_digest": {"$ref": "#/$defs/sha256"},
+    "coverage_accumulator": {"$ref": "#/$defs/coverage"},
+    "terminal_coverage": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/coverage"}
+      ]
+    },
+    "consumed": {"$ref": "#/$defs/counters"},
+    "limits": {"$ref": "#/$defs/counters"},
+    "terminal_reason": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$"}
+  },
+  "allOf": [
+    {"if": {"properties": {"state": {"const": "pending"}}}, "then": {"properties": {"terminal_reason": false}}},
+    {"if": {"properties": {"state": {"enum": ["completed", "failed", "cancelled", "timed_out"]}}}, "then": {"required": ["terminal_reason"], "properties": {"next_range_descriptor": {"type": "null"}, "next_range_digest": {"type": "null"}}}}
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "coverage": {"type": "object", "additionalProperties": false, "required": ["disposition", "omissions", "ocr_disposition"], "properties": {"disposition": {"enum": ["complete", "partial_known", "partial_unknown", "unsupported"]}, "omissions": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}, "ocr_disposition": {"enum": ["unavailable", "not_performed", "performed_partial", "performed_complete", "not_evaluated"]}}},
+    "counters": {
+      "type": "object", "additionalProperties": false,
+      "required": ["ranges", "blocks", "bytes", "retries"],
+      "properties": {
+        "ranges": {"type": "integer", "minimum": 0},
+        "blocks": {"type": "integer", "minimum": 0},
+        "bytes": {"type": "integer", "minimum": 0},
+        "retries": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

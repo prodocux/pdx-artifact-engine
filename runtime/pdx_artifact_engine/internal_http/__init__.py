@@ -10,6 +10,12 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from pdx_artifact_core import ContinuableExtractionError
+
+from pdx_artifact_engine.continuable_extraction import (
+    ContinuableExtractionService,
+    ContinuableExtractionStore,
+)
 from pdx_artifact_engine.internal_http.auth import (
     auth_profile_ok,
     authenticate_request,
@@ -59,6 +65,7 @@ class BodyLimitError(Exception):
 class InternalJobHandler(BaseHTTPRequestHandler):
     service: JobService
     workflow_service: RuntimeWorkflowService | None = None
+    extraction_service: ContinuableExtractionService
 
     def log_message(self, format: str, *args: Any) -> None:
         # Never log request bodies; keep access lines minimal.
@@ -147,6 +154,30 @@ class InternalJobHandler(BaseHTTPRequestHandler):
     def _send_workflow_error(self, error: RuntimeWorkflowError) -> None:
         self._send(error.status, error.as_document())
 
+    def _send_extraction_error(self, error: ContinuableExtractionError) -> None:
+        message = str(error)
+        if "not found" in message:
+            status, code = 404, "EXTRACTION_NOT_FOUND"
+        elif any(
+            marker in message
+            for marker in ("conflict", "terminal extraction", "pending extraction")
+        ):
+            status, code = 409, "EXTRACTION_STATE_CONFLICT"
+        else:
+            status, code = 400, "EXTRACTION_REQUEST_INVALID"
+        self._send(
+            status,
+            {
+                "schema_version": "pdx_internal_error_v1",
+                "ok": False,
+                "code": code,
+                "message": message,
+                "retryable": status == 409,
+                "request_id": "unknown",
+                "correlation_id": "unknown",
+            },
+        )
+
     def do_GET(self) -> None:
         if not self._auth_ok():
             return
@@ -161,7 +192,10 @@ class InternalJobHandler(BaseHTTPRequestHandler):
                 workflow_ready = self.workflow_service.readiness()
                 checks["runtime_workflow_hmac_ready"] = workflow_ready["ready"]
                 ok = ok and workflow_ready["ready"]
-            elif os.environ.get("PDX_ENGINE_RUNTIME_WORKFLOWS_ENABLED", "").strip() == "1":
+            elif (
+                os.environ.get("PDX_ENGINE_RUNTIME_WORKFLOWS_ENABLED", "").strip()
+                == "1"
+            ):
                 checks["runtime_workflow_hmac_ready"] = False
                 ok = False
             self._send(
@@ -172,7 +206,29 @@ class InternalJobHandler(BaseHTTPRequestHandler):
                 },
             )
             return
-        workflow = re.fullmatch(r"/internal/v1/runtime-provider-workflows/([^/]+)", path)
+        extraction_receipt = re.fullmatch(
+            r"/internal/v1/continuable-extractions/([^/]+)/receipt", path
+        )
+        if extraction_receipt:
+            try:
+                doc = self.extraction_service.receipt(extraction_receipt.group(1))
+            except ContinuableExtractionError as exc:
+                self._send_extraction_error(exc)
+                return
+            self._send(200, doc)
+            return
+        extraction = re.fullmatch(r"/internal/v1/continuable-extractions/([^/]+)", path)
+        if extraction:
+            try:
+                doc = self.extraction_service.get(extraction.group(1))
+            except ContinuableExtractionError as exc:
+                self._send_extraction_error(exc)
+                return
+            self._send(200, doc)
+            return
+        workflow = re.fullmatch(
+            r"/internal/v1/runtime-provider-workflows/([^/]+)", path
+        )
         if workflow:
             try:
                 doc = self._workflow().get_state(workflow.group(1))
@@ -181,7 +237,9 @@ class InternalJobHandler(BaseHTTPRequestHandler):
                 return
             self._send(200, doc)
             return
-        workflow_plan = re.fullmatch(r"/internal/v1/runtime-provider-workflows/([^/]+)/plan", path)
+        workflow_plan = re.fullmatch(
+            r"/internal/v1/runtime-provider-workflows/([^/]+)/plan", path
+        )
         if workflow_plan:
             try:
                 doc = self._workflow().get_plan(workflow_plan.group(1))
@@ -206,7 +264,9 @@ class InternalJobHandler(BaseHTTPRequestHandler):
                 return
             self._send(200, doc)
             return
-        workflow_receipt = re.fullmatch(r"/internal/v1/runtime-provider-workflows/([^/]+)/receipt", path)
+        workflow_receipt = re.fullmatch(
+            r"/internal/v1/runtime-provider-workflows/([^/]+)/receipt", path
+        )
         if workflow_receipt:
             try:
                 doc = self._workflow().get_receipt(workflow_receipt.group(1))
@@ -221,7 +281,9 @@ class InternalJobHandler(BaseHTTPRequestHandler):
         )
         if workflow_binding:
             try:
-                doc = self._workflow().get_conformance_binding(*workflow_binding.groups())
+                doc = self._workflow().get_conformance_binding(
+                    *workflow_binding.groups()
+                )
             except RuntimeWorkflowError as exc:
                 self._send_workflow_error(exc)
                 return
@@ -354,6 +416,47 @@ class InternalJobHandler(BaseHTTPRequestHandler):
             self._send(status, doc)
             return
 
+        if path == "/internal/v1/continuable-extractions":
+            try:
+                doc = self.extraction_service.create_from_kernel(body)
+            except ContinuableExtractionError as exc:
+                self._send_extraction_error(exc)
+                return
+            self._send(202, doc)
+            return
+
+        extraction_route = re.fullmatch(
+            r"/internal/v1/continuable-extractions/([^/]+)/(execute-next|reconcile|cancel|timeout|retry|fail)",
+            path,
+        )
+        if extraction_route:
+            operation_id, operation = extraction_route.groups()
+            try:
+                if operation == "execute-next":
+                    doc = self.extraction_service.execute_next(operation_id, **body)
+                elif operation == "reconcile":
+                    doc = self.extraction_service.reconcile(operation_id)
+                elif operation == "cancel":
+                    doc = self.extraction_service.cancel(operation_id, **body)
+                elif operation == "timeout":
+                    doc = self.extraction_service.time_out(operation_id, **body)
+                elif operation == "retry":
+                    doc = self.extraction_service.record_retry(operation_id, **body)
+                else:
+                    doc = self.extraction_service.fail(operation_id, **body)
+            except (ContinuableExtractionError, TypeError) as exc:
+                error = (
+                    exc
+                    if isinstance(exc, ContinuableExtractionError)
+                    else ContinuableExtractionError(
+                        "request fields do not match operation"
+                    )
+                )
+                self._send_extraction_error(error)
+                return
+            self._send(200, doc)
+            return
+
         runtime_route = re.fullmatch(
             r"/internal/v1/runtime-provider-workflows/([^/]+)/(cancel|reconcile|provider-claims|provider-leases/renew|provider-updates|check-claims|check-leases/renew|check-updates)",
             path,
@@ -370,12 +473,14 @@ class InternalJobHandler(BaseHTTPRequestHandler):
                     instance = authenticated_control_plane_instance(self.headers)
                     if operation == "provider-claims":
                         doc = workflow_service.activate_provider(
-                            workflow_job_id, body,
+                            workflow_job_id,
+                            body,
                             authenticated_instance_id=instance or "",
                         )
                     else:
                         doc = workflow_service.activate_check(
-                            workflow_job_id, body,
+                            workflow_job_id,
+                            body,
                             authenticated_instance_id=instance or "",
                         )
                 elif operation == "provider-leases/renew":
@@ -493,11 +598,23 @@ def make_server(
     kernel_client = kernel if kernel is not None else _default_kernel_client()
     service = JobService(store=store, staging=staging, kernel=kernel_client)
     workflow_service = None
+    try:
+        from pdx_adapter_prodocux.verified_projection import (
+            validate_kernel_projection,
+        )
+    except ImportError:
+        validate_kernel_projection = None
+    extraction_service = ContinuableExtractionService(
+        ContinuableExtractionStore(db_path),
+        kernel=kernel_client,
+        projection_validator=validate_kernel_projection,
+    )
     hmac_configuration = _workflow_hmac_configuration()
     if hmac_configuration is not None:
         keys, active_key_id = hmac_configuration
         workflow_service = RuntimeWorkflowService(
-            store=RuntimeWorkflowStore(db_path), hmac_keys=keys,
+            store=RuntimeWorkflowStore(db_path),
+            hmac_keys=keys,
             active_hmac_key_id=active_key_id,
         )
 
@@ -506,6 +623,7 @@ def make_server(
 
     BoundHandler.service = service
     BoundHandler.workflow_service = workflow_service
+    BoundHandler.extraction_service = extraction_service
     return ThreadingHTTPServer((host, port), BoundHandler)
 
 
@@ -521,9 +639,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--staging",
-        default=os.environ.get(
-            "PDX_ENGINE_STAGING_ROOT", "./.pdx-engine/staging"
-        ),
+        default=os.environ.get("PDX_ENGINE_STAGING_ROOT", "./.pdx-engine/staging"),
     )
     args = parser.parse_args(argv)
     server = make_server(

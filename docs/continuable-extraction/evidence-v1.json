@@ -1,0 +1,36 @@
+{
+  "schema_version": "pdx_continuable_extraction_freeze_evidence_v1",
+  "status": "frozen_contract_evidence",
+  "vectors": {
+    "pdf_55_pages_50_plus_5": {
+      "ranges": [[1, 51], [51, 56]],
+      "tail_marker": "TAIL_MARKER_PAGE_55",
+      "expected_terminal_state": "completed",
+      "expected_coverage": "complete",
+      "expected_blocks": 55
+    },
+    "pdf_scanned_page_in_first_range": {
+      "ranges": [[1, 51], [51, 56]],
+      "first_range_coverage": "partial_unknown",
+      "first_range_omission": "ocr_required_not_performed",
+      "last_range_coverage": "complete",
+      "expected_terminal_state": "failed",
+      "expected_coverage": "partial_unknown",
+      "expected_ocr_disposition": "not_performed"
+    }
+  },
+  "ocr_aggregation_priority": [
+    "unavailable",
+    "not_performed",
+    "performed_partial",
+    "performed_complete",
+    "not_evaluated"
+  ],
+  "terminal_reason_omissions": {
+    "CANCELLED": "cancelled_before_completion",
+    "TIME_LIMIT": "time_limit_exhausted",
+    "RETRY_BUDGET_EXHAUSTED": "retry_budget_exhausted",
+    "SOURCE_TOO_LARGE": "source_too_large",
+    "other_failure": "unaccepted_ranges"
+  }
+}

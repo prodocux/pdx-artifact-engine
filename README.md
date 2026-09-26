@@ -10,7 +10,7 @@ checksummed manifests.
 > requirement.
 
 <!-- pypi-release-status:start -->
-Source version in this branch: **`0.3.0a9`**.
+Source version in this branch: **`0.3.0a10`**.
 
 Latest verified PyPI release: **[`0.3.0a9`](https://pypi.org/project/pdx-artifact-engine/0.3.0a9/)**,
 published from tag **[`v0.3.0a9`](https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a9)**

@@ -9,18 +9,17 @@ import json
 from pathlib import Path
 
 import pytest
-
 from pdx_adapter_prodocux import (
+    DocumentProfileExecutor,
+    ExtractContentBlocksExecutor,
+    PdfExtractPagesExecutor,
+    PresentationProfileExecutor,
     ProDocuXHttpClient,
     ProDocuXHttpError,
-    ValidateStructureExecutor,
-    PdfExtractPagesExecutor,
-    TableProfileExecutor,
-    WorkbookProfileExecutor,
-    DocumentProfileExecutor,
-    PresentationProfileExecutor,
-    ExtractContentBlocksExecutor,
     RenderArtifactExecutor,
+    TableProfileExecutor,
+    ValidateStructureExecutor,
+    WorkbookProfileExecutor,
 )
 from pdx_adapter_prodocux.pdf_extract_pages import resolve_pdf_bytes
 from pdx_adapter_prodocux.validate_structure import resolve_document_path_for_kernel
@@ -37,11 +36,67 @@ class _FakeResp:
     def getcode(self) -> int:
         return self.status
 
-    def __enter__(self) -> "_FakeResp":
+    def __enter__(self) -> _FakeResp:
         return self
 
     def __exit__(self, *args: object) -> None:
         return None
+
+
+@pytest.mark.parametrize(
+    ("format_name", "path_suffix", "limit_name"),
+    [
+        ("pdf", "/v1/intake/extract-pages/continue", "max_pages"),
+        ("csv", "/v1/intake/profile-table/continue", "max_rows"),
+        ("xlsx", "/v1/intake/profile-workbook/continue", "max_rows"),
+        ("pptx", "/v1/intake/profile-presentation/continue", "max_slides"),
+        ("image", "/v1/intake/profile-image/tiles", "max_tiles"),
+    ],
+)
+def test_continuation_client_maps_registered_kernel_producers(
+    format_name: str, path_suffix: str, limit_name: str
+) -> None:
+    observed: dict = {}
+    response = {
+        "schema_version": f"example_{format_name}_projection_v1",
+        "source_sha256": "a" * 64,
+        "parser_contract": {"name": "example", "version": "1"},
+        "range": {"unit": "example", "start": 0, "end": 1},
+        "next_cursor": None,
+        "coverage": {"disposition": "complete"},
+        "counts": {"returned": 1},
+    }
+
+    def opener(req: object, timeout: float = 0) -> _FakeResp:
+        observed["url"] = req.full_url
+        observed["body"] = json.loads(req.data)
+        return _FakeResp(response)
+
+    result = ProDocuXHttpClient(
+        "http://example.test/v1", opener=opener
+    ).continue_projection(
+        format_name=format_name,
+        document_b64="ZGF0YQ==",
+        document_filename=f"source.{format_name if format_name != 'image' else 'png'}",
+        range_limit=7,
+        tile_edge=512 if format_name == "image" else None,
+    )
+    assert observed["url"].endswith(path_suffix)
+    assert observed["body"][limit_name] == 7
+    assert result == response
+
+
+def test_continuation_client_rejects_incomplete_kernel_response() -> None:
+    client = ProDocuXHttpClient(
+        "http://example.test/v1", opener=lambda request, timeout=0: _FakeResp({})
+    )
+    with pytest.raises(ProDocuXHttpError, match="incomplete"):
+        client.continue_projection(
+            format_name="pdf",
+            document_b64="ZGF0YQ==",
+            document_filename="source.pdf",
+            range_limit=50,
+        )
 
 
 def test_validate_structure_writes_report(tmp_path: Path) -> None:
@@ -296,7 +351,7 @@ def test_table_profile_calls_kernel_and_writes_artifact(tmp_path: Path) -> None:
     }
 
     def opener(req: object, timeout: float = 0) -> _FakeResp:
-        assert getattr(req, "full_url").endswith("/v1/intake/profile-table")
+        assert req.full_url.endswith("/v1/intake/profile-table")
         return _FakeResp(payload)
 
     source = tmp_path / "schedule.csv"
@@ -323,7 +378,7 @@ def test_workbook_profile_calls_kernel_and_writes_artifact(tmp_path: Path) -> No
     }
 
     def opener(req: object, timeout: float = 0) -> _FakeResp:
-        assert getattr(req, "full_url").endswith("/v1/intake/profile-workbook")
+        assert req.full_url.endswith("/v1/intake/profile-workbook")
         return _FakeResp(payload)
 
     source = tmp_path / "schedule.xlsx"
@@ -351,7 +406,7 @@ def test_document_profile_calls_kernel_and_writes_artifact(tmp_path: Path) -> No
     }
 
     def opener(req: object, timeout: float = 0) -> _FakeResp:
-        assert getattr(req, "full_url").endswith("/v1/intake/profile-document")
+        assert req.full_url.endswith("/v1/intake/profile-document")
         return _FakeResp(payload)
 
     source = tmp_path / "brief.docx"
@@ -378,7 +433,7 @@ def test_presentation_profile_calls_kernel_and_writes_artifact(tmp_path: Path) -
     }
 
     def opener(req: object, timeout: float = 0) -> _FakeResp:
-        assert getattr(req, "full_url").endswith("/v1/intake/profile-presentation")
+        assert req.full_url.endswith("/v1/intake/profile-presentation")
         return _FakeResp(payload)
 
     source = tmp_path / "plan.pptx"
@@ -406,7 +461,7 @@ def test_extract_content_blocks_calls_kernel_and_writes_artifact(tmp_path: Path)
     }
 
     def opener(req: object, timeout: float = 0) -> _FakeResp:
-        assert getattr(req, "full_url").endswith("/v1/intake/extract-blocks")
+        assert req.full_url.endswith("/v1/intake/extract-blocks")
         return _FakeResp(payload)
 
     source = tmp_path / "rows.csv"
@@ -435,7 +490,7 @@ def test_render_artifact_executor_writes_inline_file_and_rejects_gs(tmp_path: Pa
     }
 
     def opener(req: object, timeout: float = 0) -> _FakeResp:
-        assert getattr(req, "full_url").endswith("/v1/render/artifact")
+        assert req.full_url.endswith("/v1/render/artifact")
         return _FakeResp(payload)
 
     executor = RenderArtifactExecutor(
@@ -511,7 +566,7 @@ class _FakeBytesResp:
     def getcode(self) -> int:
         return self.status
 
-    def __enter__(self) -> "_FakeBytesResp":
+    def __enter__(self) -> _FakeBytesResp:
         return self
 
     def __exit__(self, *args: object) -> None:
@@ -542,7 +597,7 @@ def test_render_artifact_executor_retrieves_kernel_identity(tmp_path: Path) -> N
     }
 
     def opener(req: object, timeout: float = 0) -> object:
-        url = getattr(req, "full_url")
+        url = req.full_url
         if url.endswith("/v1/render/artifact"):
             return _FakeResp(payload)
         if url.endswith("/v1/render/artifacts/out-docx"):
@@ -597,7 +652,7 @@ def test_render_artifact_executor_rejects_retrieved_digest_mismatch(tmp_path: Pa
     }
 
     def opener(req: object, timeout: float = 0) -> object:
-        url = getattr(req, "full_url")
+        url = req.full_url
         if url.endswith("/v1/render/artifact"):
             return _FakeResp(payload)
         return _FakeBytesResp(b"real")

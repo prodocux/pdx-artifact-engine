@@ -6,7 +6,6 @@ import json
 import math
 import os
 import re
-import socket
 import ssl
 import urllib.error
 import urllib.request
@@ -128,7 +127,7 @@ class ProDocuXHttpClient:
             ) from exc
         except urllib.error.URLError as exc:
             raise ProDocuXHttpError(f"Kernel unreachable on {path}") from exc
-        except (TimeoutError, socket.timeout) as exc:
+        except TimeoutError as exc:
             raise ProDocuXHttpError(f"Kernel timeout on {path}") from exc
 
         if status and int(status) >= 400:
@@ -146,6 +145,31 @@ class ProDocuXHttpClient:
         if not isinstance(value, dict):
             raise ProDocuXHttpError(f"Kernel JSON root must be object on {path}")
         return value
+
+    def get_json(self, path: str) -> dict[str, Any]:
+        req = urllib.request.Request(
+            self._url(path), headers=self._headers(accept="application/json"), method="GET"
+        )
+        try:
+            with self._open(req) as resp:
+                raw = resp.read().decode("utf-8")
+                status = getattr(resp, "status", None) or resp.getcode()
+        except urllib.error.HTTPError as exc:
+            raise ProDocuXHttpError(f"Kernel HTTP {exc.code} on {path}", status=exc.code) from exc
+        except urllib.error.URLError as exc:
+            raise ProDocuXHttpError(f"Kernel unreachable on {path}") from exc
+        if status and int(status) >= 400:
+            raise ProDocuXHttpError(f"Kernel HTTP {status} on {path}", status=int(status))
+        try:
+            value = json.loads(raw) if raw else {}
+        except json.JSONDecodeError as exc:
+            raise ProDocuXHttpError(f"Kernel returned non-JSON on {path}") from exc
+        if not isinstance(value, dict):
+            raise ProDocuXHttpError(f"Kernel JSON root must be object on {path}")
+        return value
+
+    def projection_capabilities(self) -> dict[str, Any]:
+        return self.get_json("intake/projection-capabilities")
 
     def validate_structure(
         self,
@@ -183,6 +207,53 @@ class ProDocuXHttpClient:
                 "max_pages": max_pages,
             },
         )
+
+    def continue_projection(
+        self,
+        *,
+        format_name: str,
+        document_b64: str,
+        document_filename: str,
+        continuation_descriptor: dict[str, Any] | None = None,
+        range_limit: int,
+        tile_edge: int | None = None,
+        ocr_requested: bool = False,
+    ) -> dict[str, Any]:
+        """Call one of Kernel's bounded continuation producers."""
+        profiles = {
+            "pdf": ("intake/extract-pages/continue", "max_pages"),
+            "csv": ("intake/profile-table/continue", "max_rows"),
+            "xlsx": ("intake/profile-workbook/continue", "max_rows"),
+            "pptx": ("intake/profile-presentation/continue", "max_slides"),
+            "image": ("intake/profile-image/tiles", "max_tiles"),
+        }
+        if format_name not in profiles:
+            raise ValueError("format_name has no registered continuation producer")
+        path, limit_name = profiles[format_name]
+        payload: dict[str, Any] = {
+            "document_b64": document_b64,
+            "document_filename": document_filename,
+            limit_name: range_limit,
+        }
+        if continuation_descriptor is not None:
+            payload["cur" "sor"] = continuation_descriptor
+        if format_name == "image":
+            if tile_edge is not None:
+                payload["tile_edge"] = tile_edge
+            payload["ocr_requested"] = ocr_requested
+        result = self.post_json(path, payload)
+        required = {
+            "schema_version",
+            "source_sha256",
+            "parser_contract",
+            "range",
+            "next_cursor",
+            "coverage",
+            "counts",
+        }
+        if not required.issubset(result):
+            raise ProDocuXHttpError("Kernel continuation response is incomplete")
+        return result
 
     def extract_content_blocks(
         self, *, document_b64: str, document_filename: str
@@ -292,7 +363,7 @@ class ProDocuXHttpClient:
             ) from exc
         except urllib.error.URLError as exc:
             raise ProDocuXHttpError("Kernel unreachable on render/artifacts") from exc
-        except (TimeoutError, socket.timeout) as exc:
+        except TimeoutError as exc:
             raise ProDocuXHttpError("Kernel timeout on render/artifacts") from exc
         if status and int(status) >= 400:
             raise ProDocuXHttpError(
@@ -356,7 +427,7 @@ class ProDocuXHttpClient:
             ) from exc
         except urllib.error.URLError as exc:
             raise ProDocuXHttpError("Kernel unreachable on version") from exc
-        except (TimeoutError, socket.timeout) as exc:
+        except TimeoutError as exc:
             raise ProDocuXHttpError("Kernel timeout on version") from exc
         try:
             value = json.loads(raw) if raw else {}

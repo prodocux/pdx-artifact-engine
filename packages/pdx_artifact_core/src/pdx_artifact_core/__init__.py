@@ -16,6 +16,13 @@ from pdx_artifact_core.approval import (
     create_checkpoint,
 )
 from pdx_artifact_core.compat_v0 import translate_plan_v0_to_v1
+from pdx_artifact_core.continuable_extraction import (
+    ContinuableExtractionError,
+    accept_extraction_range,
+    create_continuable_extraction,
+    validate_continuable_extraction,
+    validate_continuable_extraction_receipt,
+)
 from pdx_artifact_core.events import (
     InMemoryEventSink,
     RunEventError,
@@ -91,6 +98,7 @@ __all__ = [
     "ApprovalLedger",
     "CancellationSignal",
     "CheckpointRepository",
+    "ContinuableExtractionError",
     "DecisionRepository",
     "EventSink",
     "ExecutionContextError",
@@ -108,6 +116,7 @@ __all__ = [
     "ToolExecutor",
     "Verifier",
     "__version__",
+    "accept_extraction_range",
     "allowed_transitions",
     "build_resumed_plan",
     "can_transition",
@@ -115,6 +124,7 @@ __all__ = [
     "canonical_digest",
     "create_approval_request",
     "create_checkpoint",
+    "create_continuable_extraction",
     "create_execution_context",
     "create_external_operation",
     "create_provenance_bundle",
@@ -134,6 +144,8 @@ __all__ = [
     "transition_external_operation",
     "translate_plan_v0_to_v1",
     "validate_artifact_storage_identity",
+    "validate_continuable_extraction",
+    "validate_continuable_extraction_receipt",
     "validate_execution_context",
     "validate_execution_plan",
     "validate_external_operation",

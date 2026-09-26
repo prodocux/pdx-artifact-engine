@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/continuable_extraction_receipt.v1.schema.json",
+  "title": "PDX continuable extraction terminal receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "operation_id", "source_artifact_digest", "source_sha256", "media_type", "parser_contract", "capability_digest", "capability_authority", "capability_verified", "state", "terminal_reason", "coverage", "omissions", "ocr_disposition", "final_revision", "accepted_ranges_digest", "aggregate_artifact_digest", "consumed", "limits", "receipt_digest"],
+  "properties": {
+    "schema_version": {"const": "pdx_continuable_extraction_receipt_v1"},
+    "operation_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "source_artifact_digest": {"$ref": "#/$defs/sha256"},
+    "source_sha256": {"$ref": "#/$defs/sha256"},
+    "media_type": {"type": "string", "minLength": 1, "maxLength": 255},
+    "parser_contract": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 128},
+        "version": {"type": "string", "minLength": 1, "maxLength": 64}
+      }
+    },
+    "capability_digest": {"$ref": "#/$defs/sha256"},
+    "capability_authority": {"enum": ["kernel_adapter", "caller_assertion"]},
+    "capability_verified": {"type": "boolean"},
+    "state": {"enum": ["completed", "failed", "cancelled", "timed_out"]},
+    "terminal_reason": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$"},
+    "coverage": {"enum": ["complete", "partial_known", "partial_unknown", "unsupported"]},
+    "omissions": {
+      "type": "array", "maxItems": 64, "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 128}
+    },
+    "final_revision": {"type": "integer", "minimum": 1},
+    "accepted_ranges_digest": {"$ref": "#/$defs/sha256"},
+    "aggregate_artifact_digest": {"$ref": "#/$defs/sha256"},
+    "ocr_disposition": {"enum": ["unavailable", "not_performed", "performed_partial", "performed_complete", "not_evaluated"]},
+    "consumed": {"$ref": "#/$defs/counters"},
+    "limits": {"$ref": "#/$defs/counters"},
+    "receipt_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "counters": {
+      "type": "object", "additionalProperties": false,
+      "required": ["ranges", "blocks", "bytes", "retries"],
+      "properties": {
+        "ranges": {"type": "integer", "minimum": 0},
+        "blocks": {"type": "integer", "minimum": 0},
+        "bytes": {"type": "integer", "minimum": 0},
+        "retries": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

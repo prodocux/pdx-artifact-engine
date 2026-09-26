@@ -1,0 +1,50 @@
+{
+  "schema_version": "pdx_continuable_extraction_freeze_v1",
+  "status": "frozen",
+  "frozen_at": "2026-09-26",
+  "candidate_version": "0.3.0a10",
+  "implementation_authorized": true,
+  "publication_authorized": false,
+  "schemas": {
+    "continuable_extraction.v1.schema.json": "05a469e881988419616562ff7a1ec72c2d85525e6ff7d2879ca69f6d376f89e2",
+    "continuable_extraction_receipt.v1.schema.json": "b588a9a82047ffe669e29e7ab6024fd6d48f1e952152ddd6953a16d4d0cad86a"
+  },
+  "semantic_validators": {
+    "pdx_artifact_core/continuable_extraction.py": "1d36e0dafbc43a5dccca5d1443ad3d1b6c059c92b636d84d4d5b27f4844054e9",
+    "pdx_artifact_engine/continuable_extraction/service.py": "0b3831c1334d4ef9fca54496a0fbe06681adf4a0b3990e37740a4c80180404dc"
+  },
+  "adapter": {
+    "http_client.py": "c549e1f9d08d3c58d79bbd90cb6783e71bfe8687d5f60832a1428eb5d1a8b220",
+    "verified_projection.py": "7b1734127e904942b66a4f6dd602a988026cb7826bee6996dbbd1c9da11a83ae",
+    "formats": {
+      "pdf": "prodocux_pdf_page_projection_v1@1",
+      "csv": "prodocux_csv_row_projection_v1@1",
+      "xlsx": "prodocux_xlsx_worksheet_row_projection_v1@1",
+      "pptx": "prodocux_pptx_slide_projection_v1@1",
+      "image": "prodocux_image_tile_projection_v1@1"
+    }
+  },
+  "kernel_contracts": {
+    "prodocux_projection_cursor_v1.json": "35508a545c04d458dc374fa2c4e66c7215789b8f711f7a1edbda5167c99bb33c",
+    "prodocux_pdf_continuable_projection_v1.json": "e22d56a8a9c51412782c89b879540dab4821f614fa1ca28671eed8a5d2ddd565",
+    "prodocux_csv_continuable_projection_v1.json": "4bd5aa6ddc8ffaebd19f3eef05bb4aa6934ba27dd544ff2539afeb3582f154f3",
+    "prodocux_xlsx_continuable_projection_v1.json": "f161ac2317e01fd6f63f8e6f0b056ff7af7c00a8da0b1ee18151cc16c5b60d09",
+    "prodocux_pptx_continuable_projection_v1.json": "3446f4a327b9afa4b315de1b9d28d84c02275726dfb49dd0d2656648d66b86c6",
+    "prodocux_image_tile_projection_v1.json": "76148e2fea6c9c9678601e34f2c4274bb9299252b5db341af9f44517ddb11d8f",
+    "prodocux_projection_capabilities_v1.json": "a4a3af64e2b14c7343809c2b9b9a148f74ceef08fd673ee098b80105662c7d2a",
+    "semantic_validator.py": "bd2915a3c7e6aebaeb667b2396428ea02a63afd8509c4c057fd7531b3d5d700d"
+  },
+  "evidence": {
+    "evidence-v1.json": "6041684a16cbfb1a5a3fe13d12664cd46cfbaf7a706a289d1f8b515dd5b12cb0"
+  },
+  "legacy_compatibility": {
+    "pdx_artifact_engine_release_a5.json": "680047ce32085365f50e65abb39ebdce2436e7aae10ae239c46e1eaabc0fb6d0",
+    "pdx_artifact_engine_release_a6.json": "b66aa6774f85b25ef34cec3fb19359072b9332c699993637950a177c95eebe20",
+    "pdx_prodocux_compatibility_v1.json": "0b860fc0a5693a96083de1560ff030398e762c9f0c9dc4c0975eceb1d6ca1303",
+    "pdx_prodocux_compatibility_v2.json": "c301aba7442b150b8186ce3b7cd8da99e9470ad0592c13f7f2818d38fd5f378e",
+    "pdx_prodocux_compatibility_v3.json": "9591ab363472db78efb64265e3050fa4626be43783f848d0888e732898486d2b",
+    "pdx_prodocux_release_rc3_a3.json": "78814f01968eb28f69278219727f3aeb8a6a57736b3623a3db7d8e6c8c658f68",
+    "pdx_prodocux_release_rc4_a4.json": "15f2141ed56ddfda9aba2f6bceb20233ed4adc4f05fb39bfc5072a08d3a1f619",
+    "pdx_prodocux_release_v1.json": "1f7e87f4099265b3730ead8876542ad2120c58d23c9664a32d0b2ffb5f3d4b83"
+  }
+}
