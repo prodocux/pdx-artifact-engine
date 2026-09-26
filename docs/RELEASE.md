@@ -57,6 +57,22 @@ token belongs in repository secrets. Future GitHub Releases start the workflow
 automatically; an existing coordinated release can be promoted by manually
 running **Publish release assets to PyPI** with its exact tag.
 
+The release workflow intentionally does not edit `README.md` or open a pull
+request. After the workflow has confirmed that the exact Engine version is
+available from the PyPI JSON API, update the verified-release block manually in
+a README-only commit:
+
+```powershell
+python scripts/update_readme_after_publish.py --version <version> --tag <tag> --commit <release-commit>
+git add README.md
+git commit -m "docs(readme): mark <tag> as published"
+git push origin main
+```
+
+Do not run this step before PyPI exposes the release. Review the staged diff and
+confirm that only `README.md` changed before committing. Media-only publication
+does not use the Engine README updater.
+
 The coordinated packages containing the additive ProDocuX deterministic
 extract/render adapter are:
 
