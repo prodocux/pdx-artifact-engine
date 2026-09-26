@@ -82,7 +82,7 @@ def test_engine_release_candidate_preserves_bundled_core_a4_version() -> None:
     assert frozen_surface_version == "0.3.0a1"
     assert {
         engine_metadata["project"]["version"], pdx_artifact_engine.__version__
-    } == {"0.3.0a10"}
+    } == {"0.3.0a11"}
     assert {
         core_metadata["project"]["version"], pdx_artifact_core.__version__
     } == {"0.3.0a4"}

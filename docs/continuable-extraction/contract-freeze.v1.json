@@ -2,7 +2,7 @@
   "schema_version": "pdx_continuable_extraction_freeze_v1",
   "status": "frozen",
   "frozen_at": "2026-09-26",
-  "candidate_version": "0.3.0a10",
+  "candidate_version": "0.3.0a11",
   "implementation_authorized": true,
   "publication_authorized": false,
   "schemas": {
@@ -14,7 +14,7 @@
     "pdx_artifact_engine/continuable_extraction/service.py": "0b3831c1334d4ef9fca54496a0fbe06681adf4a0b3990e37740a4c80180404dc"
   },
   "adapter": {
-    "http_client.py": "c549e1f9d08d3c58d79bbd90cb6783e71bfe8687d5f60832a1428eb5d1a8b220",
+    "http_client.py": "265471822f4a9b4647668442bbb7db0c857d3e3fef7bfaf422273fc5e6b51bcf",
     "verified_projection.py": "7b1734127e904942b66a4f6dd602a988026cb7826bee6996dbbd1c9da11a83ae",
     "formats": {
       "pdf": "prodocux_pdf_page_projection_v1@1",

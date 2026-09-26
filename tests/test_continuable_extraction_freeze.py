@@ -9,13 +9,17 @@ FREEZE = ROOT / "docs/continuable-extraction/contract-freeze.v1.json"
 
 
 def _sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    # Git stores these public contracts with LF line endings, while a Windows
+    # checkout may materialize CRLF. Hash canonical UTF-8/LF text so the
+    # freeze assertion is stable across supported CI and developer hosts.
+    canonical = path.read_text(encoding="utf-8").replace("\r\n", "\n")
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def test_continuable_extraction_freeze_matches_public_bytes() -> None:
     manifest = json.loads(FREEZE.read_text(encoding="utf-8"))
     assert manifest["status"] == "frozen"
-    assert manifest["candidate_version"] == "0.3.0a10"
+    assert manifest["candidate_version"] == "0.3.0a11"
     assert manifest["publication_authorized"] is False
     schema_root = ROOT / "packages/pdx_artifact_core/src/pdx_artifact_core/schemas"
     for name, digest in manifest["schemas"].items():
