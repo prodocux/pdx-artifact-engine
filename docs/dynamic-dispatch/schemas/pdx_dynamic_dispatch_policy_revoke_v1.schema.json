@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/policy-revoke-v1.json",
+  "title": "PDX governed dynamic dispatch policy revoke request v1 draft",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "request_id", "dispatch_policy_id", "expected_policy_revision_epoch", "expected_policy_digest", "reason_code"],
+  "properties": {
+    "schema_version": {"const": "pdx_dynamic_dispatch_policy_revoke_v1"},
+    "request_id": {"$ref": "common-v1.json#/$defs/id"},
+    "dispatch_policy_id": {"$ref": "common-v1.json#/$defs/id"},
+    "expected_policy_revision_epoch": {"type": "integer", "minimum": 1},
+    "expected_policy_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "reason_code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+    "reason": {"type": "string", "maxLength": 512},
+    "caller_authority_id": {"$ref": "common-v1.json#/$defs/principal"}
+  }
+}

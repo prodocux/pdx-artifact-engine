@@ -1,0 +1,12 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_canonicalization_vectors_v1",
+  "positive": [
+    {"name": "property ordering and Unicode", "input": {"€": "Euro Sign", "\r": "Carriage Return", "1": "One", "😀": "Emoji", "ö": "Latin Small Letter O With Diaeresis"}, "canonical": "{\"\\r\":\"Carriage Return\",\"1\":\"One\",\"ö\":\"Latin Small Letter O With Diaeresis\",\"€\":\"Euro Sign\",\"😀\":\"Emoji\"}", "sha256": "35bc1121f88942f9e16b544d5467ceeae99038006767ebaa3a31e93cea02d9dd"},
+    {"name": "ECMAScript number normalization", "input": [333333333.33333329, 1e+30, 4.50, 0.002, 1e-27], "canonical": "[333333333.3333333,1e+30,4.5,0.002,1e-27]", "sha256": "7c6bc86d861387d823ae596b79ca0b26567dddc22a77acb1f4e06d441f555adf"},
+    {"name": "opaque secret reference remains opaque", "input": {"credential": "secret-ref://vault/tokens/key-1", "expression": "1+1"}, "canonical": "{\"credential\":\"secret-ref://vault/tokens/key-1\",\"expression\":\"1+1\"}", "sha256": "8de23d51a963b1102122f1a6d44d876bd7d434c948bf1f9259685373a44d62c9"}
+  ],
+  "negative": [
+    {"name": "lone high surrogate", "encoded_json": "\"\\ud800\"", "code": "CANONICAL_JSON_INVALID"},
+    {"name": "lone low surrogate key", "encoded_json": "{\"\\udc00\":1}", "code": "CANONICAL_JSON_INVALID"}
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_activation_response_v1",
+  "activation_request_id": "activation_request_001",
+  "workflow_job_id": "workflow_dispatch_001",
+  "workflow_step_id": "step_dispatch_001",
+  "dispatch_attempt_id": "dispatch_attempt_001",
+  "authoritative_activation_id": "activation_001",
+  "run_b_id": "run_execution_001",
+  "run_b_plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "idempotency_binding_digest": "ad53dbb4ad5c087098f4e08d4bee1aa999e99453eade57b1702c28cd43ae56b7",
+  "result": "created",
+  "created_at": "2026-10-03T12:02:00Z"
+}

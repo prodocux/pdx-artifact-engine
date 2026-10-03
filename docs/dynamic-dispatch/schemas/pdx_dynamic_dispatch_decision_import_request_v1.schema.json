@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/decision-import-request-v1.json",
+  "title": "PDX external decision receipt import request v1 draft",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "request_id", "workflow_job_id", "workflow_step_id", "source_manifest_artifact", "decision_receipt"],
+  "properties": {
+    "schema_version": {"const": "pdx_dynamic_dispatch_decision_import_request_v1"},
+    "request_id": {"$ref": "common-v1.json#/$defs/id"},
+    "workflow_job_id": {"$ref": "common-v1.json#/$defs/id"},
+    "workflow_step_id": {"$ref": "common-v1.json#/$defs/id"},
+    "source_manifest_artifact": {"$ref": "common-v1.json#/$defs/artifact"},
+    "decision_receipt": {"$ref": "decision-receipt-v1.json"},
+    "caller_authority_id": {"$ref": "common-v1.json#/$defs/principal"}
+  }
+}

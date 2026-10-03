@@ -1,0 +1,8 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_error_v1",
+  "code": "DISPATCH_POLICY_REVOKED",
+  "message": "dispatch policy is revoked",
+  "retryable": false,
+  "reconciliation_required": false,
+  "receipt_id": "dispatch_rejection_001"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_step_projection_v1",
+  "workflow_job_id": "workflow_dispatch_001",
+  "workflow_step_id": "step_dispatch_001",
+  "plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "policy": {"dispatch_policy_id": "policy_dispatch_001", "policy_revision_epoch": 1, "policy_digest": "4444444444444444444444444444444444444444444444444444444444444444", "policy_status": "active"},
+  "phase": "terminal",
+  "attempt_count": 1,
+  "active_activation": null,
+  "terminal_receipt": {"receipt_id": "dispatch_receipt_001", "status": "completed", "receipt_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "receipt_cas_published": true},
+  "reconciliation_required": false,
+  "updated_at": "2026-10-03T12:03:00Z"
+}

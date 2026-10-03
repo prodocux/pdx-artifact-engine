@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/tool-proposal-v1.json",
+  "title": "PDX governed dynamic dispatch tool proposal v1 draft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool_name", "arguments"],
+  "properties": {
+    "schema_version": {"const": "pdx_dynamic_dispatch_tool_proposal_v1"},
+    "tool_name": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "arguments": {"type": "object", "maxProperties": 64}
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_activation_request_v1",
+  "activation_request_id": "activation_request_001",
+  "workflow_job_id": "workflow_dispatch_001",
+  "workflow_step_id": "step_dispatch_001",
+  "idempotency_key": "dispatch-idempotency-001",
+  "source_run_id": "run_decision_001",
+  "source_plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "decision_receipt_id": "decision_receipt_001",
+  "decision_receipt_digest": "1a00c56f61d7456ede3a47b3ab207e2be02bcfe21f43319c6e6c84e77f36b285",
+  "dispatch_policy_id": "policy_dispatch_001",
+  "policy_digest_assertion": "df78dc90a572d00b9cd0e2245ae3e5ad64a6a008af77efbbf530944201e33a31",
+  "policy_revision_epoch": 1,
+  "caller_authority_id": "control-plane-01"
+}

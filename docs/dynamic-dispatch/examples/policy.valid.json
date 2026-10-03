@@ -1,0 +1,30 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_policy_v1",
+  "dispatch_policy_id": "policy_dispatch_001",
+  "workflow_job_id": "workflow_dispatch_001",
+  "workflow_step_id": "step_dispatch_001",
+  "run_a_plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "decision_step_id": "step_decision_001",
+  "policy_status": "active",
+  "policy_revision_epoch": 1,
+  "allowed_tool_names": ["calc"],
+  "allowed_tool_names_digest": "2e746ba7b2bb76facbf07e88a4ed28ec0655e9b492e8c61b9c1e561b0be70d8a",
+  "allowed_tools": [{
+    "name": "calc", "version": "1.0",
+    "skill_definition_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "input_schema_id": "https://example.invalid/schemas/calc-input-v1.json",
+    "input_schema_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "output_schema_id": "https://example.invalid/schemas/calc-output-v1.json",
+    "output_schema_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "verification_hooks_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "deployment": {"kind": "deployment_bundle", "bundle_name": "benchmark-tools", "bundle_version": "1.0.0", "bundle_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "registry_revision": 1, "entrypoint_symbol": "benchmark_tools:calc", "identity_digest": "f6350865543beb5a43812d46678347b81147bd96e4b85b7fc71ce6d7d3aaa9d0"},
+    "executor_kind": "in_process", "idempotent_read_only": true
+  }],
+  "frozen_tool_definitions_digest": "587544bf89a45097a2310b6d78ec8796bce830126772722f983310c5b79af1e8",
+  "proposal_limits": {"max_depth": 8, "max_properties_per_object": 64, "max_total_keys": 256, "max_canonical_bytes": 65536, "max_secret_refs": 8, "max_array_length": 1024},
+  "expires_at": null,
+  "revoked_at": null,
+  "registered_by": "control-plane-01",
+  "registered_at": "2026-10-03T12:00:00Z",
+  "policy_digest": "df78dc90a572d00b9cd0e2245ae3e5ad64a6a008af77efbbf530944201e33a31"
+}

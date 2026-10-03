@@ -1,0 +1,17 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_route_mapping_v1",
+  "authority": {
+    "principal_source": "authenticated_transport",
+    "request_body_principal_authoritative": false,
+    "workflow_authority": "runtime_provider_workflow"
+  },
+  "routes": [
+    {"operation": "register_policy", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/steps/{workflow_step_id}/dispatch/policy", "request_schema": "pdx_dynamic_dispatch_policy_register_request_v1", "success_schema": "pdx_dynamic_dispatch_policy_v1"},
+    {"operation": "revoke_policy", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/steps/{workflow_step_id}/dispatch/policy/revoke", "request_schema": "pdx_dynamic_dispatch_policy_revoke_v1", "success_schema": "pdx_dynamic_dispatch_step_projection_v1"},
+    {"operation": "import_external_decision_receipt", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/steps/{workflow_step_id}/dispatch/decision-receipt", "request_schema": "pdx_dynamic_dispatch_decision_import_request_v1", "success_schema": "pdx_dynamic_dispatch_step_projection_v1"},
+    {"operation": "activate", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/steps/{workflow_step_id}/dispatch/activations", "request_schema": "pdx_dynamic_dispatch_activation_request_v1", "success_schema": "pdx_dynamic_dispatch_activation_response_v1"},
+    {"operation": "get_step_projection", "method": "GET", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/steps/{workflow_step_id}/dispatch", "request_schema": null, "success_schema": "pdx_dynamic_dispatch_step_projection_v1"},
+    {"operation": "get_dispatch_receipt", "method": "GET", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/steps/{workflow_step_id}/dispatch/receipt", "request_schema": null, "success_schema": "pdx_dynamic_dispatch_receipt_v1"},
+    {"operation": "reconcile_dispatch", "method": "POST", "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/steps/{workflow_step_id}/dispatch/reconcile", "request_schema": "pdx_dynamic_dispatch_reconcile_v1", "success_schema": "pdx_dynamic_dispatch_step_projection_v1"}
+  ]
+}

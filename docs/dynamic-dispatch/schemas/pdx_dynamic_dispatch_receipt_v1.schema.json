@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/receipt-v1.json",
+  "title": "PDX governed dynamic dispatch terminal receipt v1 draft",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "receipt_id", "activation_request_id", "authoritative_activation_id", "workflow_job_id", "workflow_step_id", "dispatch_attempt_id", "run_b_id", "run_b_plan_digest", "idempotency_key_digest", "idempotency_binding_digest", "dispatch_policy_id", "policy_revision_epoch", "policy_digest", "allowed_tool_names_digest", "frozen_tool_definitions_digest", "resolved_tool", "arguments_digest", "status", "error_code", "execution_occurred", "input_schema_verified", "output_schema_verified", "receipt_cas_published", "executor_output_artifacts_published", "artifact_identities", "reconciliation_required", "recorded_at", "receipt_digest"],
+  "properties": {
+    "schema_version": {"const": "pdx_dynamic_dispatch_receipt_v1"},
+    "receipt_id": {"$ref": "common-v1.json#/$defs/id"},
+    "activation_request_id": {"$ref": "common-v1.json#/$defs/id"},
+    "authoritative_activation_id": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"},
+    "workflow_job_id": {"$ref": "common-v1.json#/$defs/id"},
+    "workflow_step_id": {"$ref": "common-v1.json#/$defs/id"},
+    "dispatch_attempt_id": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"},
+    "run_b_id": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"},
+    "run_b_plan_digest": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "idempotency_key_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "idempotency_binding_digest": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "dispatch_policy_id": {"$ref": "common-v1.json#/$defs/id"},
+    "policy_revision_epoch": {"type": "integer", "minimum": 1},
+    "policy_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "allowed_tool_names_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "frozen_tool_definitions_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "resolved_tool": {"type": ["string", "null"], "maxLength": 128},
+    "arguments_digest": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "status": {"$ref": "common-v1.json#/$defs/terminalStatus"},
+    "error_code": {"oneOf": [{"$ref": "common-v1.json#/$defs/errorCode"}, {"type": "null"}]},
+    "execution_occurred": {"type": "boolean"},
+    "input_schema_verified": {"type": "boolean"},
+    "output_schema_verified": {"type": "boolean"},
+    "receipt_cas_published": {"type": "boolean"},
+    "executor_output_artifacts_published": {"type": "boolean"},
+    "artifact_identities": {"type": "array", "maxItems": 256, "items": {"$ref": "common-v1.json#/$defs/artifact"}},
+    "cancellation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["phase", "termination_result", "external_outcome"],
+      "properties": {
+        "phase": {"enum": ["not_started", "running"]},
+        "termination_result": {"enum": ["clean_abort_not_started", "process_tree_terminated", "unresponsive_kill", "cooperative_stop", "termination_unconfirmed"]},
+        "external_outcome": {"enum": ["none", "external_side_effects_possible", "unknown"]}
+      }
+    },
+    "reconciliation_required": {"type": "boolean"},
+    "recorded_at": {"$ref": "common-v1.json#/$defs/timestamp"},
+    "receipt_digest": {"$ref": "common-v1.json#/$defs/digest"}
+  },
+  "allOf": [
+    {"if": {"properties": {"status": {"const": "completed"}}}, "then": {"properties": {"error_code": {"type": "null"}, "execution_occurred": {"const": true}, "input_schema_verified": {"const": true}, "output_schema_verified": {"const": true}, "receipt_cas_published": {"const": true}, "executor_output_artifacts_published": {"const": true}, "reconciliation_required": {"const": false}}}},
+    {"if": {"properties": {"status": {"enum": ["executed_output_invalid", "executor_failed"]}}}, "then": {"properties": {"execution_occurred": {"const": true}, "receipt_cas_published": {"const": true}, "executor_output_artifacts_published": {"const": false}}}},
+    {"if": {"properties": {"status": {"type": "string", "pattern": "^rejected_"}}}, "then": {"properties": {"authoritative_activation_id": {"type": "null"}, "dispatch_attempt_id": {"type": "null"}, "run_b_id": {"type": "null"}, "run_b_plan_digest": {"type": "null"}, "execution_occurred": {"const": false}, "receipt_cas_published": {"const": false}, "executor_output_artifacts_published": {"const": false}, "artifact_identities": {"type": "array", "maxItems": 0}}}},
+    {"if": {"properties": {"status": {"const": "cancelled"}}}, "then": {"required": ["cancellation"], "properties": {"cancellation": {"type": "object"}, "receipt_cas_published": {"const": true}, "executor_output_artifacts_published": {"const": false}}}}
+  ]
+}

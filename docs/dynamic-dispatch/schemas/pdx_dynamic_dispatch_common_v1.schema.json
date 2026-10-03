@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/common-v1.json",
+  "title": "PDX governed dynamic dispatch common definitions v1 draft",
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "principal": {"type": "string", "minLength": 3, "maxLength": 256},
+    "executorKind": {"enum": ["subprocess", "oci", "in_process"]},
+    "deploymentIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "bundle_name", "bundle_version", "bundle_digest", "registry_revision", "entrypoint_symbol", "identity_digest"],
+      "properties": {
+        "kind": {"enum": ["wheel", "oci", "deployment_bundle"]},
+        "bundle_name": {"type": "string", "minLength": 1, "maxLength": 256},
+        "bundle_version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "bundle_digest": {"$ref": "#/$defs/digest"},
+        "registry_revision": {"type": "integer", "minimum": 1},
+        "entrypoint_symbol": {"type": "string", "minLength": 1, "maxLength": 512},
+        "identity_digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "frozenTool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "skill_definition_digest", "input_schema_id", "input_schema_digest", "output_schema_id", "output_schema_digest", "verification_hooks_digest", "deployment", "executor_kind", "idempotent_read_only"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+        "version": {"type": "string", "minLength": 1, "maxLength": 64},
+        "skill_definition_digest": {"$ref": "#/$defs/digest"},
+        "input_schema_id": {"type": "string", "format": "uri", "maxLength": 1024},
+        "input_schema_digest": {"$ref": "#/$defs/digest"},
+        "output_schema_id": {"type": "string", "format": "uri", "maxLength": 1024},
+        "output_schema_digest": {"$ref": "#/$defs/digest"},
+        "verification_hooks_digest": {"$ref": "#/$defs/digest"},
+        "deployment": {"$ref": "#/$defs/deploymentIdentity"},
+        "executor_kind": {"$ref": "#/$defs/executorKind"},
+        "idempotent_read_only": {"type": "boolean"}
+      }
+    },
+    "artifact": {"$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"},
+    "terminalStatus": {
+      "enum": ["completed", "executed_output_invalid", "executor_failed", "rejected_tool_not_allowed", "rejected_unknown_skill", "rejected_skill_definition_mismatch", "rejected_input_schema_invalid", "rejected_idempotency_conflict", "rejected_policy_mismatch", "synthesis_failed", "cancelled"]
+    },
+    "errorCode": {
+      "enum": ["DISPATCH_CALLER_UNAUTHORIZED", "DISPATCH_CALLER_MISMATCH", "DISPATCH_POLICY_NOT_FOUND", "DISPATCH_POLICY_EXPIRED", "DISPATCH_POLICY_REVOKED", "DISPATCH_POLICY_MISMATCH", "DISPATCH_DECISION_NOT_FOUND", "DISPATCH_DECISION_NOT_TERMINAL", "DISPATCH_DECISION_BINDING_MISMATCH", "DISPATCH_PROPOSAL_BOUNDS_EXCEEDED", "DISPATCH_TOOL_NOT_ALLOWED", "DISPATCH_UNKNOWN_SKILL", "DISPATCH_SKILL_DEFINITION_MISMATCH", "DISPATCH_INPUT_SCHEMA_INVALID", "DISPATCH_IDEMPOTENCY_CONFLICT", "DISPATCH_SYNTHESIS_FAILED", "DISPATCH_OUTPUT_SCHEMA_INVALID", "DISPATCH_EXECUTOR_FAILED", "DISPATCH_CANCELLED"]
+    }
+  }
+}

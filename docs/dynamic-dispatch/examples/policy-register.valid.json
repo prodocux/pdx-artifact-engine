@@ -1,0 +1,35 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_policy_register_request_v1",
+  "request_id": "request_policy_001",
+  "dispatch_policy_id": "policy_dispatch_001",
+  "workflow_job_id": "workflow_dispatch_001",
+  "workflow_step_id": "step_dispatch_001",
+  "run_a_plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "decision_step_id": "step_decision_001",
+  "policy_revision_epoch": 1,
+  "allowed_tool_names": ["calc"],
+  "allowed_tools": [{
+    "name": "calc",
+    "version": "1.0",
+    "skill_definition_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "input_schema_id": "https://example.invalid/schemas/calc-input-v1.json",
+    "input_schema_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "output_schema_id": "https://example.invalid/schemas/calc-output-v1.json",
+    "output_schema_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "verification_hooks_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "deployment": {
+      "kind": "deployment_bundle",
+      "bundle_name": "benchmark-tools",
+      "bundle_version": "1.0.0",
+      "bundle_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "registry_revision": 1,
+      "entrypoint_symbol": "benchmark_tools:calc",
+      "identity_digest": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "executor_kind": "in_process",
+    "idempotent_read_only": true
+  }],
+  "proposal_limits": {"max_depth": 8, "max_properties_per_object": 64, "max_total_keys": 256, "max_canonical_bytes": 65536, "max_secret_refs": 8, "max_array_length": 1024},
+  "expires_at": null,
+  "caller_authority_id": "control-plane-01"
+}

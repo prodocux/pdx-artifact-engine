@@ -1,0 +1,50 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_contract_freeze_v1",
+  "status": "frozen",
+  "frozen_on": "2026-10-03",
+  "implementation_authorized": false,
+  "release_version": null,
+  "pre_freeze_manifest": {
+    "path": "draft-manifest.json",
+    "sha256": "a423cdd1fb439301ba215686031c668f315c25f29e3b42e893009041ece6fd3a"
+  },
+  "schemas": {
+    "pdx_dynamic_dispatch_activation_request_v1.schema.json": "ad70f2c492212ba64f27b5b82a7cf27549ab95486ce69c396e49efa3e0c1a788",
+    "pdx_dynamic_dispatch_activation_response_v1.schema.json": "e1569d759dd4f85f47acb2a465fd074836165a161ef5347dab1ede9742c0d303",
+    "pdx_dynamic_dispatch_common_v1.schema.json": "93d0cf7e0b1168beb8ace8999026891f1e78b65c3ffe1ade0a3045a2a271290d",
+    "pdx_dynamic_dispatch_decision_import_request_v1.schema.json": "7b772c6db29e926ae54497b4b71665aa07e32fae69d67df60774f0b579fdd37a",
+    "pdx_dynamic_dispatch_decision_receipt_v1.schema.json": "247fe6cce26f1f57ebdfe5b9073c5dc45f915b500c611565683ac55eeafce034",
+    "pdx_dynamic_dispatch_error_v1.schema.json": "a4765a6fd9dc9bfce7bb0a519710a7c774f6c3aa4303ce67429312a99e711aae",
+    "pdx_dynamic_dispatch_policy_register_request_v1.schema.json": "b353e9cf1ed093866248029c5d76c8539eb069510edc75bb843e7ab669884c4d",
+    "pdx_dynamic_dispatch_policy_revoke_v1.schema.json": "db359ef643169b4ed8a5ba392a5242de03fbad68f763c89254f5e0836074cb27",
+    "pdx_dynamic_dispatch_policy_v1.schema.json": "99b26615e8aef5a0f52199e66ed6e6edc7d8c0f5424d25830ad9d57c6dca4bf3",
+    "pdx_dynamic_dispatch_receipt_v1.schema.json": "93fe3673bdd52249989d016fee03b1453b6a9714e41acbebaea7691f1486cb5c",
+    "pdx_dynamic_dispatch_reconcile_v1.schema.json": "233b52926677051020d8409689b66ae7dcadf9193d79f7f5844fb1cd76116e76",
+    "pdx_dynamic_dispatch_route_mapping_v1.schema.json": "88020b7135d7dffc929171d9f7baa4befbdf3bb31aee4f47f0cdc31d313c67e4",
+    "pdx_dynamic_dispatch_step_projection_v1.schema.json": "e0208240ad7b5a9fc786aa244edbe77decefd15d310a5757f0d9e9b478d34cff",
+    "pdx_dynamic_dispatch_tool_proposal_v1.schema.json": "4690ca23e3706f1e2b54fd6a8d739f932bd71c4ff0b4926953a8d4fa36538f50"
+  },
+  "authority": {
+    "route-mapping.json": "8afa1f46bc5c8f23b51bb3a2210512bb975b69ecf7ba93ca7226d672c53ae4d5",
+    "semantic-validator.mjs": "8a801dbcb48745a8afc97d1a9ea382ddf288d34a628b4bd4c317e10d034c179c",
+    "canonicalization-vectors.v1.json": "ca2ca5e236193fda863c86c0cc2db9b99175a885db6eaa60a30f7fb2bd4f8d4e",
+    "verify-ajv-strict.mjs": "75ed6a7f057a6c6b33319a4a31ef9e657571fbffc95700bcb07a19e45fff20e9",
+    "SEMANTICS.md": "4071177ab8f499e0252b558721b42c8daa625a52322808bee617d2f20f6ced01"
+  },
+  "examples": {
+    "activation-request.valid.json": "bc05e0183645b906dda865b97a3fabe4d200cce54e19052b0efc72a390fb7293",
+    "activation-response.valid.json": "f599a34c42c4370ac1118821aad644f5c5c27714ee3456a502f4b7418a333ff1",
+    "decision-receipt.valid.json": "e26a990356dc930abbbd432de19f6ba6dc8b97192470afb66da8dcfeba880a1f",
+    "error.valid.json": "677b108b30b91600e103e88df327d09f6ef9fd4ddd2982cbfe86990253cd8270",
+    "policy-register.valid.json": "db5fcd88046b22994cf7529992f203af8687cab1beddaea23791932af71b6a85",
+    "policy.valid.json": "f7b972800edec9a74c2f8d44a8dc733b9c52bd6467562417c006fb3e741282bc",
+    "receipt-completed.valid.json": "2466213734d9f6c50c671b46058825a3c4908421d6661a0c73513274b695c6af",
+    "receipt-rejected.valid.json": "db35ac67d9ffc963ec25f383479892547e7c0a693506c28815c83589a8a3a494",
+    "step-projection.valid.json": "9cb95689c1e9f949e3379cd9deaba993820ca5c5763e7a4545d755be86aed562"
+  },
+  "validation": {
+    "python_contract_and_semantic_tests": "12 passed",
+    "ajv_2020_12_strict": "14/14 passed",
+    "canonical_parity": "3 positive + 2 negative passed"
+  }
+}

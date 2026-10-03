@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/reconcile-v1.json",
+  "title": "PDX governed dynamic dispatch reconcile request v1 draft",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "request_id", "expected_dispatch_attempt_id", "reason"],
+  "properties": {
+    "schema_version": {"const": "pdx_dynamic_dispatch_reconcile_v1"},
+    "request_id": {"$ref": "common-v1.json#/$defs/id"},
+    "expected_dispatch_attempt_id": {"$ref": "common-v1.json#/$defs/id"},
+    "reason": {"enum": ["host_restart", "cancellation", "external_outcome", "receipt_recovery"]},
+    "caller_authority_id": {"$ref": "common-v1.json#/$defs/principal"}
+  }
+}
