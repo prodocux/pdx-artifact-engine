@@ -130,4 +130,5 @@
   counterproposal are recorded in `docs/dynamic-dispatch/`. Bilateral review
   accepted the 14-schema surface, semantic validator, canonical vectors and
   route mapping; `contract-freeze.v1.json` is the authoritative freeze record.
+- Implementation: signed-off candidate `a58663734dde245bfbb8506699c1d3d0e3cdc1a6`
 - Shipped in: not shipped

@@ -1,6 +1,6 @@
 # ER-002 implementation candidate
 
-Status: `implementation_candidate_not_signed_off`
+Status: `implementation_candidate_signed_off`
 
 This candidate implements the frozen governed dynamic-dispatch contracts and
 ERRATUM-001 parent-workflow authority. It does not assign a release version,
@@ -25,6 +25,7 @@ executors. A worker calls `run_next_activation()`; the Engine atomically fences
 competing workers before invoking the registered executor.
 
 Review evidence and file digests are recorded in
-`implementation-candidate.v1.json`. Demand-side sign-off is required before a
-version, tag, wheel publication or downstream adapter implementation is
-authorized.
+`implementation-candidate.v1.json`. Demand-side review reproduced the local
+wheel, 19 frozen schemas and the complete regression suite. That sign-off
+qualifies the implementation for release-candidate preparation; it does not
+authorize a tag, wheel publication or downstream adapter implementation.

@@ -1,6 +1,6 @@
 {
   "schema_version": "pdx_dynamic_dispatch_implementation_candidate_v1",
-  "status": "implementation_candidate_not_signed_off",
+  "status": "implementation_candidate_signed_off",
   "contract_freeze_commit": "0f8422e61e422f6cded74ec6629dced5c16d138c",
   "contract_freeze_manifest_sha256": "1cbbb29e504f61ee74eb940129c6b11da4e46f8bec48a88ef7ba86af14ec0a9f",
   "erratum_freeze_commit": "ddf14ce3dde5115093ebbbc0516066f0078b84b9",
@@ -37,7 +37,7 @@
     "isolated_pip_check": "passed"
   },
   "governance": {
-    "demand_side_sign_off": false,
+    "demand_side_sign_off": true,
     "version_assignment_authorized": false,
     "commit_authorized": true,
     "push_authorized": false,
