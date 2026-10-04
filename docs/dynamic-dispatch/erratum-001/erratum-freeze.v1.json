@@ -1,0 +1,46 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_erratum_001_freeze_v1",
+  "status": "frozen",
+  "frozen_on": "2026-10-04",
+  "implementation_authorized": true,
+  "release_version": null,
+  "parent_freeze": {
+    "commit": "0f8422e61e422f6cded74ec6629dced5c16d138c",
+    "manifest_path": "../contract-freeze.v1.json",
+    "manifest_sha256": "1cbbb29e504f61ee74eb940129c6b11da4e46f8bec48a88ef7ba86af14ec0a9f"
+  },
+  "reviewed_candidate": {
+    "path": "candidate-manifest.v1.json",
+    "sha256": "203d7b1177d6e1de5eff18cc7bebff30085aa8a9b86d10102f74ce24d8a58f0f"
+  },
+  "authority_documents": {
+    "../ERRATUM-001-PLAN-AUTHORITY.md": "0cfec215ae786cabee6b8ab44b3d1ec330fe6ee24a21aaf8c46ee4e289756044",
+    "../ERRATUM-001-ROUTE-ADDENDUM.md": "9fd35dc26211a6f5504dd325e110b3c02b1d4768721946df73c2da6f9552a1a3"
+  },
+  "schemas": {
+    "pdx_runtime_provider_workflow_create_request_v2.schema.json": "8c28758cd316003a7a0458996a629a96d7f2fcd5ad37012cf404b38dc72d3771",
+    "pdx_runtime_provider_workflow_plan_v2.schema.json": "22143a381d9ae9733637730d199090010d6ea936ea2957aad7968b0bdbc86012",
+    "pdx_runtime_provider_workflow_receipt_v2.schema.json": "287fe142cada4345e9da13e42b72a66eea8ab7f25100f3691f4f4f2c6e34752a",
+    "pdx_runtime_provider_workflow_state_v2.schema.json": "aab2efd817d95d75598c1a5e6af72b9d3a58eb1b3bed347a9040b76eaa37e1d9",
+    "pdx_runtime_provider_route_mapping_v2.schema.json": "5b600512c92f3fa97d8dd35d72fb3f5ef153f127e0b70d6c152ed6860ecb9bfb"
+  },
+  "evidence": {
+    "README.md": "e6789e97e269b016eff94c81d47f84c584aa20cadeb8b8e8f62c68f7ece84827",
+    "examples/route-mapping-v2.valid.json": "746164dcedbad46027db3d3286863d2d401b2cbedb625569cc0bb8dd2b30e333",
+    "examples/workflow-create-request-v2.valid.json": "1fa4aab22f8607b40956843ba390fb24fef048f8f691269b1c4e5fa85daff02c",
+    "examples/workflow-plan-v2.valid.json": "fff85010f62e230a26e506cfea0a82217c5cc399f202e3d571958b0d3058424b",
+    "examples/workflow-receipt-v2.valid.json": "89ad16d84c48560c3ae31a574a4d4b36ac211af3845b8c19177bdf97e771be37",
+    "examples/workflow-state-v2.valid.json": "90d29d2d916dd7bdf70b9a00c8e5cfedc18274d2894eca4a62564f2a3076f6bb",
+    "semantic-validator.mjs": "3a6b7db4cffafc2a8b904c4a9571bb8ed7210182fc0ef4beb54dfb31a6bcbb6f",
+    "verify-ajv-strict.mjs": "facce4e50e2b4ba3bedd4f24f31846b8ba67f0b2ea417c474cdd15fa928ecd24"
+  },
+  "frozen_v1_route_authority": {
+    "../../runtime-provider-workflow/route-mapping.json": "f79ffb93043b5b47965e5f560a5ddee4e179bd496522d0c43000db9a5315bb8c",
+    "../../runtime-provider-workflow/schemas/pdx_runtime_provider_route_mapping_v1.schema.json": "4000d6d632982afd40531fa3225fc97943cbf899d7067aafccf883e2bd2313dc"
+  },
+  "validation": {
+    "python_contract_and_semantic_tests": "21 passed",
+    "ajv_2020_12_strict": "5/5 passed",
+    "release_hygiene": "10 passed"
+  }
+}

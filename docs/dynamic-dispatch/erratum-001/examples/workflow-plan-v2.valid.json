@@ -1,0 +1,18 @@
+{
+  "schema_version": "pdx_runtime_provider_workflow_plan_v2",
+  "workflow_job_id": "workflow_dispatch_001",
+  "task_id": "task_dispatch_001",
+  "run_id": "run_parent_001",
+  "plan_digest": "1b6c9b22e7ab7e4cb691c4fe637e9bdff4e4ecb5cd46721358476540bc3ca67f",
+  "steps": [
+    {"workflow_step_id": "step_decision_001", "step_kind": "builder", "depends_on": [], "max_attempts": 1, "operation_digest": "1111111111111111111111111111111111111111111111111111111111111111"},
+    {"workflow_step_id": "step_dispatch_001", "step_kind": "dispatch", "depends_on": ["step_decision_001"], "max_attempts": 1, "operation_digest": "2222222222222222222222222222222222222222222222222222222222222222", "dispatch_policy_id": "policy_dispatch_001", "run_a_plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "decision_step_id": "step_decision_001"},
+    {"workflow_step_id": "step_review_001", "step_kind": "reviewer", "depends_on": ["step_dispatch_001"], "max_attempts": 1, "operation_digest": "3333333333333333333333333333333333333333333333333333333333333333"}
+  ],
+  "budgets": {"max_provider_attempts": 2, "max_check_attempts": 0, "max_dispatch_attempts": 1, "max_concurrent_steps": 1, "max_repair_iterations": 0, "max_total_runtime_seconds": 600, "max_dispatch_runtime_seconds": 300, "max_total_event_bytes": 1048576, "max_total_artifact_bytes": 10485760, "max_cross_step_artifact_edges": 3, "max_external_operations": 1},
+  "artifact_edges": [
+    {"edge_id": "edge_decision_001", "producer_step_id": "step_decision_001", "consumer_step_id": "step_dispatch_001", "artifact_role": "decision_receipt"},
+    {"edge_id": "edge_dispatch_receipt_001", "producer_step_id": "step_dispatch_001", "consumer_step_id": "step_review_001", "artifact_role": "dispatch_receipt"},
+    {"edge_id": "edge_dispatch_output_001", "producer_step_id": "step_dispatch_001", "consumer_step_id": "step_review_001", "artifact_role": "dispatch_output"}
+  ]
+}

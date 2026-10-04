@@ -1,0 +1,8 @@
+{
+  "schema_version": "pdx_runtime_provider_workflow_state_v2",
+  "workflow_job_id": "workflow_dispatch_001", "task_id": "task_dispatch_001", "run_id": "run_parent_001",
+  "plan_digest": "1b6c9b22e7ab7e4cb691c4fe637e9bdff4e4ecb5cd46721358476540bc3ca67f",
+  "state": "running",
+  "counters": {"provider_attempts": 1, "check_attempts": 0, "dispatch_attempts": 1, "active_steps": 1, "active_dispatches": 1, "repair_iterations": 0, "total_runtime_seconds": 10, "dispatch_runtime_seconds": 3, "total_event_bytes": 128, "total_artifact_bytes": 0, "cross_step_artifact_edges": 1, "external_operations": 1},
+  "updated_at": "2026-10-03T12:00:00Z"
+}

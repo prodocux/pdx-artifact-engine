@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/route-mapping-v2.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "version_authority", "routes"],
+  "properties": {
+    "schema_version": {"const": "pdx_runtime_provider_route_mapping_v2"},
+    "version_authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "caller_selectable", "immutable_after_create"],
+      "properties": {
+        "source": {"const": "stored_workflow_contract_version"},
+        "caller_selectable": {"const": false},
+        "immutable_after_create": {"const": true}
+      }
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["operation", "method", "path", "v1", "v2"],
+        "properties": {
+          "operation": {"enum": ["create", "get_state", "get_plan", "cancel", "reconcile", "claim_provider", "renew_provider_lease", "update_provider", "claim_check", "renew_check_lease", "update_check", "get_receipt"]},
+          "method": {"enum": ["GET", "POST"]},
+          "path": {"type": "string", "pattern": "^/internal/v1/runtime-provider-workflows"},
+          "v1": {"$ref": "#/$defs/schemaPair"},
+          "v2": {"$ref": "#/$defs/schemaPair"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "schemaPair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request_schema", "success_schema"],
+      "properties": {
+        "request_schema": {"type": ["string", "null"]},
+        "success_schema": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
