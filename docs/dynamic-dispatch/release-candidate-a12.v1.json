@@ -1,0 +1,34 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_release_candidate_v1",
+  "status": "release_candidate_not_published",
+  "version": "0.3.0a12",
+  "implementation_commit": "a58663734dde245bfbb8506699c1d3d0e3cdc1a6",
+  "implementation_signoff_commit": "c493c3a",
+  "contract_freeze_manifest_sha256": "1cbbb29e504f61ee74eb940129c6b11da4e46f8bec48a88ef7ba86af14ec0a9f",
+  "erratum_freeze_manifest_sha256": "1e615eac06f55b28e03590a59c93d6e0bf4f857b4a372ff1b175415598e9a75c",
+  "wheel": {
+    "filename": "pdx_artifact_engine-0.3.0a12-py3-none-any.whl",
+    "size_bytes": 191809,
+    "sha256": "1ac34e04702029d8b0dd4819d579284a7660ea077fad8ad3489fb5e6b9211a77",
+    "local_build_only": true
+  },
+  "verification": {
+    "full_regression_tests_passed": 336,
+    "full_regression_warnings": 4,
+    "isolated_wheel_tests_passed": 11,
+    "isolated_pip_check": "passed",
+    "packaged_frozen_schema_count": 19,
+    "packaged_schema_byte_mismatches": 0,
+    "focused_ruff": "passed",
+    "readme_source_version_check": "passed",
+    "isolated_twine_check": "passed"
+  },
+  "publication": {
+    "release_candidate_commit_required": true,
+    "push_authorized": false,
+    "tag_authorized": false,
+    "github_release_authorized": false,
+    "pypi_authorized": false,
+    "downstream_adapter_authorized": false
+  }
+}

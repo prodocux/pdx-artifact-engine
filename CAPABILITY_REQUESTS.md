@@ -66,7 +66,7 @@
   and release remain separately gated.
 - Shipped in: not shipped
 
-## ER-002 [status: approved]
+## ER-002 [status: in-progress]
 
 - Reporter: governed dynamic-dispatch consumer
 - Date: 2026-10-03
