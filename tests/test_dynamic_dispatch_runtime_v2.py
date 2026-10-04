@@ -21,6 +21,9 @@ PACKAGED = (
     / "contracts"
     / "runtime_provider_workflow"
 )
+DISPATCH_PACKAGED = (
+    ROOT / "runtime" / "pdx_artifact_engine" / "contracts" / "dynamic_dispatch"
+)
 SECRET = b"dynamic-dispatch-runtime-test-key-0001"
 
 
@@ -33,6 +36,18 @@ def test_frozen_erratum_schemas_are_packaged_byte_identical() -> None:
     for filename in freeze["schemas"]:
         assert (PACKAGED / filename).read_bytes() == (
             ERRATUM / "schemas" / filename
+        ).read_bytes()
+
+
+def test_frozen_dispatch_schemas_are_packaged_byte_identical() -> None:
+    freeze = json.loads(
+        (ROOT / "docs" / "dynamic-dispatch" / "contract-freeze.v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    for filename in freeze["schemas"]:
+        assert (DISPATCH_PACKAGED / filename).read_bytes() == (
+            ROOT / "docs" / "dynamic-dispatch" / "schemas" / filename
         ).read_bytes()
 
 

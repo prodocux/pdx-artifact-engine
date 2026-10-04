@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/activation-request-v1.json",
+  "title": "PDX governed dynamic dispatch activation request v1 draft",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "activation_request_id", "workflow_job_id", "workflow_step_id", "idempotency_key", "source_run_id", "source_plan_digest", "decision_receipt_id", "decision_receipt_digest", "dispatch_policy_id", "policy_digest_assertion", "policy_revision_epoch"],
+  "properties": {
+    "schema_version": {"const": "pdx_dynamic_dispatch_activation_request_v1"},
+    "activation_request_id": {"$ref": "common-v1.json#/$defs/id"},
+    "workflow_job_id": {"$ref": "common-v1.json#/$defs/id"},
+    "workflow_step_id": {"$ref": "common-v1.json#/$defs/id"},
+    "idempotency_key": {"type": "string", "minLength": 16, "maxLength": 256},
+    "source_run_id": {"$ref": "common-v1.json#/$defs/id"},
+    "source_plan_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "decision_receipt_id": {"$ref": "common-v1.json#/$defs/id"},
+    "decision_receipt_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "dispatch_policy_id": {"$ref": "common-v1.json#/$defs/id"},
+    "policy_digest_assertion": {"$ref": "common-v1.json#/$defs/digest"},
+    "policy_revision_epoch": {"type": "integer", "minimum": 1},
+    "caller_authority_id": {"$ref": "common-v1.json#/$defs/principal"}
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/step-projection-v1.json",
+  "title": "PDX governed dynamic dispatch step projection v1 draft",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "workflow_job_id", "workflow_step_id", "plan_digest", "policy", "phase", "attempt_count", "active_activation", "terminal_receipt", "reconciliation_required", "updated_at"],
+  "properties": {
+    "schema_version": {"const": "pdx_dynamic_dispatch_step_projection_v1"},
+    "workflow_job_id": {"$ref": "common-v1.json#/$defs/id"},
+    "workflow_step_id": {"$ref": "common-v1.json#/$defs/id"},
+    "plan_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "policy": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["dispatch_policy_id", "policy_revision_epoch", "policy_digest", "policy_status"],
+      "properties": {
+        "dispatch_policy_id": {"$ref": "common-v1.json#/$defs/id"},
+        "policy_revision_epoch": {"type": "integer", "minimum": 1},
+        "policy_digest": {"$ref": "common-v1.json#/$defs/digest"},
+        "policy_status": {"enum": ["active", "revoked"]}
+      }
+    },
+    "phase": {"enum": ["policy_pending", "decision_pending", "decision_recorded", "activated", "executing", "terminal"]},
+    "attempt_count": {"type": "integer", "minimum": 0},
+    "active_activation": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["dispatch_attempt_id", "authoritative_activation_id", "run_b_id", "started_at"],
+      "properties": {
+        "dispatch_attempt_id": {"$ref": "common-v1.json#/$defs/id"},
+        "authoritative_activation_id": {"$ref": "common-v1.json#/$defs/id"},
+        "run_b_id": {"$ref": "common-v1.json#/$defs/id"},
+        "started_at": {"$ref": "common-v1.json#/$defs/timestamp"}
+      }
+    },
+    "terminal_receipt": {"type": ["object", "null"], "additionalProperties": false, "required": ["receipt_id", "status", "receipt_digest", "receipt_cas_published"], "properties": {"receipt_id": {"$ref": "common-v1.json#/$defs/id"}, "status": {"$ref": "common-v1.json#/$defs/terminalStatus"}, "receipt_digest": {"$ref": "common-v1.json#/$defs/digest"}, "receipt_cas_published": {"type": "boolean"}}},
+    "reconciliation_required": {"type": "boolean"},
+    "updated_at": {"$ref": "common-v1.json#/$defs/timestamp"}
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/error-v1.json",
+  "title": "PDX governed dynamic dispatch error v1 draft",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "code", "message", "retryable", "reconciliation_required"],
+  "properties": {
+    "schema_version": {"const": "pdx_dynamic_dispatch_error_v1"},
+    "code": {"$ref": "common-v1.json#/$defs/errorCode"},
+    "message": {"type": "string", "minLength": 1, "maxLength": 1024},
+    "retryable": {"type": "boolean"},
+    "reconciliation_required": {"type": "boolean"},
+    "receipt_id": {"$ref": "common-v1.json#/$defs/id"}
+  }
+}

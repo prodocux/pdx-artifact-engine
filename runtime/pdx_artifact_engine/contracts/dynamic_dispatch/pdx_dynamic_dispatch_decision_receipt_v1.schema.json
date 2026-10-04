@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/decision-receipt-v1.json",
+  "title": "PDX governed dynamic dispatch decision receipt v1 draft",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "decision_receipt_id", "workflow_job_id", "workflow_step_id", "source_run_id", "source_plan_digest", "decision_step_id", "decision_attempt_number", "dispatch_policy_id", "policy_revision_epoch", "policy_digest", "proposal_schema_id", "proposal_schema_digest", "tool_name", "arguments", "arguments_digest", "canonical_proposal_digest", "source_manifest_artifact", "terminal_status", "credential_free_guarantee", "recorded_at", "decision_receipt_digest"],
+  "properties": {
+    "schema_version": {"const": "pdx_dynamic_dispatch_decision_receipt_v1"},
+    "decision_receipt_id": {"$ref": "common-v1.json#/$defs/id"},
+    "workflow_job_id": {"$ref": "common-v1.json#/$defs/id"},
+    "workflow_step_id": {"$ref": "common-v1.json#/$defs/id"},
+    "source_run_id": {"$ref": "common-v1.json#/$defs/id"},
+    "source_plan_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "decision_step_id": {"$ref": "common-v1.json#/$defs/id"},
+    "decision_attempt_number": {"type": "integer", "minimum": 1},
+    "dispatch_policy_id": {"$ref": "common-v1.json#/$defs/id"},
+    "policy_revision_epoch": {"type": "integer", "minimum": 1},
+    "policy_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "proposal_schema_id": {"type": "string", "format": "uri", "maxLength": 1024},
+    "proposal_schema_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "tool_name": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "arguments": {"type": "object", "maxProperties": 64},
+    "arguments_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "canonical_proposal_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "source_manifest_artifact": {"$ref": "common-v1.json#/$defs/artifact"},
+    "terminal_status": {"const": "completed"},
+    "credential_free_guarantee": {"const": true},
+    "recorded_at": {"$ref": "common-v1.json#/$defs/timestamp"},
+    "decision_receipt_digest": {"$ref": "common-v1.json#/$defs/digest"}
+  }
+}

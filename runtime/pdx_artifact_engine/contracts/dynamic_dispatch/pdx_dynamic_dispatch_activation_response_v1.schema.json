@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/activation-response-v1.json",
+  "title": "PDX governed dynamic dispatch activation response v1 draft",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "activation_request_id", "workflow_job_id", "workflow_step_id", "dispatch_attempt_id", "authoritative_activation_id", "run_b_id", "run_b_plan_digest", "idempotency_binding_digest", "result", "created_at"],
+  "properties": {
+    "schema_version": {"const": "pdx_dynamic_dispatch_activation_response_v1"},
+    "activation_request_id": {"$ref": "common-v1.json#/$defs/id"},
+    "workflow_job_id": {"$ref": "common-v1.json#/$defs/id"},
+    "workflow_step_id": {"$ref": "common-v1.json#/$defs/id"},
+    "dispatch_attempt_id": {"$ref": "common-v1.json#/$defs/id"},
+    "authoritative_activation_id": {"$ref": "common-v1.json#/$defs/id"},
+    "run_b_id": {"$ref": "common-v1.json#/$defs/id"},
+    "run_b_plan_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "idempotency_binding_digest": {"$ref": "common-v1.json#/$defs/digest"},
+    "result": {"enum": ["created", "exact_retry"]},
+    "created_at": {"$ref": "common-v1.json#/$defs/timestamp"}
+  }
+}
