@@ -19,10 +19,13 @@ ACTIVE_STATES = frozenset({"pending", "running"})
 TERMINAL_STATES = frozenset(
     {"completed", "completed_with_review", "failed", "blocked", "cancelled", "timed_out"}
 )
-COUNTER_NAMES = (
+COUNTER_NAMES_V1 = (
     "provider_attempts", "check_attempts", "active_steps", "repair_iterations",
     "total_runtime_seconds", "total_event_bytes", "total_artifact_bytes",
     "cross_step_artifact_edges", "external_operations",
+)
+COUNTER_NAMES_V2 = COUNTER_NAMES_V1 + (
+    "dispatch_attempts", "active_dispatches", "dispatch_runtime_seconds",
 )
 
 
@@ -111,8 +114,9 @@ class RuntimeWorkflowService:
         return row
 
     def _state(self, row: Any) -> dict[str, Any]:
+        contract_version = row["contract_version"]
         result = {
-            "schema_version": "pdx_runtime_provider_workflow_state_v1",
+            "schema_version": f"pdx_runtime_provider_workflow_state_v{contract_version}",
             "workflow_job_id": row["workflow_job_id"], "task_id": row["task_id"],
             "run_id": row["run_id"], "plan_digest": row["plan_digest"],
             "state": row["state"], "counters": json.loads(row["counters_json"]),
@@ -148,7 +152,21 @@ class RuntimeWorkflowService:
         )
 
     def create(self, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
-        self._validate("pdx_runtime_provider_workflow_create_request_v1.schema.json", body)
+        request_version = body.get("schema_version")
+        request_schemas = {
+            "pdx_internal_runtime_provider_workflow_create_request_v1": (
+                "pdx_runtime_provider_workflow_create_request_v1.schema.json", 1
+            ),
+            "pdx_internal_runtime_provider_workflow_create_request_v2": (
+                "pdx_runtime_provider_workflow_create_request_v2.schema.json", 2
+            ),
+        }
+        if request_version not in request_schemas:
+            raise RuntimeWorkflowError(
+                "PAYLOAD_DIGEST_INVALID", "unsupported workflow contract version", 400
+            )
+        request_schema, contract_version = request_schemas[request_version]
+        self._validate(request_schema, body)
         plan = body["plan"]
         semantic_errors = validate_plan(
             plan, _digest({key: value for key, value in plan.items() if key != "plan_digest"})
@@ -158,21 +176,35 @@ class RuntimeWorkflowService:
                 "PAYLOAD_DIGEST_INVALID", ", ".join(semantic_errors), 400
             )
         now = _now_iso()
-        counters = {name: 0 for name in COUNTER_NAMES}
+        counters = {
+            name: 0
+            for name in (
+                COUNTER_NAMES_V2 if contract_version == 2 else COUNTER_NAMES_V1
+            )
+        }
         with self.store.transaction() as connection:
             existing = connection.execute(
                 "SELECT * FROM runtime_workflows WHERE idempotency_key = ?",
                 (body["idempotency_key"],),
             ).fetchone()
             if existing is not None:
-                if existing["operation_digest"] != body["operation_digest"] or existing["plan_digest"] != plan["plan_digest"]:
+                if (
+                    existing["contract_version"] != contract_version
+                    or existing["operation_digest"] != body["operation_digest"]
+                    or existing["plan_digest"] != plan["plan_digest"]
+                ):
                     raise RuntimeWorkflowError("IDEMPOTENCY_CONFLICT", "create binding differs", 409)
                 return 200, self._create_response(existing, body)
             connection.execute(
-                """INSERT INTO runtime_workflows VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, NULL, NULL, ?, ?)""",
+                """INSERT INTO runtime_workflows(
+                    workflow_job_id, idempotency_key, operation_digest,
+                    plan_digest, plan_json, task_id, run_id, state,
+                    counters_json, terminal_error_json, receipt_json,
+                    created_at, updated_at, contract_version
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, NULL, NULL, ?, ?, ?)""",
                 (plan["workflow_job_id"], body["idempotency_key"], body["operation_digest"],
                  plan["plan_digest"], _dump(plan), plan["task_id"], plan["run_id"],
-                 _dump(counters), now, now),
+                 _dump(counters), now, now, contract_version),
             )
             for step in plan["steps"]:
                 connection.execute(
@@ -360,6 +392,12 @@ class RuntimeWorkflowService:
             if step is None:
                 raise RuntimeWorkflowError("STEP_NOT_READY", "step does not exist", 409)
             expected_check = step["step_kind"] == "check"
+            if step["step_kind"] == "dispatch":
+                raise RuntimeWorkflowError(
+                    "STEP_KIND_MISMATCH",
+                    "dispatch steps require the governed dispatch activation route",
+                    409,
+                )
             if expected_check != (kind == "check"):
                 raise RuntimeWorkflowError("STEP_KIND_MISMATCH", "step kind does not match activation route", 409)
             step_row = connection.execute(

@@ -34,11 +34,20 @@ def validate_plan(plan: dict[str, Any], computed_digest: str) -> list[str]:
     for step_id in id_set:
         visit(step_id)
     kinds = {step["workflow_step_id"]: step["step_kind"] for step in steps}
+    is_v2 = plan.get("schema_version") == "pdx_runtime_provider_workflow_plan_v2"
     role_producers = {
         "patch": {"builder", "repair"}, "check_report": {"check"},
         "review": {"reviewer"}, "repair_output": {"repair"},
         "supporting_evidence": {"builder", "check", "reviewer", "repair"},
     }
+    if is_v2:
+        role_producers.update(
+            {
+                "decision_receipt": {"builder", "reviewer"},
+                "dispatch_receipt": {"dispatch"},
+                "dispatch_output": {"dispatch"},
+            }
+        )
     edge_ids = [edge["edge_id"] for edge in plan["artifact_edges"]]
     if len(edge_ids) != len(set(edge_ids)):
         errors.append("ARTIFACT_EDGE_ID_DUPLICATE")
@@ -49,16 +58,37 @@ def validate_plan(plan: dict[str, Any], computed_digest: str) -> list[str]:
             errors.append("ARTIFACT_EDGE_STEP_UNKNOWN")
         if producer == consumer:
             errors.append("ARTIFACT_EDGE_SELF_REFERENCE")
-        if kinds.get(producer) not in role_producers[edge["artifact_role"]]:
+        if kinds.get(producer) not in role_producers.get(edge["artifact_role"], set()):
             errors.append("ARTIFACT_EDGE_ROLE_INVALID")
     budgets = plan["budgets"]
-    provider_steps = [step for step in steps if step["step_kind"] != "check"]
+    provider_steps = [
+        step for step in steps if step["step_kind"] not in {"check", "dispatch"}
+    ]
     check_steps = [step for step in steps if step["step_kind"] == "check"]
+    dispatch_steps = [step for step in steps if step["step_kind"] == "dispatch"]
     repair_steps = [step for step in steps if step["step_kind"] == "repair"]
     if sum(step["max_attempts"] for step in provider_steps) > budgets["max_provider_attempts"]:
         errors.append("WORKFLOW_PROVIDER_ATTEMPT_BUDGET_CONTRADICTION")
     if sum(step["max_attempts"] for step in check_steps) > budgets["max_check_attempts"]:
         errors.append("WORKFLOW_CHECK_ATTEMPT_BUDGET_CONTRADICTION")
+    if is_v2:
+        if (
+            sum(step["max_attempts"] for step in dispatch_steps)
+            > budgets["max_dispatch_attempts"]
+        ):
+            errors.append("WORKFLOW_DISPATCH_ATTEMPT_BUDGET_CONTRADICTION")
+        if (
+            budgets["max_dispatch_runtime_seconds"]
+            > budgets["max_total_runtime_seconds"]
+        ):
+            errors.append("WORKFLOW_DISPATCH_RUNTIME_BUDGET_CONTRADICTION")
+        first_dispatch = dispatch_steps[0]["workflow_step_id"] if dispatch_steps else None
+        for edge in plan["artifact_edges"]:
+            if (
+                edge["artifact_role"] == "decision_receipt"
+                and edge["consumer_step_id"] != first_dispatch
+            ):
+                errors.append("ARTIFACT_EDGE_ROLE_INVALID")
     iterations = sorted(step["repair_iteration"] for step in repair_steps)
     if iterations != list(range(1, len(iterations) + 1)):
         errors.append("WORKFLOW_REPAIR_ITERATION_INVALID")

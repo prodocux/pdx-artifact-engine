@@ -41,7 +41,8 @@ class RuntimeWorkflowStore:
                     terminal_error_json TEXT,
                     receipt_json TEXT,
                     created_at TEXT NOT NULL,
-                    updated_at TEXT NOT NULL
+                    updated_at TEXT NOT NULL,
+                    contract_version INTEGER NOT NULL DEFAULT 1
                 );
                 CREATE TABLE IF NOT EXISTS runtime_workflow_steps (
                     workflow_job_id TEXT NOT NULL,
@@ -137,6 +138,15 @@ class RuntimeWorkflowStore:
             if "runtime_accounted_seconds" not in columns:
                 connection.execute(
                     "ALTER TABLE runtime_workflow_claims ADD COLUMN runtime_accounted_seconds INTEGER NOT NULL DEFAULT 0"
+                )
+            workflow_columns = {
+                row[1] for row in connection.execute(
+                    "PRAGMA table_info(runtime_workflows)"
+                ).fetchall()
+            }
+            if "contract_version" not in workflow_columns:
+                connection.execute(
+                    "ALTER TABLE runtime_workflows ADD COLUMN contract_version INTEGER NOT NULL DEFAULT 1"
                 )
 
     @contextmanager

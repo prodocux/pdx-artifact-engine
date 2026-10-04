@@ -173,6 +173,11 @@ def test_frozen_schemas_are_packaged_without_modifying_published_contracts() -> 
         "pdx_conformance_check_binding_v1.schema.json",
         "pdx_runtime_check_update_v2.schema.json",
         "pdx_runtime_provider_step_projection_v1.schema.json",
+        "pdx_runtime_provider_route_mapping_v2.schema.json",
+        "pdx_runtime_provider_workflow_create_request_v2.schema.json",
+        "pdx_runtime_provider_workflow_plan_v2.schema.json",
+        "pdx_runtime_provider_workflow_receipt_v2.schema.json",
+        "pdx_runtime_provider_workflow_state_v2.schema.json",
     }
     text = (CONTRACT / "README.md").read_text(encoding="utf-8")
     assert "Production implementation was separately authorized" in text
