@@ -734,6 +734,8 @@ class RuntimeWorkflowService:
         document = {"edge_id": edge["edge_id"], "artifact": artifact, "artifact_identity_digest": identity_digest,
                     "producer_step_id": claim["workflow_step_id"], "producer_attempt_number": claim["attempt_number"],
                     "consumer_step_id": edge["consumer_step_id"], "recorded_once": True}
+        if workflow["contract_version"] == 2:
+            document["artifact_role"] = "check_report"
         try:
             connection.execute("INSERT INTO runtime_artifact_edges VALUES (?, ?, ?, ?, ?)",
                                (workflow["workflow_job_id"], edge["edge_id"], artifact["artifact_id"], identity_digest, _dump(document)))
@@ -820,10 +822,21 @@ class RuntimeWorkflowService:
             "SELECT terminal_record_json FROM runtime_workflow_claims WHERE workflow_job_id = ? AND terminal_record_json IS NOT NULL ORDER BY rowid",
             (workflow_job_id,),
         ).fetchall()]
+        if workflow["contract_version"] == 2:
+            steps.extend(
+                json.loads(row[0])
+                for row in connection.execute(
+                    """SELECT parent_step_receipt_json
+                       FROM dynamic_dispatch_activations
+                       WHERE workflow_job_id = ?
+                       AND parent_step_receipt_json IS NOT NULL ORDER BY rowid""",
+                    (workflow_job_id,),
+                ).fetchall()
+            )
         edges = [json.loads(row[0]) for row in connection.execute(
             "SELECT receipt_json FROM runtime_artifact_edges WHERE workflow_job_id = ? ORDER BY rowid", (workflow_job_id,)
         ).fetchall()]
-        receipt = {"schema_version": "pdx_runtime_provider_workflow_receipt_v1",
+        receipt = {"schema_version": f"pdx_runtime_provider_workflow_receipt_v{workflow['contract_version']}",
                    "receipt_id": f"receipt_{workflow_job_id}", "workflow_job_id": workflow_job_id,
                    "task_id": workflow["task_id"], "run_id": workflow["run_id"], "plan_digest": workflow["plan_digest"],
                    "status": workflow["state"], "step_receipts": steps, "artifact_edges": edges,

@@ -16,6 +16,10 @@ from pdx_artifact_engine.continuable_extraction import (
     ContinuableExtractionService,
     ContinuableExtractionStore,
 )
+from pdx_artifact_engine.dynamic_dispatch import (
+    DispatchToolRegistry,
+    DynamicDispatchService,
+)
 from pdx_artifact_engine.internal_http.auth import (
     auth_profile_ok,
     authenticate_request,
@@ -65,6 +69,7 @@ class BodyLimitError(Exception):
 class InternalJobHandler(BaseHTTPRequestHandler):
     service: JobService
     workflow_service: RuntimeWorkflowService | None = None
+    dispatch_service: DynamicDispatchService | None = None
     extraction_service: ContinuableExtractionService
 
     def log_message(self, format: str, *args: Any) -> None:
@@ -153,6 +158,28 @@ class InternalJobHandler(BaseHTTPRequestHandler):
 
     def _send_workflow_error(self, error: RuntimeWorkflowError) -> None:
         self._send(error.status, error.as_document())
+
+    def _dispatch(self) -> DynamicDispatchService:
+        if self.dispatch_service is None:
+            raise RuntimeWorkflowError(
+                "DISPATCH_CALLER_UNAUTHORIZED",
+                "dynamic dispatch is not configured",
+                503,
+            )
+        return self.dispatch_service
+
+    def _send_dispatch_error(self, error: RuntimeWorkflowError) -> None:
+        self._send(
+            error.status,
+            {
+                "schema_version": "pdx_dynamic_dispatch_error_v1",
+                "code": error.code,
+                "message": error.message[:1024],
+                "retryable": error.retryable,
+                "reconciliation_required": error.code
+                in {"DISPATCH_CANCELLED", "DISPATCH_EXECUTOR_FAILED"},
+            },
+        )
 
     def _send_extraction_error(self, error: ContinuableExtractionError) -> None:
         message = str(error)
@@ -286,6 +313,26 @@ class InternalJobHandler(BaseHTTPRequestHandler):
                 )
             except RuntimeWorkflowError as exc:
                 self._send_workflow_error(exc)
+                return
+            self._send(200, doc)
+            return
+        dispatch_get = re.fullmatch(
+            r"/internal/v1/runtime-provider-workflows/([^/]+)/steps/([^/]+)/dispatch(?:/(receipt))?",
+            path,
+        )
+        if dispatch_get:
+            workflow_job_id, workflow_step_id, receipt = dispatch_get.groups()
+            try:
+                if receipt:
+                    doc = self._dispatch().get_receipt(
+                        workflow_job_id, workflow_step_id
+                    )
+                else:
+                    doc = self._dispatch().get_projection(
+                        workflow_job_id, workflow_step_id
+                    )
+            except RuntimeWorkflowError as exc:
+                self._send_dispatch_error(exc)
                 return
             self._send(200, doc)
             return
@@ -497,6 +544,61 @@ class InternalJobHandler(BaseHTTPRequestHandler):
             self._send(200, doc)
             return
 
+        dispatch_route = re.fullmatch(
+            r"/internal/v1/runtime-provider-workflows/([^/]+)/steps/([^/]+)/dispatch/(policy|policy/revoke|decision-receipt|activations|reconcile)",
+            path,
+        )
+        if dispatch_route:
+            workflow_job_id, workflow_step_id, operation = dispatch_route.groups()
+            principal = authenticated_control_plane_instance(self.headers) or ""
+            try:
+                dispatch = self._dispatch()
+                if operation == "policy":
+                    doc = dispatch.register_policy(
+                        workflow_job_id,
+                        workflow_step_id,
+                        body,
+                        authenticated_principal=principal,
+                    )
+                    status = 201
+                elif operation == "policy/revoke":
+                    doc = dispatch.revoke_policy(
+                        workflow_job_id,
+                        workflow_step_id,
+                        body,
+                        authenticated_principal=principal,
+                    )
+                    status = 200
+                elif operation == "decision-receipt":
+                    doc = dispatch.import_decision(
+                        workflow_job_id,
+                        workflow_step_id,
+                        body,
+                        authenticated_principal=principal,
+                    )
+                    status = 200
+                elif operation == "reconcile":
+                    doc = dispatch.reconcile(
+                        workflow_job_id,
+                        workflow_step_id,
+                        body,
+                        authenticated_principal=principal,
+                    )
+                    status = 200
+                else:
+                    doc = dispatch.activate(
+                        workflow_job_id,
+                        workflow_step_id,
+                        body,
+                        authenticated_principal=principal,
+                    )
+                    status = 202 if doc["result"] == "created" else 200
+            except RuntimeWorkflowError as exc:
+                self._send_dispatch_error(exc)
+                return
+            self._send(status, doc)
+            return
+
         cancel = re.fullmatch(r"/internal/v1/jobs/([^/]+)/cancel", path)
         if cancel:
             try:
@@ -592,12 +694,14 @@ def make_server(
     db_path: Path,
     staging_root: Path,
     kernel: Any | None = None,
+    dispatch_registry: DispatchToolRegistry | None = None,
 ) -> ThreadingHTTPServer:
     store = JobStore(db_path)
     staging = StagingStore(staging_root)
     kernel_client = kernel if kernel is not None else _default_kernel_client()
     service = JobService(store=store, staging=staging, kernel=kernel_client)
     workflow_service = None
+    dispatch_service = None
     try:
         from pdx_adapter_prodocux.verified_projection import (
             validate_kernel_projection,
@@ -617,12 +721,16 @@ def make_server(
             hmac_keys=keys,
             active_hmac_key_id=active_key_id,
         )
+        dispatch_service = DynamicDispatchService(
+            workflow_service.store, registry=dispatch_registry
+        )
 
     class BoundHandler(InternalJobHandler):
         pass
 
     BoundHandler.service = service
     BoundHandler.workflow_service = workflow_service
+    BoundHandler.dispatch_service = dispatch_service
     BoundHandler.extraction_service = extraction_service
     return ThreadingHTTPServer((host, port), BoundHandler)
 

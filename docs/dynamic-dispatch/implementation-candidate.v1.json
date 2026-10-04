@@ -1,0 +1,47 @@
+{
+  "schema_version": "pdx_dynamic_dispatch_implementation_candidate_v1",
+  "status": "implementation_candidate_not_signed_off",
+  "contract_freeze_commit": "0f8422e61e422f6cded74ec6629dced5c16d138c",
+  "contract_freeze_manifest_sha256": "1cbbb29e504f61ee74eb940129c6b11da4e46f8bec48a88ef7ba86af14ec0a9f",
+  "erratum_freeze_commit": "ddf14ce3dde5115093ebbbc0516066f0078b84b9",
+  "erratum_freeze_manifest_sha256": "1e615eac06f55b28e03590a59c93d6e0bf4f857b4a372ff1b175415598e9a75c",
+  "implementation_base_commits": [
+    "065fb8f",
+    "2bd70bc"
+  ],
+  "candidate_distribution": {
+    "filename": "pdx_artifact_engine-0.3.0a11-py3-none-any.whl",
+    "size_bytes": 191792,
+    "sha256": "9a66862fdd521574ee16c9cc73687bd7ebb79ef5111de28fe6e23255e306e780",
+    "local_build_only": true,
+    "release_candidate": false,
+    "publication_authorized": false
+  },
+  "implementation_files": {
+    "pyproject.toml": "60b3ec356ad3460ddd3dd270068fd4cb04fb414841cfab14005e30dc66cf79c7",
+    "runtime/pdx_artifact_engine/dynamic_dispatch/contracts.py": "e3cb392221aa3f8ef5427b19eccdbb75deac7e3cce047915a36c6aa9cd934295",
+    "runtime/pdx_artifact_engine/dynamic_dispatch/registry.py": "b2d4ae4993d16c6dfd8c70da2704a1235bf07da095f73014dcccaecf507fc0c1",
+    "runtime/pdx_artifact_engine/dynamic_dispatch/service.py": "e3eae10408de654a832c75d529c6936336680d292fd259f5e8ff3a51a7c445e7",
+    "runtime/pdx_artifact_engine/runtime_workflows/store.py": "290237c5d172ae951acdfa42cb3b0261771e76390f099fd3571f90f8c8abcf65",
+    "runtime/pdx_artifact_engine/runtime_workflows/service.py": "8e4cb2a17e8800bb4a40f7cd4b422a6a3de377cbc1f93fb0f0846e5789c184b5",
+    "runtime/pdx_artifact_engine/internal_http/__init__.py": "4d923cf507afd225639aac348e214cd81e1dedb2dc44a866169a0f29111c5345",
+    "tests/test_dynamic_dispatch_service.py": "2f652e93e5f3139cabdf54f2b46c114c4ab093f6016438a62f040883cace4219"
+  },
+  "verification": {
+    "packaged_dynamic_dispatch_schemas": 14,
+    "packaged_erratum_schemas": 5,
+    "schema_byte_mismatches": 0,
+    "isolated_service_tests_passed": 11,
+    "full_regression_tests_passed": 336,
+    "full_regression_warnings": 4,
+    "isolated_pip_check": "passed"
+  },
+  "governance": {
+    "demand_side_sign_off": false,
+    "version_assignment_authorized": false,
+    "commit_authorized": true,
+    "push_authorized": false,
+    "publication_authorized": false,
+    "downstream_adapter_authorized": false
+  }
+}

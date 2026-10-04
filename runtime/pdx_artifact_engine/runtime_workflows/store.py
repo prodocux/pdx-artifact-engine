@@ -120,6 +120,66 @@ class RuntimeWorkflowStore:
                     document_json TEXT NOT NULL,
                     PRIMARY KEY (workflow_job_id, record_id)
                 );
+                CREATE TABLE IF NOT EXISTS dynamic_dispatch_policies (
+                    dispatch_policy_id TEXT PRIMARY KEY,
+                    workflow_job_id TEXT NOT NULL,
+                    workflow_step_id TEXT NOT NULL,
+                    policy_revision_epoch INTEGER NOT NULL,
+                    policy_digest TEXT NOT NULL,
+                    policy_status TEXT NOT NULL,
+                    policy_json TEXT NOT NULL,
+                    registered_by TEXT NOT NULL,
+                    registered_at TEXT NOT NULL,
+                    revocation_binding_digest TEXT,
+                    updated_at TEXT NOT NULL,
+                    UNIQUE (workflow_job_id, workflow_step_id),
+                    FOREIGN KEY (workflow_job_id) REFERENCES runtime_workflows(workflow_job_id)
+                );
+                CREATE TABLE IF NOT EXISTS dynamic_dispatch_decisions (
+                    decision_receipt_id TEXT PRIMARY KEY,
+                    workflow_job_id TEXT NOT NULL,
+                    workflow_step_id TEXT NOT NULL,
+                    dispatch_policy_id TEXT NOT NULL,
+                    decision_receipt_digest TEXT NOT NULL,
+                    receipt_json TEXT NOT NULL,
+                    recorded_at TEXT NOT NULL,
+                    UNIQUE (workflow_job_id, workflow_step_id),
+                    FOREIGN KEY (workflow_job_id) REFERENCES runtime_workflows(workflow_job_id),
+                    FOREIGN KEY (dispatch_policy_id) REFERENCES dynamic_dispatch_policies(dispatch_policy_id)
+                );
+                CREATE TABLE IF NOT EXISTS dynamic_dispatch_activations (
+                    authoritative_activation_id TEXT PRIMARY KEY,
+                    activation_request_id TEXT NOT NULL,
+                    workflow_job_id TEXT NOT NULL,
+                    workflow_step_id TEXT NOT NULL,
+                    dispatch_attempt_id TEXT NOT NULL UNIQUE,
+                    run_b_id TEXT NOT NULL UNIQUE,
+                    run_b_plan_digest TEXT NOT NULL,
+                    idempotency_key TEXT NOT NULL,
+                    idempotency_binding_digest TEXT NOT NULL,
+                    authenticated_principal TEXT NOT NULL,
+                    policy_digest TEXT NOT NULL,
+                    decision_receipt_digest TEXT NOT NULL,
+                    activation_json TEXT NOT NULL,
+                    run_b_plan_json TEXT NOT NULL,
+                    response_json TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    cancellation_requested INTEGER NOT NULL DEFAULT 0,
+                    execution_started_at TEXT,
+                    terminal_receipt_json TEXT,
+                    parent_step_receipt_json TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    UNIQUE (workflow_job_id, workflow_step_id, idempotency_key),
+                    FOREIGN KEY (workflow_job_id) REFERENCES runtime_workflows(workflow_job_id)
+                );
+                CREATE TABLE IF NOT EXISTS dynamic_dispatch_cas (
+                    sha256 TEXT PRIMARY KEY,
+                    media_type TEXT NOT NULL,
+                    size_bytes INTEGER NOT NULL,
+                    content BLOB NOT NULL,
+                    created_at TEXT NOT NULL
+                );
                 """
             )
             columns = {
@@ -138,6 +198,32 @@ class RuntimeWorkflowStore:
             if "runtime_accounted_seconds" not in columns:
                 connection.execute(
                     "ALTER TABLE runtime_workflow_claims ADD COLUMN runtime_accounted_seconds INTEGER NOT NULL DEFAULT 0"
+                )
+            activation_columns = {
+                row[1] for row in connection.execute(
+                    "PRAGMA table_info(dynamic_dispatch_activations)"
+                ).fetchall()
+            }
+            if "parent_step_receipt_json" not in activation_columns:
+                connection.execute(
+                    "ALTER TABLE dynamic_dispatch_activations ADD COLUMN parent_step_receipt_json TEXT"
+                )
+            if "cancellation_requested" not in activation_columns:
+                connection.execute(
+                    "ALTER TABLE dynamic_dispatch_activations ADD COLUMN cancellation_requested INTEGER NOT NULL DEFAULT 0"
+                )
+            if "execution_started_at" not in activation_columns:
+                connection.execute(
+                    "ALTER TABLE dynamic_dispatch_activations ADD COLUMN execution_started_at TEXT"
+                )
+            policy_columns = {
+                row[1] for row in connection.execute(
+                    "PRAGMA table_info(dynamic_dispatch_policies)"
+                ).fetchall()
+            }
+            if "revocation_binding_digest" not in policy_columns:
+                connection.execute(
+                    "ALTER TABLE dynamic_dispatch_policies ADD COLUMN revocation_binding_digest TEXT"
                 )
             workflow_columns = {
                 row[1] for row in connection.execute(
