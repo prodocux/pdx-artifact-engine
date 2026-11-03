@@ -1,0 +1,186 @@
+{
+  "schema_version": "pdx_engine_public_contract_freeze_v1",
+  "status": "frozen",
+  "frozen_on": "2026-11-03",
+  "request": "ER-003",
+  "runtime_available": false,
+  "release_version": null,
+  "scope": "Governed external-operation authorization and query-only recovery",
+  "hash_encoding": "sha256_utf8_text_lf",
+  "schema_documents": [
+    "schemas/engine-external-operation.draft.schema.json",
+    "schemas/engine-support.draft.schema.json",
+    "schemas/parent-create_request-v3.draft.schema.json",
+    "schemas/parent-error-v3.draft.schema.json",
+    "schemas/parent-plan-v3.draft.schema.json",
+    "schemas/parent-receipt-v3.draft.schema.json",
+    "schemas/parent-state-v3.draft.schema.json",
+    "schemas/route-mapping.schema.json"
+  ],
+  "files": [
+    {
+      "sha256_utf8_lf": "b2381800b1c6a74cd096fcf90f7508efd7cfc35fd81eed4451d1bbd0a4fce8be",
+      "path": "canonical-vectors.json"
+    },
+    {
+      "sha256_utf8_lf": "e9414a2cbc379615d6bedf6af907cdf2dfa2a3754840e9cc0672417695746d46",
+      "path": "CONTRACT.md"
+    },
+    {
+      "sha256_utf8_lf": "93d0cf7e0b1168beb8ace8999026891f1e78b65c3ffe1ade0a3045a2a271290d",
+      "path": "dependencies/pdx_dynamic_dispatch_common_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "7c6b36ceaf1fdc0e3e19bdf4aba153666f2bf8a178468f016a6cbd9c47484114",
+      "path": "dependencies/pdx_runtime_check_claim_request_v2.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "cadbacc2e4bb785b713543d2bfbf26bfefd56d88eb57639837df54594873169f",
+      "path": "dependencies/pdx_runtime_check_claim_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "a3bafe34d0a0194f658e6220156af559d06ce3db6ac40ab7fa920d1869fa16e3",
+      "path": "dependencies/pdx_runtime_check_lease_renew_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "27ed63142c4f7060ca3102b334064426bd3faabcab5cd49f1a66286ab6bba1ae",
+      "path": "dependencies/pdx_runtime_check_record_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "0d3dc4c75a97062722fa06e9fc226e0246e9077d2451e1b7b447a1b5bfbad1ad",
+      "path": "dependencies/pdx_runtime_check_update_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "2a91f59b3f81778e96226ff3bfc656a07ed295fc99aeb0f836cec50677bd3ee0",
+      "path": "dependencies/pdx_runtime_lease_renew_response_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "cd0ef880e46986ab58549153fd593e435022e69bef24d083c0ca0656833d8c99",
+      "path": "dependencies/pdx_runtime_provider_claim_request_v2.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "a75f5417d53f430ae561b71c8e52ec3ce8390b934a6d213f753c46ceccded14d",
+      "path": "dependencies/pdx_runtime_provider_claim_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "9691a6ed6441dfb7bab706f518b0749aa381cb4ee5ea7b59a84a503a6d8e4f5d",
+      "path": "dependencies/pdx_runtime_provider_common_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "ea7de6307323cbc963120ac56385e9e08b55e3f18d5e703bf493d89b6f31f75a",
+      "path": "dependencies/pdx_runtime_provider_lease_renew_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "da40f210b0973c62847effb485c62ae742b00be3a3100a91cce12bec50de0a64",
+      "path": "dependencies/pdx_runtime_provider_record_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "c7bec844e5e5c069d2f8345361e0410bc29c0ced4e79471ca510dd7a8b9393cb",
+      "path": "dependencies/pdx_runtime_provider_update_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "e06f3b21c6531c7c0a2352701b97f7afd869202e6e925a5e14eb3f9d3203354d",
+      "path": "dependencies/pdx_runtime_provider_workflow_create_response_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "0fea2c09b36cabe1b878f221338c2c3f2a186e526a10abde278180ba5274dfaf",
+      "path": "dependencies/pdx_runtime_workflow_cancel_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "2f75c3d18f3c713df0b838751c3cefb9bf65b6ba5b5365c4b7edcd2cc727635c",
+      "path": "dependencies/pdx_runtime_workflow_reconcile_v1.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "6d4f3ac76c85a4c2da6b139bffd76485951a2b440c483c6dea92e65b0165e516",
+      "path": "examples.json"
+    },
+    {
+      "sha256_utf8_lf": "99db4ce748e4241c245031d7b7eaa4f2f77fdb473c2c76a192128a6d019fa7e4",
+      "path": "package.json"
+    },
+    {
+      "sha256_utf8_lf": "ff2a827ed647de752dd9dd06ac130d26ef30c9641910e145982667c63a3260e5",
+      "path": "requirements-contracts.txt"
+    },
+    {
+      "sha256_utf8_lf": "6ba0056ec68da28fd3547d56c94937bf4abdddc85921a1ca20f1252b58381243",
+      "path": "route-mapping.json"
+    },
+    {
+      "sha256_utf8_lf": "fa23d391f8f5f30ddd0e2169012c2dbc3d6cab08ad0ee9af3a52c9cf9dfd08d7",
+      "path": "schemas/engine-external-operation.draft.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "c20117276299f44b864a68f56594e81eeaf7acf586091ecfcd00a8a94abcc585",
+      "path": "schemas/engine-support.draft.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "b982549052de2ddfb7c294a2e1b23322edb8d0ac8620c0d2ba0600ec04540d97",
+      "path": "schemas/parent-create_request-v3.draft.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "b9efdef6cdc953376d576ea7b21afb247053eddb17da90d7a8c4b3a4f58e5655",
+      "path": "schemas/parent-error-v3.draft.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "67d06c406bcad5e9b9686198f75ab7ca86af0960cc06c061f5730664ea4154f6",
+      "path": "schemas/parent-plan-v3.draft.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "a4d2258e33314a98ac361e4b8d6728f6bd53b9e05d8ffb9f133a63282fdbfee2",
+      "path": "schemas/parent-receipt-v3.draft.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "f92428dee3e9826a7561b50d97a06c5221f58710f8a8547c267666068b304919",
+      "path": "schemas/parent-state-v3.draft.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "464e0e7e8f19bc543dd64fe8c66aae2f270237c2d5a1a0095086a5a97493d686",
+      "path": "schemas/route-mapping.schema.json"
+    },
+    {
+      "sha256_utf8_lf": "ab97a8eba2557d07a7337cc13952f4c4e52372e1285435d86bc0ca2f0e3882c3",
+      "path": "semantic_cases.py"
+    },
+    {
+      "sha256_utf8_lf": "b9132ed1acde45d3011d46d5b80d2a35da77d51405189d4b44071181cb4d3183",
+      "path": "semantic_validator.py"
+    },
+    {
+      "sha256_utf8_lf": "0a71dd9534fd0effb37c904f03b628f474f71f54411ac0e4c6faf45622e37a6d",
+      "path": "shape-fixtures.json"
+    },
+    {
+      "sha256_utf8_lf": "253084742d92401369f96dd6c5e1f8c64506e74eec956027a4102c98e40664a7",
+      "path": "verify_contracts.py"
+    },
+    {
+      "sha256_utf8_lf": "e6e308ab474f0a2b5609e57088251c4ed06d008eac1cdfe094fd8f117d821d74",
+      "path": "verify_node.mjs"
+    }
+  ],
+  "verification_dependencies": [
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json",
+    "https://prodocux.dev/schemas/pdx/dynamic-dispatch/common-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/create-response-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/cancel-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/reconcile-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-claim-request-v2.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-claim-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-lease-renew-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/lease-renew-response-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-update-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-claim-request-v2.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-claim-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-lease-renew-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-update-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/record-v1.json",
+    "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-record-v1.json"
+  ],
+  "export_rules": [
+    "Separate owner-specific route map from the integration surface.",
+    "Retain schema identifiers and constraints; normalize file newlines to LF.",
+    "Resolve all schema and verification resources within this repository.",
+    "Synthetic examples verify contracts and are not runtime evidence."
+  ]
+}

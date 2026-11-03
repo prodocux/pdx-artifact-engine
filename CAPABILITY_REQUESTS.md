@@ -132,3 +132,85 @@
   route mapping; `contract-freeze.v1.json` is the authoritative freeze record.
 - Implementation: signed-off candidate `a58663734dde245bfbb8506699c1d3d0e3cdc1a6`
 - Shipped in: not shipped
+
+## ER-003 [status: approved]
+
+- Reporter: source-bound verification consumer
+- Date: 2026-10-31
+- Public baseline: `pdx-artifact-engine==0.3.0a12`
+- Blocker: an approved decision is a historical record, and leaving that
+  record `approved` after resume is not itself a defect. The missing
+  capability is an atomic limit on which operation that decision may
+  activate, how many times, and how an already started operation is
+  recovered. `ApprovalLedger` is an in-memory reference. `resume_plan()` is
+  the simple resume entry: two concurrent calls with one recorded decision
+  each completed a registered external executor, and the ledger stayed
+  `approved`. Separately, `create_external_operation()` accepts another
+  envelope with a new idempotency key, and a `timed_out` operation with
+  `retryable=true` and `reconcile_required=false` reports retry allowed.
+  Dropping the first Python object and constructing a second envelope shows
+  only that these pure functions do not dedupe across operations. It is not
+  a process-kill or restart proof, and it does not show that every a12
+  durable-workflow path has failed. These observations also do not mean
+  `resume_plan()` violates its published contract.
+- Requested Engine capability: extend the existing durable workflow, lease,
+  CAS, and receipt authority. Do not add a second workflow state machine.
+  Keep the approval record immutable. Record activation and use in separate
+  durable state. Activation authority includes the authenticated principal,
+  expiry, revocation version, and the operation binding below. Exact retry
+  of the same activation returns the existing operation and does not execute
+  it again. Concurrent activation from multiple connections or processes
+  creates one operation.
+- Operation identity: a trusted control plane allocates
+  `operation_subject_id` for one business operation. `operation_digest`
+  binds the immutable business payload, evidence digest, executor or
+  provider identity, and environment. It does not include a caller-chosen
+  replacement key. `provider_idempotency_key` is persisted by Engine when
+  the subject is first activated, and retries reuse that stored key.
+  Changing the payload, evidence, executor, provider, or environment
+  changes `operation_digest` and invalidates the binding. While a subject
+  is executing, unknown, or reconciliation-required, Engine rejects a
+  substitute operation for that subject. A new attempt is allowed only
+  after reconciliation confirms the provider did not execute it, and only
+  under an explicit restart policy. Two lawful operations with the same
+  payload may use different subjects. Engine must not dedupe solely by
+  amount and payee.
+- Recovery: persist the intent and the bound provider idempotency key
+  before the external call. If the process stops after the provider has
+  accepted the call and before the response is stored, restart queries that
+  same operation and does not submit another. If the provider query is
+  still indeterminate, the subject stays blocked. A confirmed result is not
+  overwritten by a duplicate, reordered, forged, or identity-mismatched
+  external result. Local persistence and the provider cannot commit
+  atomically; the guarantee is the persisted intent, the stable provider
+  key, the query, and reconciliation. This request does not claim
+  exactly-once delivery.
+- Required conformance: a countable fake provider, a separate process, and
+  a persistent store. Cover provider acceptance followed by process death
+  before the response is stored; restart queries once and does not submit
+  again; an indeterminate query remains blocked; concurrent activation
+  creates one operation; exact retry returns that operation; approval
+  history stays immutable while activation state changes; a payload or
+  evidence change invalidates the binding; and duplicate, reordered,
+  forged, or mismatched external results do not replace a confirmed result.
+  Document the distinct guarantees of `resume_plan()`, snapshot recovery,
+  and the durable workflow. Clean-install tests must not treat the
+  in-memory ledger or a discarded object as the crash fixture.
+- Boundary: contract approval only. This does not authorize runtime
+  implementation, assign a release, or authorize adapter work. The verified
+  source-bound executor remains a separate request after the Kernel check
+  contract is stable. Engine does not call a payment provider, parse
+  invoice meaning, or select a model. Consumer probe fixtures remain
+  outside this repository. Existing frozen contracts stay byte-stable;
+  additions use a new versioned contract.
+- Evidence: consumer probe against installed `pdx-artifact-engine==0.3.0a12`
+  on 2026-10-31. Concurrent `resume_plan()` produced two completed executor
+  calls for one decision. The pure external-operation helpers accepted a
+  second idempotency key, and timeout retry was allowed when reconciliation
+  was not required. No provider process was killed and no durable store was
+  reopened in that probe.
+- Referee decision: contract frozen on 2026-11-03. Product-neutral specification
+  and standalone checks are in `docs/external-operations/CONTRACT.md` and
+  `docs/external-operations/contract-freeze.v1.json`. Runtime implementation and
+  release require separate authorization.
+- Shipped in: not shipped

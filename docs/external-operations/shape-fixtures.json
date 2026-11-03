@@ -1,0 +1,1512 @@
+[
+  {
+    "name": "engine-external-operation.draft.schema:activationRequest",
+    "schema": "urn:pdx:draft:er003:core:1#/$defs/activationRequest",
+    "instance": {
+      "schema_version": "pdx_external_operation_activation_request_draft_v1",
+      "request_id": "example-001",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "operation_subject_id": "example-001",
+      "operation_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "authorization_id": "example-001",
+      "issuer_id": "example-001",
+      "workflow_job_id": "example-001",
+      "workflow_step_id": "example-001",
+      "plan_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "idempotency_key": "example-001xxxxx"
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-external-operation.draft.schema:manualAttestation",
+    "schema": "urn:pdx:draft:er003:core:1#/$defs/manualAttestation",
+    "instance": {
+      "case_id": "example-001",
+      "attestation_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "example-001",
+        "uri": "artifact://example/evidence.json",
+        "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "size_bytes": 0,
+        "media_type": "example-001"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-external-operation.draft.schema:observationRequest",
+    "schema": "urn:pdx:draft:er003:core:1#/$defs/observationRequest",
+    "instance": {
+      "schema_version": "pdx_external_operation_observation_request_draft_v1",
+      "request_id": "example-001",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "operation_subject_id": "example-001",
+      "operation_id": "example-001",
+      "operation_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "provider_profile_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "account_alias": "example-001",
+      "environment": "sandbox",
+      "provider_key_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "provider_operation_id": "example-001",
+      "observation_id": "example-001",
+      "channel": "query_adapter",
+      "outcome": "pending",
+      "observed_at": "2026-11-03T00:00:00Z",
+      "evidence_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "example-001",
+        "uri": "artifact://example/evidence.json",
+        "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "size_bytes": 0,
+        "media_type": "example-001"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-external-operation.draft.schema:error",
+    "schema": "urn:pdx:draft:er003:core:1#/$defs/error",
+    "instance": {
+      "schema_version": "pdx_external_operation_error_draft_v1",
+      "request_id": "example-001",
+      "code": "REQUEST_INVALID",
+      "message": "example-001",
+      "retryable": false
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:authority_config",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/authority_config",
+    "instance": {
+      "schema_version": "pdx_er003_authority_config_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "controller_principals": [],
+      "issuer_principals": [],
+      "adapter_principals": [],
+      "manual_principals": [],
+      "administrator_principals": [],
+      "supervisor_principals": [],
+      "reader_principals": [],
+      "revision": 1
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:provider_register",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/provider_register",
+    "instance": {
+      "schema_version": "pdx_er003_provider_register_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "request_id": "example-001",
+      "idempotency_key": "example-001",
+      "provider_profile_id": "example-001",
+      "revision": 1,
+      "account_alias": "example-001",
+      "environment": "sandbox",
+      "submit_deployment": {
+        "kind": "wheel",
+        "bundle_name": "example-001",
+        "bundle_version": "example-001",
+        "bundle_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "registry_revision": 1,
+        "entrypoint_symbol": "example-001",
+        "identity_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e"
+      },
+      "query_deployment": {
+        "kind": "wheel",
+        "bundle_name": "example-001",
+        "bundle_version": "example-001",
+        "bundle_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "registry_revision": 1,
+        "entrypoint_symbol": "example-001",
+        "identity_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e"
+      },
+      "execution_policy_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "lookup_proven": false,
+      "lookup_proof": {
+        "verified_artifact": {
+          "schema_version": "prodocux_opaque_artifact_v1",
+          "artifact_id": "example-001",
+          "uri": "artifact://example/evidence.json",
+          "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+          "size_bytes": 0,
+          "media_type": "example-001"
+        },
+        "verifier_id": "example-001",
+        "verifier_contract_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e"
+      },
+      "recovery_mode": "query_only",
+      "endpoint_policy_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "outcome_mapping_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "dedupe_retention_seconds": 0,
+      "provider_key_format": "lowercase_hex_32",
+      "budgets": {
+        "max_query_calls": 20,
+        "max_query_execution_seconds": 600,
+        "max_scheduling_seconds": 86400,
+        "max_observations": 64,
+        "max_evidence_bytes": 1048576,
+        "max_manual_records_per_case": 16,
+        "max_manual_bytes_per_case": 1048576
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:operation_specification",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/operation_specification",
+    "instance": {
+      "payload_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "example-001",
+        "uri": "artifact://example/evidence.json",
+        "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "size_bytes": 0,
+        "media_type": "example-001"
+      },
+      "payload_schema_id": "example-001",
+      "payload_schema_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "evidence_artifacts": [],
+      "provider_profile_id": "example-001",
+      "provider_profile_revision": 1,
+      "provider_profile_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "account_alias": "example-001",
+      "environment": "sandbox",
+      "executor_identity_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "execution_policy_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e"
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:subject_register",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/subject_register",
+    "instance": {
+      "schema_version": "pdx_er003_subject_register_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "request_id": "example-001",
+      "idempotency_key": "example-001",
+      "operation_subject_id": "example-001",
+      "specification": {
+        "payload_artifact": {
+          "schema_version": "prodocux_opaque_artifact_v1",
+          "artifact_id": "example-001",
+          "uri": "artifact://example/evidence.json",
+          "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+          "size_bytes": 0,
+          "media_type": "example-001"
+        },
+        "payload_schema_id": "example-001",
+        "payload_schema_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "evidence_artifacts": [],
+        "provider_profile_id": "example-001",
+        "provider_profile_revision": 1,
+        "provider_profile_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "account_alias": "example-001",
+        "environment": "sandbox",
+        "executor_identity_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "execution_policy_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:authorization_register",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/authorization_register",
+    "instance": {
+      "schema_version": "pdx_er003_authorization_register_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "request_id": "example-001",
+      "idempotency_key": "example-001",
+      "authorization_id": "example-001",
+      "issuer_id": "example-001",
+      "actor_id": "example-001",
+      "operation_subject_id": "example-001",
+      "operation_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "controller_principal": "example-001",
+      "execution_policy_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "issued_at": "2026-11-03T00:00:00Z",
+      "expires_at": "2026-11-03T00:00:00Z",
+      "issuer_epoch": 1,
+      "max_operations": 1
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:authorization_revoke",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/authorization_revoke",
+    "instance": {
+      "schema_version": "pdx_er003_authorization_revoke_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "request_id": "example-001",
+      "idempotency_key": "example-001",
+      "authorization_id": "example-001",
+      "issuer_id": "example-001",
+      "revocation_id": "example-001",
+      "issuer_epoch": 1
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:issuer_freshness",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/issuer_freshness",
+    "instance": {
+      "schema_version": "pdx_er003_issuer_freshness_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "request_id": "example-001",
+      "idempotency_key": "example-001",
+      "issuer_id": "example-001",
+      "issuer_epoch": 1,
+      "observed_at": "2026-11-03T00:00:00Z",
+      "valid_until": "2026-11-03T00:00:00Z"
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:registration_response",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/registration_response",
+    "instance": {
+      "schema_version": "pdx_er003_registration_response_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "request_id": "example-001",
+      "record_id": "example-001",
+      "record_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "created": false
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:activation_response",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/activation_response",
+    "instance": {
+      "schema_version": "pdx_er003_activation_response_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "request_id": "example-001",
+      "operation_subject_id": "example-001",
+      "operation_id": "example-001",
+      "operation_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "activation_id": "example-001",
+      "activation_binding_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "authorization_id": "example-001",
+      "issuer_id": "example-001",
+      "provider_key_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "workflow_job_id": "example-001",
+      "workflow_step_id": "example-001",
+      "created": false
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:projection",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/projection",
+    "instance": {
+      "schema_version": "pdx_er003_projection_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "operation_subject_id": "example-001",
+      "operation_id": "example-001",
+      "operation_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "workflow_job_id": "example-001",
+      "workflow_step_id": "example-001",
+      "plan_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "authorization_id": "example-001",
+      "issuer_id": "example-001",
+      "provider_profile_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "provider_key_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "account_alias": "example-001",
+      "environment": "sandbox",
+      "submission_evidence": "not_started",
+      "provider_outcome": "unobserved",
+      "reconciliation_required": false,
+      "subject_reserved": true,
+      "submit_permits": 0,
+      "resubmission_allowed": false,
+      "sequence": 1,
+      "recovery_mode": "query_only",
+      "consumed": {
+        "query_calls": 0,
+        "query_execution_ms": 0,
+        "scheduling_elapsed_seconds": 0,
+        "observation_records": 0,
+        "evidence_bytes": 0
+      },
+      "manual_cases": [],
+      "latest_receipt_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "example-001",
+        "uri": "artifact://example/evidence.json",
+        "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "size_bytes": 0,
+        "media_type": "example-001"
+      },
+      "parent_terminal_receipt_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "example-001",
+        "uri": "artifact://example/evidence.json",
+        "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "size_bytes": 0,
+        "media_type": "example-001"
+      },
+      "conflict_count": 0
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:reconcile_request",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/reconcile_request",
+    "instance": {
+      "schema_version": "pdx_er003_reconcile_request_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "request_id": "example-001",
+      "idempotency_key": "example-001",
+      "operation_id": "example-001",
+      "operation_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "provider_profile_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "expected_sequence": 1
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:reconcile_response",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/reconcile_response",
+    "instance": {
+      "schema_version": "pdx_er003_reconcile_response_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "request_id": "example-001",
+      "operation_id": "example-001",
+      "query_scheduled": false,
+      "manual_required": false,
+      "projection": {
+        "schema_version": "pdx_er003_projection_draft_v2",
+        "authority_id": "example-001",
+        "tenant_id": "example-001",
+        "operation_subject_id": "example-001",
+        "operation_id": "example-001",
+        "operation_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "workflow_job_id": "example-001",
+        "workflow_step_id": "example-001",
+        "plan_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "authorization_id": "example-001",
+        "issuer_id": "example-001",
+        "provider_profile_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "provider_key_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "account_alias": "example-001",
+        "environment": "sandbox",
+        "submission_evidence": "not_started",
+        "provider_outcome": "unobserved",
+        "reconciliation_required": false,
+        "subject_reserved": true,
+        "submit_permits": 0,
+        "resubmission_allowed": false,
+        "sequence": 1,
+        "recovery_mode": "query_only",
+        "consumed": {
+          "query_calls": 0,
+          "query_execution_ms": 0,
+          "scheduling_elapsed_seconds": 0,
+          "observation_records": 0,
+          "evidence_bytes": 0
+        },
+        "manual_cases": [],
+        "latest_receipt_artifact": {
+          "schema_version": "prodocux_opaque_artifact_v1",
+          "artifact_id": "example-001",
+          "uri": "artifact://example/evidence.json",
+          "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+          "size_bytes": 0,
+          "media_type": "example-001"
+        },
+        "parent_terminal_receipt_artifact": {
+          "schema_version": "prodocux_opaque_artifact_v1",
+          "artifact_id": "example-001",
+          "uri": "artifact://example/evidence.json",
+          "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+          "size_bytes": 0,
+          "media_type": "example-001"
+        },
+        "conflict_count": 0
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:observation_response",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/observation_response",
+    "instance": {
+      "schema_version": "pdx_er003_observation_response_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "request_id": "example-001",
+      "operation_id": "example-001",
+      "observation_id": "example-001",
+      "accepted": false,
+      "conflict_recorded": false,
+      "receipt_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "example-001",
+        "uri": "artifact://example/evidence.json",
+        "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "size_bytes": 0,
+        "media_type": "example-001"
+      },
+      "sequence": 1
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:receipt",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/receipt",
+    "instance": {
+      "schema_version": "pdx_er003_receipt_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "operation_subject_id": "example-001",
+      "operation_id": "example-001",
+      "operation_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "workflow_job_id": "example-001",
+      "workflow_step_id": "example-001",
+      "plan_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "authorization_id": "example-001",
+      "issuer_id": "example-001",
+      "provider_profile_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "provider_key_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "account_alias": "example-001",
+      "environment": "sandbox",
+      "submission_evidence": "not_started",
+      "provider_outcome": "unobserved",
+      "reconciliation_required": false,
+      "subject_reserved": true,
+      "submit_permits": 0,
+      "resubmission_allowed": false,
+      "receipt_id": "example-001",
+      "sequence": 1,
+      "activation_id": "example-001",
+      "activation_binding_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "authorization_record_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "observation_artifacts": [],
+      "conflict_artifacts": [],
+      "consumed": {
+        "query_calls": 0,
+        "query_execution_ms": 0,
+        "scheduling_elapsed_seconds": 0,
+        "observation_records": 0,
+        "evidence_bytes": 0
+      },
+      "manual_cases": [],
+      "recorded_at": "2026-11-03T00:00:00Z",
+      "previous_receipt_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "parent_terminal_receipt_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "example-001",
+        "uri": "artifact://example/evidence.json",
+        "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+        "size_bytes": 0,
+        "media_type": "example-001"
+      },
+      "receipt_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e"
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:submit_permit_record",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/submit_permit_record",
+    "instance": {
+      "schema_version": "pdx_er003_submit_permit_record_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "operation_subject_id": "example-001",
+      "operation_id": "example-001",
+      "operation_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "workflow_job_id": "example-001",
+      "workflow_step_id": "example-001",
+      "plan_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "authorization_id": "example-001",
+      "issuer_id": "example-001",
+      "provider_profile_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "provider_key_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "account_alias": "example-001",
+      "environment": "sandbox",
+      "permit_id": "example-001",
+      "claim_id": "example-001",
+      "claim_fence": 1,
+      "permit_sequence": 1,
+      "submission_evidence": "possibly_submitted",
+      "issued_at": "2026-11-03T00:00:00Z",
+      "intent_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e"
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:query_claim_record",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/query_claim_record",
+    "instance": {
+      "schema_version": "pdx_er003_query_claim_record_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "operation_subject_id": "example-001",
+      "operation_id": "example-001",
+      "operation_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "workflow_job_id": "example-001",
+      "workflow_step_id": "example-001",
+      "plan_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "authorization_id": "example-001",
+      "issuer_id": "example-001",
+      "provider_profile_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "provider_key_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "account_alias": "example-001",
+      "environment": "sandbox",
+      "query_id": "example-001",
+      "claim_id": "example-001",
+      "claim_fence": 1,
+      "deadline": "2026-11-03T00:00:00Z",
+      "reserved_runtime_ms": 1,
+      "query_number": 1
+    },
+    "valid": true
+  },
+  {
+    "name": "engine-support.draft.schema:step_binding",
+    "schema": "urn:pdx:draft:er003:support:2#/$defs/step_binding",
+    "instance": {
+      "schema_version": "pdx_er003_step_binding_draft_v2",
+      "authority_id": "example-001",
+      "tenant_id": "example-001",
+      "operation_subject_id": "example-001",
+      "operation_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "provider_profile_digest": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "authorization_id": "example-001",
+      "issuer_id": "example-001",
+      "budgets": {
+        "max_query_calls": 20,
+        "max_query_execution_seconds": 600,
+        "max_scheduling_seconds": 86400,
+        "max_observations": 64,
+        "max_evidence_bytes": 1048576,
+        "max_manual_records_per_case": 16,
+        "max_manual_bytes_per_case": 1048576
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "parent-receipt-v3.draft.schema:safeError",
+    "schema": "urn:pdx:draft:er003:parent:receipt:3#/$defs/safeError",
+    "instance": {
+      "code": "SAFE_ERROR",
+      "message": "example-001",
+      "retryable": false,
+      "reconcile_required": false
+    },
+    "valid": true
+  },
+  {
+    "name": "parent-receipt-v3.draft.schema:counters",
+    "schema": "urn:pdx:draft:er003:parent:receipt:3#/$defs/counters",
+    "instance": {
+      "provider_attempts": 0,
+      "check_attempts": 0,
+      "dispatch_attempts": 0,
+      "active_steps": 0,
+      "active_dispatches": 0,
+      "repair_iterations": 0,
+      "total_runtime_seconds": 0,
+      "dispatch_runtime_seconds": 0,
+      "total_event_bytes": 0,
+      "total_artifact_bytes": 0,
+      "cross_step_artifact_edges": 0,
+      "external_operations": 0,
+      "external_calls": 0,
+      "recovery_query_calls": 0
+    },
+    "valid": true
+  },
+  {
+    "name": "parent-receipt-v3.draft.schema:opaqueArtifact",
+    "schema": "urn:pdx:draft:er003:parent:receipt:3#/$defs/opaqueArtifact",
+    "instance": {
+      "schema_version": "prodocux_opaque_artifact_v1",
+      "artifact_id": "example-001",
+      "uri": "artifact://example/evidence.json",
+      "sha256": "3a3436765885cdf2edc179512c22dd4c4259410f0d18f391cbc8d83a837c678e",
+      "size_bytes": 0,
+      "media_type": "example-001"
+    },
+    "valid": true
+  },
+  {
+    "name": "parent-state-v3.draft.schema:counters",
+    "schema": "urn:pdx:draft:er003:parent:state:3#/$defs/counters",
+    "instance": {
+      "provider_attempts": 0,
+      "check_attempts": 0,
+      "dispatch_attempts": 0,
+      "active_steps": 0,
+      "active_dispatches": 0,
+      "repair_iterations": 0,
+      "total_runtime_seconds": 0,
+      "dispatch_runtime_seconds": 0,
+      "total_event_bytes": 0,
+      "total_artifact_bytes": 0,
+      "cross_step_artifact_edges": 0,
+      "external_operations": 0,
+      "external_calls": 0,
+      "recovery_query_calls": 0
+    },
+    "valid": true
+  },
+  {
+    "name": "S07",
+    "schema": "urn:pdx:draft:er003:core:1",
+    "instance": {
+      "schema_version": "pdx_external_operation_activation_request_draft_v1",
+      "request_id": "req-shape-002",
+      "authority_id": "authority-example",
+      "tenant_id": "tenant-example",
+      "operation_subject_id": "subject-example",
+      "operation_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "authorization_id": "authorization-example",
+      "issuer_id": "issuer-example",
+      "workflow_job_id": "workflow-example",
+      "workflow_step_id": "dispatch-example",
+      "plan_digest": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+      "idempotency_key": "activation-shape-key-001"
+    },
+    "valid": true
+  },
+  {
+    "name": "S08",
+    "schema": "urn:pdx:draft:er003:core:1",
+    "instance": {
+      "schema_version": "pdx_external_operation_activation_request_draft_v1",
+      "request_id": "req-shape-002",
+      "authority_id": "authority-example",
+      "tenant_id": "tenant-example",
+      "operation_subject_id": "subject-example",
+      "operation_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "authorization_id": "authorization-example",
+      "issuer_id": "issuer-example",
+      "workflow_job_id": "workflow-example",
+      "workflow_step_id": "dispatch-example",
+      "plan_digest": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+      "idempotency_key": "activation-shape-key-001",
+      "provider_idempotency_key": "caller-key"
+    },
+    "valid": false
+  },
+  {
+    "name": "S09",
+    "schema": "urn:pdx:draft:er003:core:1",
+    "instance": {
+      "schema_version": "pdx_external_operation_activation_request_draft_v1",
+      "request_id": "req-shape-002",
+      "authority_id": "authority-example",
+      "tenant_id": "tenant-example",
+      "operation_subject_id": "subject-example",
+      "operation_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "authorization_id": "authorization-example",
+      "issuer_id": "issuer-example",
+      "workflow_job_id": "workflow-example",
+      "workflow_step_id": "dispatch-example",
+      "plan_digest": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+      "idempotency_key": "activation-shape-key-001",
+      "approval_actor": "caller-actor"
+    },
+    "valid": false
+  },
+  {
+    "name": "S10",
+    "schema": "urn:pdx:draft:er003:core:1",
+    "instance": {
+      "schema_version": "pdx_external_operation_observation_request_draft_v1",
+      "request_id": "req-shape-003",
+      "authority_id": "authority-example",
+      "tenant_id": "tenant-example",
+      "operation_subject_id": "subject-example",
+      "operation_id": "operation-example",
+      "operation_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "provider_profile_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "account_alias": "account-example",
+      "environment": "sandbox",
+      "provider_key_digest": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+      "provider_operation_id": null,
+      "observation_id": "observation-example",
+      "channel": "query_adapter",
+      "outcome": "unknown",
+      "observed_at": "2026-10-31T00:00:00Z",
+      "evidence_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "evidence-example",
+        "uri": "artifact://example/evidence/observation.json",
+        "sha256": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+        "size_bytes": 5,
+        "media_type": "application/json"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "S11",
+    "schema": "urn:pdx:draft:er003:core:1",
+    "instance": {
+      "schema_version": "pdx_external_operation_observation_request_draft_v1",
+      "request_id": "req-shape-003",
+      "authority_id": "authority-example",
+      "tenant_id": "tenant-example",
+      "operation_subject_id": "subject-example",
+      "operation_id": "operation-example",
+      "operation_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "provider_profile_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "account_alias": "account-example",
+      "environment": "sandbox",
+      "provider_key_digest": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+      "provider_operation_id": null,
+      "observation_id": "observation-example",
+      "channel": "manual_authority",
+      "outcome": "unknown",
+      "observed_at": "2026-10-31T00:00:00Z",
+      "evidence_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "evidence-example",
+        "uri": "artifact://example/evidence/observation.json",
+        "sha256": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+        "size_bytes": 5,
+        "media_type": "application/json"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "S12",
+    "schema": "urn:pdx:draft:er003:core:1",
+    "instance": {
+      "schema_version": "pdx_external_operation_observation_request_draft_v1",
+      "request_id": "req-shape-003",
+      "authority_id": "authority-example",
+      "tenant_id": "tenant-example",
+      "operation_subject_id": "subject-example",
+      "operation_id": "operation-example",
+      "operation_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "provider_profile_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "account_alias": "account-example",
+      "environment": "sandbox",
+      "provider_key_digest": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+      "provider_operation_id": null,
+      "observation_id": "observation-example",
+      "channel": "query_adapter",
+      "outcome": "confirmed_not_executed",
+      "observed_at": "2026-10-31T00:00:00Z",
+      "evidence_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "evidence-example",
+        "uri": "artifact://example/evidence/observation.json",
+        "sha256": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+        "size_bytes": 5,
+        "media_type": "application/json"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "S13",
+    "schema": "urn:pdx:draft:er003:core:1",
+    "instance": {
+      "schema_version": "pdx_external_operation_observation_request_draft_v1",
+      "request_id": "req-shape-003",
+      "authority_id": "authority-example",
+      "tenant_id": "tenant-example",
+      "operation_subject_id": "subject-example",
+      "operation_id": "operation-example",
+      "operation_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "provider_profile_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "account_alias": "account-example",
+      "environment": "sandbox",
+      "provider_key_digest": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+      "provider_operation_id": null,
+      "observation_id": "observation-example",
+      "channel": "query_adapter",
+      "outcome": "unknown",
+      "observed_at": "2026-10-31T00:00:00Z",
+      "evidence_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "evidence-example",
+        "uri": "artifact://example/../other.json",
+        "sha256": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+        "size_bytes": 5,
+        "media_type": "application/json"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "S14",
+    "schema": "urn:pdx:draft:er003:core:1",
+    "instance": {
+      "schema_version": "pdx_external_operation_observation_request_draft_v1",
+      "request_id": "req-shape-003",
+      "authority_id": "authority-example",
+      "tenant_id": "tenant-example",
+      "operation_subject_id": "subject-example",
+      "operation_id": "operation-example",
+      "operation_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "provider_profile_digest": "11fc79f04199559dde502b54c3aafb2f5cbe8d35e81903709f017909854cc565",
+      "account_alias": "account-example",
+      "environment": "sandbox",
+      "provider_key_digest": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+      "provider_operation_id": null,
+      "observation_id": "observation-example",
+      "channel": "query_adapter",
+      "outcome": "unknown",
+      "observed_at": "2026-10-31T00:00:00Z",
+      "evidence_artifact": {
+        "schema_version": "prodocux_opaque_artifact_v1",
+        "artifact_id": "evidence-example",
+        "uri": "artifact://example/./other.json",
+        "sha256": "38523c087796e5d5dd1cf9bad1fb026781a838dd9dd2cf8af58b9f6502a46778",
+        "size_bytes": 5,
+        "media_type": "application/json"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "parent-plan",
+    "schema": "urn:pdx:draft:er003:parent:plan:3",
+    "instance": {
+      "schema_version": "pdx_runtime_provider_workflow_plan_v3",
+      "workflow_job_id": "workflow_dispatch_001",
+      "task_id": "task_dispatch_001",
+      "run_id": "run_parent_001",
+      "plan_digest": "1b6c9b22e7ab7e4cb691c4fe637e9bdff4e4ecb5cd46721358476540bc3ca67f",
+      "steps": [
+        {
+          "workflow_step_id": "step_decision_001",
+          "step_kind": "builder",
+          "depends_on": [],
+          "max_attempts": 1,
+          "operation_digest": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        {
+          "workflow_step_id": "step_dispatch_001",
+          "step_kind": "dispatch",
+          "depends_on": [
+            "step_decision_001"
+          ],
+          "max_attempts": 1,
+          "operation_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+          "dispatch_policy_id": "policy_dispatch_001",
+          "run_a_plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "decision_step_id": "step_decision_001"
+        },
+        {
+          "workflow_step_id": "step_review_001",
+          "step_kind": "reviewer",
+          "depends_on": [
+            "step_dispatch_001"
+          ],
+          "max_attempts": 1,
+          "operation_digest": "3333333333333333333333333333333333333333333333333333333333333333"
+        }
+      ],
+      "budgets": {
+        "max_provider_attempts": 2,
+        "max_check_attempts": 0,
+        "max_dispatch_attempts": 1,
+        "max_concurrent_steps": 1,
+        "max_repair_iterations": 0,
+        "max_total_runtime_seconds": 600,
+        "max_dispatch_runtime_seconds": 300,
+        "max_total_event_bytes": 1048576,
+        "max_total_artifact_bytes": 10485760,
+        "max_cross_step_artifact_edges": 3,
+        "max_external_operations": 1,
+        "max_external_calls": 100
+      },
+      "artifact_edges": [
+        {
+          "edge_id": "edge_decision_001",
+          "producer_step_id": "step_decision_001",
+          "consumer_step_id": "step_dispatch_001",
+          "artifact_role": "decision_receipt"
+        },
+        {
+          "edge_id": "edge_dispatch_receipt_001",
+          "producer_step_id": "step_dispatch_001",
+          "consumer_step_id": "step_review_001",
+          "artifact_role": "dispatch_receipt"
+        },
+        {
+          "edge_id": "edge_dispatch_output_001",
+          "producer_step_id": "step_dispatch_001",
+          "consumer_step_id": "step_review_001",
+          "artifact_role": "dispatch_output"
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "parent-create-request",
+    "schema": "urn:pdx:draft:er003:parent:create-request:3",
+    "instance": {
+      "schema_version": "pdx_internal_runtime_provider_workflow_create_request_v3",
+      "request_id": "request_dispatch_001",
+      "correlation_id": "correlation_dispatch_001",
+      "idempotency_key": "workflow-dispatch-idempotency-001",
+      "operation_digest": "4444444444444444444444444444444444444444444444444444444444444444",
+      "plan": {
+        "schema_version": "pdx_runtime_provider_workflow_plan_v3",
+        "workflow_job_id": "workflow_dispatch_001",
+        "task_id": "task_dispatch_001",
+        "run_id": "run_parent_001",
+        "plan_digest": "1b6c9b22e7ab7e4cb691c4fe637e9bdff4e4ecb5cd46721358476540bc3ca67f",
+        "steps": [
+          {
+            "workflow_step_id": "step_decision_001",
+            "step_kind": "builder",
+            "depends_on": [],
+            "max_attempts": 1,
+            "operation_digest": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          {
+            "workflow_step_id": "step_dispatch_001",
+            "step_kind": "dispatch",
+            "depends_on": [
+              "step_decision_001"
+            ],
+            "max_attempts": 1,
+            "operation_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+            "dispatch_policy_id": "policy_dispatch_001",
+            "run_a_plan_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "decision_step_id": "step_decision_001"
+          },
+          {
+            "workflow_step_id": "step_review_001",
+            "step_kind": "reviewer",
+            "depends_on": [
+              "step_dispatch_001"
+            ],
+            "max_attempts": 1,
+            "operation_digest": "3333333333333333333333333333333333333333333333333333333333333333"
+          }
+        ],
+        "budgets": {
+          "max_provider_attempts": 2,
+          "max_check_attempts": 0,
+          "max_dispatch_attempts": 1,
+          "max_concurrent_steps": 1,
+          "max_repair_iterations": 0,
+          "max_total_runtime_seconds": 600,
+          "max_dispatch_runtime_seconds": 300,
+          "max_total_event_bytes": 1048576,
+          "max_total_artifact_bytes": 10485760,
+          "max_cross_step_artifact_edges": 3,
+          "max_external_operations": 1,
+          "max_external_calls": 100
+        },
+        "artifact_edges": [
+          {
+            "edge_id": "edge_decision_001",
+            "producer_step_id": "step_decision_001",
+            "consumer_step_id": "step_dispatch_001",
+            "artifact_role": "decision_receipt"
+          },
+          {
+            "edge_id": "edge_dispatch_receipt_001",
+            "producer_step_id": "step_dispatch_001",
+            "consumer_step_id": "step_review_001",
+            "artifact_role": "dispatch_receipt"
+          },
+          {
+            "edge_id": "edge_dispatch_output_001",
+            "producer_step_id": "step_dispatch_001",
+            "consumer_step_id": "step_review_001",
+            "artifact_role": "dispatch_output"
+          }
+        ]
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "parent-state",
+    "schema": "urn:pdx:draft:er003:parent:state:3",
+    "instance": {
+      "schema_version": "pdx_runtime_provider_workflow_state_v3",
+      "workflow_job_id": "workflow_dispatch_001",
+      "task_id": "task_dispatch_001",
+      "run_id": "run_parent_001",
+      "plan_digest": "1b6c9b22e7ab7e4cb691c4fe637e9bdff4e4ecb5cd46721358476540bc3ca67f",
+      "state": "running",
+      "counters": {
+        "provider_attempts": 1,
+        "check_attempts": 0,
+        "dispatch_attempts": 1,
+        "active_steps": 1,
+        "active_dispatches": 1,
+        "repair_iterations": 0,
+        "total_runtime_seconds": 10,
+        "dispatch_runtime_seconds": 3,
+        "total_event_bytes": 128,
+        "total_artifact_bytes": 0,
+        "cross_step_artifact_edges": 1,
+        "external_operations": 1,
+        "external_calls": 0,
+        "recovery_query_calls": 0
+      },
+      "updated_at": "2026-10-03T12:00:00Z"
+    },
+    "valid": true
+  },
+  {
+    "name": "parent-receipt",
+    "schema": "urn:pdx:draft:er003:parent:receipt:3",
+    "instance": {
+      "schema_version": "pdx_runtime_provider_workflow_receipt_v3",
+      "receipt_id": "workflow_receipt_001",
+      "workflow_job_id": "workflow_dispatch_001",
+      "task_id": "task_dispatch_001",
+      "run_id": "run_parent_001",
+      "plan_digest": "1b6c9b22e7ab7e4cb691c4fe637e9bdff4e4ecb5cd46721358476540bc3ca67f",
+      "status": "completed",
+      "step_receipts": [
+        {
+          "workflow_step_id": "step_decision_001",
+          "step_kind": "builder",
+          "attempt_number": 1,
+          "status": "succeeded",
+          "execution_constraints_digest": "5555555555555555555555555555555555555555555555555555555555555555"
+        },
+        {
+          "workflow_step_id": "step_dispatch_001",
+          "step_kind": "dispatch",
+          "attempt_number": 1,
+          "status": "succeeded",
+          "execution_constraints_digest": "6666666666666666666666666666666666666666666666666666666666666666",
+          "dispatch_receipt_artifact": {
+            "schema_version": "prodocux_opaque_artifact_v1",
+            "artifact_id": "dispatch_receipt_001",
+            "uri": "artifact://dispatch/receipts/dispatch-001.json",
+            "sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+            "size_bytes": 2048,
+            "media_type": "application/json"
+          },
+          "receipt_profile": "ordinary_dispatch"
+        },
+        {
+          "workflow_step_id": "step_review_001",
+          "step_kind": "reviewer",
+          "attempt_number": 1,
+          "status": "succeeded",
+          "execution_constraints_digest": "8888888888888888888888888888888888888888888888888888888888888888"
+        }
+      ],
+      "artifact_edges": [
+        {
+          "edge_id": "edge_decision_001",
+          "artifact_role": "decision_receipt",
+          "artifact": {
+            "schema_version": "prodocux_opaque_artifact_v1",
+            "artifact_id": "decision_receipt_001",
+            "uri": "artifact://dispatch/receipts/decision-001.json",
+            "sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+            "size_bytes": 1024,
+            "media_type": "application/json"
+          },
+          "artifact_identity_digest": "d5b904b5595e5be21326d42a9cf03df91fc598e7bf11a697d6950b0379db905a",
+          "producer_step_id": "step_decision_001",
+          "producer_attempt_number": 1,
+          "consumer_step_id": "step_dispatch_001",
+          "recorded_once": true
+        },
+        {
+          "edge_id": "edge_dispatch_receipt_001",
+          "artifact_role": "dispatch_receipt",
+          "artifact": {
+            "schema_version": "prodocux_opaque_artifact_v1",
+            "artifact_id": "dispatch_receipt_001",
+            "uri": "artifact://dispatch/receipts/dispatch-001.json",
+            "sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+            "size_bytes": 2048,
+            "media_type": "application/json"
+          },
+          "artifact_identity_digest": "4c5e66a273bd44cac3a965474f13c0a19ec2e38048be1b4b29230b7b39f5a88f",
+          "producer_step_id": "step_dispatch_001",
+          "producer_attempt_number": 1,
+          "consumer_step_id": "step_review_001",
+          "recorded_once": true
+        },
+        {
+          "edge_id": "edge_dispatch_output_001",
+          "artifact_role": "dispatch_output",
+          "artifact": {
+            "schema_version": "prodocux_opaque_artifact_v1",
+            "artifact_id": "dispatch_output_001",
+            "uri": "artifact://dispatch/outputs/result-001.json",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "size_bytes": 128,
+            "media_type": "application/json"
+          },
+          "artifact_identity_digest": "d7964c47779453f7ef0870051dfc5146f89b9ee39448a309150733ac2e2cb7ff",
+          "producer_step_id": "step_dispatch_001",
+          "producer_attempt_number": 1,
+          "consumer_step_id": "step_review_001",
+          "recorded_once": true
+        }
+      ],
+      "authority_records": [],
+      "final_counters": {
+        "provider_attempts": 2,
+        "check_attempts": 0,
+        "dispatch_attempts": 1,
+        "active_steps": 0,
+        "active_dispatches": 0,
+        "repair_iterations": 0,
+        "total_runtime_seconds": 20,
+        "dispatch_runtime_seconds": 3,
+        "total_event_bytes": 256,
+        "total_artifact_bytes": 3200,
+        "cross_step_artifact_edges": 3,
+        "external_operations": 1,
+        "external_calls": 0,
+        "recovery_query_calls": 0
+      },
+      "recorded_at": "2026-10-03T12:05:00Z"
+    },
+    "valid": true
+  },
+  {
+    "name": "owner-route-map",
+    "schema": "urn:pdx:contracts:engine:routes:1",
+    "instance": {
+      "schema_version": "pdx_engine_contract_routes_v1",
+      "version_authority": "stored_workflow_contract_version",
+      "caller_header_selectable": false,
+      "routes": [
+        {
+          "operation": "provider_register",
+          "method": "POST",
+          "path": "/internal/v1/external-operation-provider-profiles",
+          "request_schema": "urn:pdx:draft:er003:support:2#/$defs/provider_register",
+          "success_schema": "urn:pdx:draft:er003:support:2#/$defs/registration_response",
+          "success_statuses": [
+            200,
+            201
+          ],
+          "role": "administrator",
+          "error_owner": "engine"
+        },
+        {
+          "operation": "subject_register",
+          "method": "POST",
+          "path": "/internal/v1/external-operation-subjects",
+          "request_schema": "urn:pdx:draft:er003:support:2#/$defs/subject_register",
+          "success_schema": "urn:pdx:draft:er003:support:2#/$defs/registration_response",
+          "success_statuses": [
+            200,
+            201
+          ],
+          "role": "controller",
+          "error_owner": "engine"
+        },
+        {
+          "operation": "authorization_register",
+          "method": "POST",
+          "path": "/internal/v1/external-operation-authorizations",
+          "request_schema": "urn:pdx:draft:er003:support:2#/$defs/authorization_register",
+          "success_schema": "urn:pdx:draft:er003:support:2#/$defs/registration_response",
+          "success_statuses": [
+            200,
+            201
+          ],
+          "role": "issuer",
+          "error_owner": "engine"
+        },
+        {
+          "operation": "authorization_revoke",
+          "method": "POST",
+          "path": "/internal/v1/external-operation-authorizations/{authorization_id}/revoke",
+          "request_schema": "urn:pdx:draft:er003:support:2#/$defs/authorization_revoke",
+          "success_schema": "urn:pdx:draft:er003:support:2#/$defs/registration_response",
+          "success_statuses": [
+            200
+          ],
+          "role": "issuer",
+          "error_owner": "engine"
+        },
+        {
+          "operation": "issuer_freshness",
+          "method": "POST",
+          "path": "/internal/v1/external-operation-issuer-freshness",
+          "request_schema": "urn:pdx:draft:er003:support:2#/$defs/issuer_freshness",
+          "success_schema": "urn:pdx:draft:er003:support:2#/$defs/registration_response",
+          "success_statuses": [
+            200
+          ],
+          "role": "issuer",
+          "error_owner": "engine"
+        },
+        {
+          "operation": "activation",
+          "method": "POST",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/steps/{workflow_step_id}/external-operation-activations",
+          "request_schema": "urn:pdx:draft:er003:core:1#/$defs/activationRequest",
+          "success_schema": "urn:pdx:draft:er003:support:2#/$defs/activation_response",
+          "success_statuses": [
+            200,
+            201
+          ],
+          "role": "controller",
+          "error_owner": "engine"
+        },
+        {
+          "operation": "projection",
+          "method": "GET",
+          "path": "/internal/v1/external-operations/{operation_id}",
+          "request_schema": null,
+          "success_schema": "urn:pdx:draft:er003:support:2#/$defs/projection",
+          "success_statuses": [
+            200
+          ],
+          "role": "reader",
+          "error_owner": "engine"
+        },
+        {
+          "operation": "operation_reconcile",
+          "method": "POST",
+          "path": "/internal/v1/external-operations/{operation_id}/reconcile",
+          "request_schema": "urn:pdx:draft:er003:support:2#/$defs/reconcile_request",
+          "success_schema": "urn:pdx:draft:er003:support:2#/$defs/reconcile_response",
+          "success_statuses": [
+            200,
+            202
+          ],
+          "role": "supervisor",
+          "error_owner": "engine"
+        },
+        {
+          "operation": "observation",
+          "method": "POST",
+          "path": "/internal/v1/external-operations/{operation_id}/observations",
+          "request_schema": "urn:pdx:draft:er003:core:1#/$defs/observationRequest",
+          "success_schema": "urn:pdx:draft:er003:support:2#/$defs/observation_response",
+          "success_statuses": [
+            200,
+            201
+          ],
+          "role": "adapter_or_manual",
+          "error_owner": "engine"
+        },
+        {
+          "operation": "operation_receipt",
+          "method": "GET",
+          "path": "/internal/v1/external-operations/{operation_id}/receipts/{receipt_id}",
+          "request_schema": null,
+          "success_schema": "urn:pdx:draft:er003:support:2#/$defs/receipt",
+          "success_statuses": [
+            200
+          ],
+          "role": "reader",
+          "error_owner": "engine"
+        },
+        {
+          "operation": "parent_create",
+          "method": "POST",
+          "path": "/internal/v1/runtime-provider-workflows",
+          "request_schema": "urn:pdx:draft:er003:parent:create-request:3",
+          "success_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/create-response-v1.json",
+          "success_statuses": [
+            200,
+            201
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        },
+        {
+          "operation": "parent_get_state",
+          "method": "GET",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}",
+          "request_schema": null,
+          "success_schema": "urn:pdx:draft:er003:parent:state:3",
+          "success_statuses": [
+            200
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        },
+        {
+          "operation": "parent_get_plan",
+          "method": "GET",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/plan",
+          "request_schema": null,
+          "success_schema": "urn:pdx:draft:er003:parent:plan:3",
+          "success_statuses": [
+            200
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        },
+        {
+          "operation": "parent_cancel",
+          "method": "POST",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/cancel",
+          "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/cancel-v1.json",
+          "success_schema": "urn:pdx:draft:er003:parent:state:3",
+          "success_statuses": [
+            200
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        },
+        {
+          "operation": "parent_reconcile",
+          "method": "POST",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/reconcile",
+          "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/reconcile-v1.json",
+          "success_schema": "urn:pdx:draft:er003:parent:state:3",
+          "success_statuses": [
+            200
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        },
+        {
+          "operation": "parent_claim_provider",
+          "method": "POST",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/provider-claims",
+          "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-claim-request-v2.json",
+          "success_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-claim-v1.json",
+          "success_statuses": [
+            200
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        },
+        {
+          "operation": "parent_renew_provider_lease",
+          "method": "POST",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/provider-leases/renew",
+          "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-lease-renew-v1.json",
+          "success_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/lease-renew-response-v1.json",
+          "success_statuses": [
+            200
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        },
+        {
+          "operation": "parent_update_provider",
+          "method": "POST",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/provider-updates",
+          "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-update-v1.json",
+          "success_schema": "urn:pdx:draft:er003:parent:state:3",
+          "success_statuses": [
+            200
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        },
+        {
+          "operation": "parent_claim_check",
+          "method": "POST",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/check-claims",
+          "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-claim-request-v2.json",
+          "success_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-claim-v1.json",
+          "success_statuses": [
+            200
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        },
+        {
+          "operation": "parent_renew_check_lease",
+          "method": "POST",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/check-leases/renew",
+          "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-lease-renew-v1.json",
+          "success_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/lease-renew-response-v1.json",
+          "success_statuses": [
+            200
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        },
+        {
+          "operation": "parent_update_check",
+          "method": "POST",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/check-updates",
+          "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-update-v1.json",
+          "success_schema": "urn:pdx:draft:er003:parent:state:3",
+          "success_statuses": [
+            200
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        },
+        {
+          "operation": "parent_get_receipt",
+          "method": "GET",
+          "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/receipt",
+          "request_schema": null,
+          "success_schema": "urn:pdx:draft:er003:parent:receipt:3",
+          "success_statuses": [
+            200
+          ],
+          "role": "existing_workflow_authority",
+          "error_owner": "parent"
+        }
+      ],
+      "errors": {
+        "engine": {
+          "400": [
+            "REQUEST_INVALID"
+          ],
+          "401": [
+            "UNAUTHENTICATED"
+          ],
+          "403": [
+            "AUTHORITY_FORBIDDEN"
+          ],
+          "404": [
+            "RECORD_NOT_FOUND"
+          ],
+          "409": [
+            "IDEMPOTENCY_CONFLICT",
+            "SUBJECT_ALREADY_BOUND",
+            "AUTHORIZATION_ALREADY_USED",
+            "OPERATION_BINDING_MISMATCH",
+            "PARENT_NOT_READY",
+            "AUTHORIZATION_EXPIRED",
+            "AUTHORIZATION_REVOKED",
+            "OBSERVATION_CONFLICT",
+            "STALE_EXECUTION_CLAIM",
+            "RESULT_ALREADY_CONFIRMED",
+            "RECOVERY_BUDGET_EXHAUSTED"
+          ],
+          "413": [
+            "REQUEST_TOO_LARGE"
+          ],
+          "422": [
+            "PROVIDER_PROFILE_UNSUPPORTED",
+            "EVIDENCE_INVALID"
+          ],
+          "503": [
+            "AUTHORITY_FRESHNESS_UNAVAILABLE",
+            "STORAGE_UNAVAILABLE"
+          ]
+        }
+      }
+    },
+    "valid": true
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-claim-request-v2.json",
+  "title": "PDX trusted control-plane provider attempt activation request v2",
+  "description": "Submitted only by an authenticated host control plane. Request fields are authority bindings, never worker-selected inputs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "request_id", "correlation_id", "control_plane_instance_id", "workflow_step_id", "invocation_id", "provider_id", "provider_instance_id", "execution_constraints_digest", "idempotency_key", "workspace_ref", "lease_seconds"],
+  "properties": {
+    "schema_version": {"const": "pdx_internal_runtime_provider_claim_request_v2"},
+    "request_id": {"$ref": "#/$defs/id"},
+    "correlation_id": {"$ref": "#/$defs/id"},
+    "control_plane_instance_id": {"$ref": "#/$defs/id"},
+    "workflow_step_id": {"$ref": "#/$defs/id"},
+    "invocation_id": {"$ref": "#/$defs/id"},
+    "provider_id": {"type": "string", "pattern": "^[a-z][a-z0-9.-]{2,127}$"},
+    "provider_instance_id": {"$ref": "#/$defs/id"},
+    "execution_constraints_digest": {"$ref": "#/$defs/digest"},
+    "idempotency_key": {"type": "string", "minLength": 16, "maxLength": 128},
+    "workspace_ref": {"$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/workspaceRef"},
+    "lease_seconds": {"type": "integer", "minimum": 5, "maximum": 3600}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

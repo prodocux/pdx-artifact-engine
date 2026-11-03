@@ -1,0 +1,23 @@
+{
+  "positive": [
+    {"name":"decimal_strings", "raw":"{\"amount\":\"1100.00\",\"scale\":2}"},
+    {"name":"ecmascript_thresholds", "raw":"[1e-7,1e-6,1e20,1e21,-0,333333333.33333329]"},
+    {"name":"utf16_key_order", "raw":"{\"\ue000\":1,\"\ud83d\ude00\":2,\"a\":3}"},
+    {"name":"nfc_not_implicit", "raw":"{\"composed\":\"\u00e9\",\"decomposed\":\"e\u0301\"}"},
+    {"name":"bound_artifact", "raw":"{\"uri\":\"artifact://example/report.json\",\"size_bytes\":0,\"media_type\":\"application/json\"}"},
+    {"name":"max_safe_integer", "raw":"{\"n\":9007199254740991}"},
+    {"name":"nested_identity", "raw":"{\"subject\":\"subject-001\",\"items\":[true,null,{\"z\":\"x\\ny\",\"a\":-0.0}]}"},
+    {"name":"tiny_big_float", "raw":"[5e-324,1.7976931348623157e308,1e30]"}
+  ],
+  "negative": [
+    {"name":"duplicate_key", "raw":"{\"x\":1,\"x\":2}"},
+    {"name":"nested_duplicate", "raw":"{\"outer\":{\"x\":1,\"x\":2}}"},
+    {"name":"nan", "raw":"{\"x\":NaN}"},
+    {"name":"infinity", "raw":"{\"x\":Infinity}"},
+    {"name":"overflow", "raw":"[1e400]"},
+    {"name":"lone_value_surrogate", "raw":"{\"x\":\"\ud800\"}"},
+    {"name":"lone_key_surrogate", "raw":"{\"\udfff\":1}"},
+    {"name":"unsafe_integer_literal", "raw":"[9007199254740992]"},
+    {"name":"trailing_json", "raw":"{}{}"}
+  ]
+}

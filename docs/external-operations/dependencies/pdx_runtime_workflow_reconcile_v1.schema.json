@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/reconcile-v1.json",
+  "type": "object", "additionalProperties": false, "required": ["schema_version", "request_id", "correlation_id", "workflow_job_id"],
+  "properties": {"schema_version": {"const": "pdx_internal_runtime_workflow_reconcile_v1"}, "request_id": {"$ref": "#/$defs/id"}, "correlation_id": {"$ref": "#/$defs/id"}, "workflow_job_id": {"$ref": "#/$defs/id"}},
+  "$defs": {"id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"}}
+}

@@ -1,0 +1,318 @@
+{
+  "schema_version": "pdx_engine_contract_routes_v1",
+  "version_authority": "stored_workflow_contract_version",
+  "caller_header_selectable": false,
+  "routes": [
+    {
+      "operation": "provider_register",
+      "method": "POST",
+      "path": "/internal/v1/external-operation-provider-profiles",
+      "request_schema": "urn:pdx:draft:er003:support:2#/$defs/provider_register",
+      "success_schema": "urn:pdx:draft:er003:support:2#/$defs/registration_response",
+      "success_statuses": [
+        200,
+        201
+      ],
+      "role": "administrator",
+      "error_owner": "engine"
+    },
+    {
+      "operation": "subject_register",
+      "method": "POST",
+      "path": "/internal/v1/external-operation-subjects",
+      "request_schema": "urn:pdx:draft:er003:support:2#/$defs/subject_register",
+      "success_schema": "urn:pdx:draft:er003:support:2#/$defs/registration_response",
+      "success_statuses": [
+        200,
+        201
+      ],
+      "role": "controller",
+      "error_owner": "engine"
+    },
+    {
+      "operation": "authorization_register",
+      "method": "POST",
+      "path": "/internal/v1/external-operation-authorizations",
+      "request_schema": "urn:pdx:draft:er003:support:2#/$defs/authorization_register",
+      "success_schema": "urn:pdx:draft:er003:support:2#/$defs/registration_response",
+      "success_statuses": [
+        200,
+        201
+      ],
+      "role": "issuer",
+      "error_owner": "engine"
+    },
+    {
+      "operation": "authorization_revoke",
+      "method": "POST",
+      "path": "/internal/v1/external-operation-authorizations/{authorization_id}/revoke",
+      "request_schema": "urn:pdx:draft:er003:support:2#/$defs/authorization_revoke",
+      "success_schema": "urn:pdx:draft:er003:support:2#/$defs/registration_response",
+      "success_statuses": [
+        200
+      ],
+      "role": "issuer",
+      "error_owner": "engine"
+    },
+    {
+      "operation": "issuer_freshness",
+      "method": "POST",
+      "path": "/internal/v1/external-operation-issuer-freshness",
+      "request_schema": "urn:pdx:draft:er003:support:2#/$defs/issuer_freshness",
+      "success_schema": "urn:pdx:draft:er003:support:2#/$defs/registration_response",
+      "success_statuses": [
+        200
+      ],
+      "role": "issuer",
+      "error_owner": "engine"
+    },
+    {
+      "operation": "activation",
+      "method": "POST",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/steps/{workflow_step_id}/external-operation-activations",
+      "request_schema": "urn:pdx:draft:er003:core:1#/$defs/activationRequest",
+      "success_schema": "urn:pdx:draft:er003:support:2#/$defs/activation_response",
+      "success_statuses": [
+        200,
+        201
+      ],
+      "role": "controller",
+      "error_owner": "engine"
+    },
+    {
+      "operation": "projection",
+      "method": "GET",
+      "path": "/internal/v1/external-operations/{operation_id}",
+      "request_schema": null,
+      "success_schema": "urn:pdx:draft:er003:support:2#/$defs/projection",
+      "success_statuses": [
+        200
+      ],
+      "role": "reader",
+      "error_owner": "engine"
+    },
+    {
+      "operation": "operation_reconcile",
+      "method": "POST",
+      "path": "/internal/v1/external-operations/{operation_id}/reconcile",
+      "request_schema": "urn:pdx:draft:er003:support:2#/$defs/reconcile_request",
+      "success_schema": "urn:pdx:draft:er003:support:2#/$defs/reconcile_response",
+      "success_statuses": [
+        200,
+        202
+      ],
+      "role": "supervisor",
+      "error_owner": "engine"
+    },
+    {
+      "operation": "observation",
+      "method": "POST",
+      "path": "/internal/v1/external-operations/{operation_id}/observations",
+      "request_schema": "urn:pdx:draft:er003:core:1#/$defs/observationRequest",
+      "success_schema": "urn:pdx:draft:er003:support:2#/$defs/observation_response",
+      "success_statuses": [
+        200,
+        201
+      ],
+      "role": "adapter_or_manual",
+      "error_owner": "engine"
+    },
+    {
+      "operation": "operation_receipt",
+      "method": "GET",
+      "path": "/internal/v1/external-operations/{operation_id}/receipts/{receipt_id}",
+      "request_schema": null,
+      "success_schema": "urn:pdx:draft:er003:support:2#/$defs/receipt",
+      "success_statuses": [
+        200
+      ],
+      "role": "reader",
+      "error_owner": "engine"
+    },
+    {
+      "operation": "parent_create",
+      "method": "POST",
+      "path": "/internal/v1/runtime-provider-workflows",
+      "request_schema": "urn:pdx:draft:er003:parent:create-request:3",
+      "success_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/create-response-v1.json",
+      "success_statuses": [
+        200,
+        201
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    },
+    {
+      "operation": "parent_get_state",
+      "method": "GET",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}",
+      "request_schema": null,
+      "success_schema": "urn:pdx:draft:er003:parent:state:3",
+      "success_statuses": [
+        200
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    },
+    {
+      "operation": "parent_get_plan",
+      "method": "GET",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/plan",
+      "request_schema": null,
+      "success_schema": "urn:pdx:draft:er003:parent:plan:3",
+      "success_statuses": [
+        200
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    },
+    {
+      "operation": "parent_cancel",
+      "method": "POST",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/cancel",
+      "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/cancel-v1.json",
+      "success_schema": "urn:pdx:draft:er003:parent:state:3",
+      "success_statuses": [
+        200
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    },
+    {
+      "operation": "parent_reconcile",
+      "method": "POST",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/reconcile",
+      "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/reconcile-v1.json",
+      "success_schema": "urn:pdx:draft:er003:parent:state:3",
+      "success_statuses": [
+        200
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    },
+    {
+      "operation": "parent_claim_provider",
+      "method": "POST",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/provider-claims",
+      "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-claim-request-v2.json",
+      "success_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-claim-v1.json",
+      "success_statuses": [
+        200
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    },
+    {
+      "operation": "parent_renew_provider_lease",
+      "method": "POST",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/provider-leases/renew",
+      "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-lease-renew-v1.json",
+      "success_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/lease-renew-response-v1.json",
+      "success_statuses": [
+        200
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    },
+    {
+      "operation": "parent_update_provider",
+      "method": "POST",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/provider-updates",
+      "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/provider-update-v1.json",
+      "success_schema": "urn:pdx:draft:er003:parent:state:3",
+      "success_statuses": [
+        200
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    },
+    {
+      "operation": "parent_claim_check",
+      "method": "POST",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/check-claims",
+      "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-claim-request-v2.json",
+      "success_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-claim-v1.json",
+      "success_statuses": [
+        200
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    },
+    {
+      "operation": "parent_renew_check_lease",
+      "method": "POST",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/check-leases/renew",
+      "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-lease-renew-v1.json",
+      "success_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/lease-renew-response-v1.json",
+      "success_statuses": [
+        200
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    },
+    {
+      "operation": "parent_update_check",
+      "method": "POST",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/check-updates",
+      "request_schema": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/check-update-v1.json",
+      "success_schema": "urn:pdx:draft:er003:parent:state:3",
+      "success_statuses": [
+        200
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    },
+    {
+      "operation": "parent_get_receipt",
+      "method": "GET",
+      "path": "/internal/v1/runtime-provider-workflows/{workflow_job_id}/receipt",
+      "request_schema": null,
+      "success_schema": "urn:pdx:draft:er003:parent:receipt:3",
+      "success_statuses": [
+        200
+      ],
+      "role": "existing_workflow_authority",
+      "error_owner": "parent"
+    }
+  ],
+  "errors": {
+    "engine": {
+      "400": [
+        "REQUEST_INVALID"
+      ],
+      "401": [
+        "UNAUTHENTICATED"
+      ],
+      "403": [
+        "AUTHORITY_FORBIDDEN"
+      ],
+      "404": [
+        "RECORD_NOT_FOUND"
+      ],
+      "409": [
+        "IDEMPOTENCY_CONFLICT",
+        "SUBJECT_ALREADY_BOUND",
+        "AUTHORIZATION_ALREADY_USED",
+        "OPERATION_BINDING_MISMATCH",
+        "PARENT_NOT_READY",
+        "AUTHORIZATION_EXPIRED",
+        "AUTHORIZATION_REVOKED",
+        "OBSERVATION_CONFLICT",
+        "STALE_EXECUTION_CLAIM",
+        "RESULT_ALREADY_CONFIRMED",
+        "RECOVERY_BUDGET_EXHAUSTED"
+      ],
+      "413": [
+        "REQUEST_TOO_LARGE"
+      ],
+      "422": [
+        "PROVIDER_PROFILE_UNSUPPORTED",
+        "EVIDENCE_INVALID"
+      ],
+      "503": [
+        "AUTHORITY_FRESHNESS_UNAVAILABLE",
+        "STORAGE_UNAVAILABLE"
+      ]
+    }
+  }
+}

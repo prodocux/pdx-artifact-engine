@@ -1,0 +1,9 @@
+{
+  "name": "pdx-engine-contract-checks",
+  "private": true,
+  "version": "0.0.0",
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  }
+}

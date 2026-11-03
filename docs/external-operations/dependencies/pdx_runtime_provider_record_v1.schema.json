@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/record-v1.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "record_id", "record_kind", "sequence", "payload", "payload_digest"],
+  "properties": {
+    "schema_version": {"const": "pdx_runtime_provider_record_v1"}, "record_id": {"$ref": "#/$defs/id"},
+    "record_kind": {"enum": ["event", "outcome"]}, "sequence": {"type": "integer", "minimum": 0},
+    "payload": {"oneOf": [{"$ref": "#/$defs/event"}, {"$ref": "#/$defs/outcome"}]}, "payload_digest": {"$ref": "#/$defs/digest"}
+  },
+  "allOf": [
+    {"if": {"properties": {"record_kind": {"const": "event"}}, "required": ["record_kind"]}, "then": {"properties": {"payload": {"$ref": "#/$defs/event"}}}},
+    {"if": {"properties": {"record_kind": {"const": "outcome"}}, "required": ["record_kind"]}, "then": {"properties": {"payload": {"$ref": "#/$defs/outcome"}}}}
+  ],
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"}, "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "artifactRefs": {"type": "array", "maxItems": 64, "uniqueItems": true, "items": {"$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/artifactRef"}},
+    "safeError": {"type": "object", "additionalProperties": false, "required": ["code", "message", "retryable"], "properties": {"code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "message": {"type": "string", "maxLength": 1024}, "retryable": {"type": "boolean"}}},
+    "event": {"type": "object", "additionalProperties": false, "required": ["event_kind", "message", "artifact_refs"], "properties": {"event_kind": {"enum": ["progress", "tool_summary", "check_summary", "warning"]}, "message": {"type": "string", "maxLength": 8192}, "artifact_refs": {"$ref": "#/$defs/artifactRefs"}}},
+    "outcome": {"type": "object", "additionalProperties": false, "required": ["terminal_outcome", "summary", "artifact_refs"], "properties": {"terminal_outcome": {"enum": ["succeeded", "failed", "cancelled", "timed_out", "unsupported"]}, "summary": {"type": "string", "maxLength": 16384}, "artifact_refs": {"$ref": "#/$defs/artifactRefs"}, "safe_error": {"$ref": "#/$defs/safeError"}}, "allOf": [{"if": {"properties": {"terminal_outcome": {"const": "succeeded"}}, "required": ["terminal_outcome"]}, "then": {"properties": {"safe_error": false}}, "else": {"required": ["safe_error"]}}]}
+  }
+}

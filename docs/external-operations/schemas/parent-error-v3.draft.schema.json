@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pdx:draft:er003:parent:error:3",
+  "title": "PDX runtime provider workflow error v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "code",
+    "message",
+    "retryable",
+    "reconcile_required"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "pdx_runtime_provider_workflow_error_v3"
+    },
+    "code": {
+      "enum": [
+        "ACTIVATION_AUTH_FORBIDDEN",
+        "ACTIVATION_AUTH_REQUIRED",
+        "ACTIVATION_BINDING_CONFLICT",
+        "ACTIVATION_PRINCIPAL_MISMATCH",
+        "ARTIFACT_EDGE_UNPLANNED",
+        "ARTIFACT_RECORD_CONFLICT",
+        "ARTIFACT_REFERENCE_UNAUTHORIZED",
+        "AUTHORITY_FORBIDDEN",
+        "AUTHORITY_FRESHNESS_UNAVAILABLE",
+        "AUTHORIZATION_ALREADY_USED",
+        "AUTHORIZATION_EXPIRED",
+        "AUTHORIZATION_REVOKED",
+        "CHECK_REPORT_REQUIRED",
+        "CHECK_REPORT_UNVERIFIED",
+        "CLAIM_STALE",
+        "COMMUNICATION_CHANNEL_UNAUTHORIZED",
+        "EVIDENCE_INVALID",
+        "EXTERNAL_OUTCOME_UNRESOLVED",
+        "IDEMPOTENCY_CONFLICT",
+        "LEASE_EXPIRED",
+        "OBSERVATION_CONFLICT",
+        "OPERATION_BINDING_MISMATCH",
+        "PARENT_NOT_READY",
+        "PAYLOAD_DIGEST_INVALID",
+        "POST_TERMINAL_ACTIVITY_REJECTED",
+        "PROVIDER_PROFILE_UNSUPPORTED",
+        "RECORD_NOT_FOUND",
+        "RECOVERY_BUDGET_EXHAUSTED",
+        "REQUEST_INVALID",
+        "REQUEST_TOO_LARGE",
+        "RESULT_ALREADY_CONFIRMED",
+        "SEQUENCE_CONFLICT",
+        "STALE_EXECUTION_CLAIM",
+        "STEP_KIND_MISMATCH",
+        "STEP_NOT_READY",
+        "STORAGE_UNAVAILABLE",
+        "SUBJECT_ALREADY_BOUND",
+        "UNAUTHENTICATED",
+        "WORKFLOW_BUDGET_EXHAUSTED",
+        "WORKFLOW_NOT_ACTIVE",
+        "WORKFLOW_REQUEST_TOO_LARGE"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 1024
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "reconcile_required": {
+      "type": "boolean"
+    }
+  }
+}

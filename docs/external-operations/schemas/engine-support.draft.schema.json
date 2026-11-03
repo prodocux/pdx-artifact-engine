@@ -1,0 +1,1501 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pdx:draft:er003:support:2",
+  "title": "ER-003 supporting definitions; draft only",
+  "$defs": {
+    "authority_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "controller_principals",
+        "issuer_principals",
+        "adapter_principals",
+        "manual_principals",
+        "administrator_principals",
+        "supervisor_principals",
+        "reader_principals",
+        "revision"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_authority_config_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "controller_principals": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+          },
+          "maxItems": 64
+        },
+        "issuer_principals": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+          },
+          "maxItems": 64
+        },
+        "adapter_principals": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+          },
+          "maxItems": 64
+        },
+        "manual_principals": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+          },
+          "maxItems": 64
+        },
+        "administrator_principals": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+          },
+          "maxItems": 64
+        },
+        "supervisor_principals": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+          },
+          "maxItems": 64
+        },
+        "reader_principals": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+          },
+          "maxItems": 64
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    },
+    "provider_register": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "request_id",
+        "idempotency_key",
+        "provider_profile_id",
+        "revision",
+        "account_alias",
+        "environment",
+        "submit_deployment",
+        "query_deployment",
+        "execution_policy_digest",
+        "lookup_proven",
+        "lookup_proof",
+        "recovery_mode",
+        "endpoint_policy_digest",
+        "outcome_mapping_digest",
+        "dedupe_retention_seconds",
+        "provider_key_format",
+        "budgets"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_provider_register_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "request_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "provider_profile_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "account_alias": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "environment": {
+          "enum": [
+            "sandbox",
+            "production"
+          ]
+        },
+        "submit_deployment": {
+          "$ref": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/common-v1.json#/$defs/deploymentIdentity"
+        },
+        "query_deployment": {
+          "oneOf": [
+            {
+              "$ref": "https://prodocux.dev/schemas/pdx/dynamic-dispatch/common-v1.json#/$defs/deploymentIdentity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_policy_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "lookup_proven": {
+          "type": "boolean"
+        },
+        "lookup_proof": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "verified_artifact",
+                "verifier_id",
+                "verifier_contract_digest"
+              ],
+              "properties": {
+                "verified_artifact": {
+                  "$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"
+                },
+                "verifier_id": {
+                  "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+                },
+                "verifier_contract_digest": {
+                  "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recovery_mode": {
+          "enum": [
+            "query_only",
+            "manual_only"
+          ]
+        },
+        "endpoint_policy_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "outcome_mapping_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "dedupe_retention_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31536000
+        },
+        "provider_key_format": {
+          "const": "lowercase_hex_32"
+        },
+        "budgets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "max_query_calls",
+            "max_query_execution_seconds",
+            "max_scheduling_seconds",
+            "max_observations",
+            "max_evidence_bytes",
+            "max_manual_records_per_case",
+            "max_manual_bytes_per_case"
+          ],
+          "properties": {
+            "max_query_calls": {
+              "const": 20
+            },
+            "max_query_execution_seconds": {
+              "const": 600
+            },
+            "max_scheduling_seconds": {
+              "const": 86400
+            },
+            "max_observations": {
+              "const": 64
+            },
+            "max_evidence_bytes": {
+              "const": 1048576
+            },
+            "max_manual_records_per_case": {
+              "const": 16
+            },
+            "max_manual_bytes_per_case": {
+              "const": 1048576
+            }
+          }
+        }
+      }
+    },
+    "operation_specification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payload_artifact",
+        "payload_schema_id",
+        "payload_schema_digest",
+        "evidence_artifacts",
+        "provider_profile_id",
+        "provider_profile_revision",
+        "provider_profile_digest",
+        "account_alias",
+        "environment",
+        "executor_identity_digest",
+        "execution_policy_digest"
+      ],
+      "properties": {
+        "payload_artifact": {
+          "$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"
+        },
+        "payload_schema_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "payload_schema_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "evidence_artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"
+          },
+          "maxItems": 32
+        },
+        "provider_profile_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "provider_profile_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "provider_profile_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "account_alias": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "environment": {
+          "enum": [
+            "sandbox",
+            "production"
+          ]
+        },
+        "executor_identity_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "execution_policy_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        }
+      }
+    },
+    "subject_register": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "request_id",
+        "idempotency_key",
+        "operation_subject_id",
+        "specification"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_subject_register_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "request_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "operation_subject_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "specification": {
+          "$ref": "urn:pdx:draft:er003:support:2#/$defs/operation_specification"
+        }
+      }
+    },
+    "authorization_register": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "request_id",
+        "idempotency_key",
+        "authorization_id",
+        "issuer_id",
+        "actor_id",
+        "operation_subject_id",
+        "operation_digest",
+        "controller_principal",
+        "execution_policy_digest",
+        "issued_at",
+        "expires_at",
+        "issuer_epoch",
+        "max_operations"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_authorization_register_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "request_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "authorization_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "issuer_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "actor_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_subject_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "controller_principal": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "execution_policy_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "issued_at": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/timestamp"
+        },
+        "expires_at": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/timestamp"
+        },
+        "issuer_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "max_operations": {
+          "const": 1
+        }
+      }
+    },
+    "authorization_revoke": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "request_id",
+        "idempotency_key",
+        "authorization_id",
+        "issuer_id",
+        "revocation_id",
+        "issuer_epoch"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_authorization_revoke_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "request_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "authorization_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "issuer_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "revocation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "issuer_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    },
+    "issuer_freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "request_id",
+        "idempotency_key",
+        "issuer_id",
+        "issuer_epoch",
+        "observed_at",
+        "valid_until"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_issuer_freshness_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "request_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "issuer_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "issuer_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "observed_at": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/timestamp"
+        },
+        "valid_until": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/timestamp"
+        }
+      }
+    },
+    "registration_response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "request_id",
+        "record_id",
+        "record_digest",
+        "created"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_registration_response_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "request_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "record_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "record_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "created": {
+          "type": "boolean"
+        }
+      }
+    },
+    "activation_response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "request_id",
+        "operation_subject_id",
+        "operation_id",
+        "operation_digest",
+        "activation_id",
+        "activation_binding_digest",
+        "authorization_id",
+        "issuer_id",
+        "provider_key_digest",
+        "workflow_job_id",
+        "workflow_step_id",
+        "created"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_activation_response_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "request_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_subject_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "activation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "activation_binding_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "authorization_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "issuer_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "provider_key_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "workflow_job_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "workflow_step_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "created": {
+          "type": "boolean"
+        }
+      }
+    },
+    "projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "operation_subject_id",
+        "operation_id",
+        "operation_digest",
+        "workflow_job_id",
+        "workflow_step_id",
+        "plan_digest",
+        "authorization_id",
+        "issuer_id",
+        "provider_profile_digest",
+        "provider_key_digest",
+        "account_alias",
+        "environment",
+        "submission_evidence",
+        "provider_outcome",
+        "reconciliation_required",
+        "subject_reserved",
+        "submit_permits",
+        "resubmission_allowed",
+        "sequence",
+        "recovery_mode",
+        "consumed",
+        "manual_cases",
+        "latest_receipt_artifact",
+        "parent_terminal_receipt_artifact",
+        "conflict_count"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_projection_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_subject_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "workflow_job_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "workflow_step_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "plan_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "authorization_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "issuer_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "provider_profile_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "provider_key_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "account_alias": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "environment": {
+          "enum": [
+            "sandbox",
+            "production"
+          ]
+        },
+        "submission_evidence": {
+          "enum": [
+            "not_started",
+            "possibly_submitted",
+            "provider_accepted"
+          ]
+        },
+        "provider_outcome": {
+          "enum": [
+            "unobserved",
+            "pending",
+            "unknown",
+            "confirmed_succeeded",
+            "confirmed_failed",
+            "confirmed_not_executed"
+          ]
+        },
+        "reconciliation_required": {
+          "type": "boolean"
+        },
+        "subject_reserved": {
+          "const": true
+        },
+        "submit_permits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "resubmission_allowed": {
+          "const": false
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "recovery_mode": {
+          "enum": [
+            "query_only",
+            "manual_only"
+          ]
+        },
+        "consumed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "query_calls",
+            "query_execution_ms",
+            "scheduling_elapsed_seconds",
+            "observation_records",
+            "evidence_bytes"
+          ],
+          "properties": {
+            "query_calls": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "query_execution_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 600000
+            },
+            "scheduling_elapsed_seconds": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 86400
+            },
+            "observation_records": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 64
+            },
+            "evidence_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1048576
+            }
+          }
+        },
+        "manual_cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "case_id",
+              "records",
+              "evidence_bytes"
+            ],
+            "properties": {
+              "case_id": {
+                "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+              },
+              "records": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16
+              },
+              "evidence_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1048576
+              }
+            }
+          },
+          "maxItems": 1
+        },
+        "latest_receipt_artifact": {
+          "$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"
+        },
+        "parent_terminal_receipt_artifact": {
+          "oneOf": [
+            {
+              "$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conflict_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      }
+    },
+    "reconcile_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "request_id",
+        "idempotency_key",
+        "operation_id",
+        "operation_digest",
+        "provider_profile_digest",
+        "expected_sequence"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_reconcile_request_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "request_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "operation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "provider_profile_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "expected_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    },
+    "reconcile_response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "request_id",
+        "operation_id",
+        "query_scheduled",
+        "manual_required",
+        "projection"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_reconcile_response_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "request_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "query_scheduled": {
+          "type": "boolean"
+        },
+        "manual_required": {
+          "type": "boolean"
+        },
+        "projection": {
+          "$ref": "urn:pdx:draft:er003:support:2#/$defs/projection"
+        }
+      }
+    },
+    "observation_response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "request_id",
+        "operation_id",
+        "observation_id",
+        "accepted",
+        "conflict_recorded",
+        "receipt_artifact",
+        "sequence"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_observation_response_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "request_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "observation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "accepted": {
+          "type": "boolean"
+        },
+        "conflict_recorded": {
+          "type": "boolean"
+        },
+        "receipt_artifact": {
+          "$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "operation_subject_id",
+        "operation_id",
+        "operation_digest",
+        "workflow_job_id",
+        "workflow_step_id",
+        "plan_digest",
+        "authorization_id",
+        "issuer_id",
+        "provider_profile_digest",
+        "provider_key_digest",
+        "account_alias",
+        "environment",
+        "submission_evidence",
+        "provider_outcome",
+        "reconciliation_required",
+        "subject_reserved",
+        "submit_permits",
+        "resubmission_allowed",
+        "receipt_id",
+        "sequence",
+        "activation_id",
+        "activation_binding_digest",
+        "authorization_record_digest",
+        "observation_artifacts",
+        "conflict_artifacts",
+        "consumed",
+        "manual_cases",
+        "recorded_at",
+        "previous_receipt_digest",
+        "parent_terminal_receipt_artifact",
+        "receipt_digest"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_receipt_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_subject_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "workflow_job_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "workflow_step_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "plan_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "authorization_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "issuer_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "provider_profile_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "provider_key_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "account_alias": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "environment": {
+          "enum": [
+            "sandbox",
+            "production"
+          ]
+        },
+        "submission_evidence": {
+          "enum": [
+            "not_started",
+            "possibly_submitted",
+            "provider_accepted"
+          ]
+        },
+        "provider_outcome": {
+          "enum": [
+            "unobserved",
+            "pending",
+            "unknown",
+            "confirmed_succeeded",
+            "confirmed_failed",
+            "confirmed_not_executed"
+          ]
+        },
+        "reconciliation_required": {
+          "type": "boolean"
+        },
+        "subject_reserved": {
+          "const": true
+        },
+        "submit_permits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "resubmission_allowed": {
+          "const": false
+        },
+        "receipt_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "activation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "activation_binding_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "authorization_record_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "observation_artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"
+          },
+          "maxItems": 80
+        },
+        "conflict_artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"
+          },
+          "maxItems": 64
+        },
+        "consumed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "query_calls",
+            "query_execution_ms",
+            "scheduling_elapsed_seconds",
+            "observation_records",
+            "evidence_bytes"
+          ],
+          "properties": {
+            "query_calls": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "query_execution_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 600000
+            },
+            "scheduling_elapsed_seconds": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 86400
+            },
+            "observation_records": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 64
+            },
+            "evidence_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1048576
+            }
+          }
+        },
+        "manual_cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "case_id",
+              "records",
+              "evidence_bytes"
+            ],
+            "properties": {
+              "case_id": {
+                "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+              },
+              "records": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16
+              },
+              "evidence_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1048576
+              }
+            }
+          },
+          "maxItems": 1
+        },
+        "recorded_at": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/timestamp"
+        },
+        "previous_receipt_digest": {
+          "oneOf": [
+            {
+              "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parent_terminal_receipt_artifact": {
+          "oneOf": [
+            {
+              "$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "receipt_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        }
+      }
+    },
+    "submit_permit_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "operation_subject_id",
+        "operation_id",
+        "operation_digest",
+        "workflow_job_id",
+        "workflow_step_id",
+        "plan_digest",
+        "authorization_id",
+        "issuer_id",
+        "provider_profile_digest",
+        "provider_key_digest",
+        "account_alias",
+        "environment",
+        "permit_id",
+        "claim_id",
+        "claim_fence",
+        "permit_sequence",
+        "submission_evidence",
+        "issued_at",
+        "intent_digest"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_submit_permit_record_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_subject_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "workflow_job_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "workflow_step_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "plan_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "authorization_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "issuer_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "provider_profile_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "provider_key_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "account_alias": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "environment": {
+          "enum": [
+            "sandbox",
+            "production"
+          ]
+        },
+        "permit_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "claim_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "claim_fence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "permit_sequence": {
+          "const": 1
+        },
+        "submission_evidence": {
+          "const": "possibly_submitted"
+        },
+        "issued_at": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/timestamp"
+        },
+        "intent_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        }
+      }
+    },
+    "query_claim_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "operation_subject_id",
+        "operation_id",
+        "operation_digest",
+        "workflow_job_id",
+        "workflow_step_id",
+        "plan_digest",
+        "authorization_id",
+        "issuer_id",
+        "provider_profile_digest",
+        "provider_key_digest",
+        "account_alias",
+        "environment",
+        "query_id",
+        "claim_id",
+        "claim_fence",
+        "deadline",
+        "reserved_runtime_ms",
+        "query_number"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_query_claim_record_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_subject_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "workflow_job_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "workflow_step_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "plan_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "authorization_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "issuer_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "provider_profile_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "provider_key_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "account_alias": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "environment": {
+          "enum": [
+            "sandbox",
+            "production"
+          ]
+        },
+        "query_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "claim_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "claim_fence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "deadline": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/timestamp"
+        },
+        "reserved_runtime_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600000
+        },
+        "query_number": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      }
+    },
+    "step_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "authority_id",
+        "tenant_id",
+        "operation_subject_id",
+        "operation_digest",
+        "provider_profile_digest",
+        "authorization_id",
+        "issuer_id",
+        "budgets"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_er003_step_binding_draft_v2"
+        },
+        "authority_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_subject_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "operation_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "provider_profile_digest": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/digest"
+        },
+        "authorization_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "issuer_id": {
+          "$ref": "urn:pdx:draft:er003:core:1#/$defs/id"
+        },
+        "budgets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "max_query_calls",
+            "max_query_execution_seconds",
+            "max_scheduling_seconds",
+            "max_observations",
+            "max_evidence_bytes",
+            "max_manual_records_per_case",
+            "max_manual_bytes_per_case"
+          ],
+          "properties": {
+            "max_query_calls": {
+              "const": 20
+            },
+            "max_query_execution_seconds": {
+              "const": 600
+            },
+            "max_scheduling_seconds": {
+              "const": 86400
+            },
+            "max_observations": {
+              "const": 64
+            },
+            "max_evidence_bytes": {
+              "const": 1048576
+            },
+            "max_manual_records_per_case": {
+              "const": 16
+            },
+            "max_manual_bytes_per_case": {
+              "const": 1048576
+            }
+          }
+        }
+      }
+    }
+  }
+}
