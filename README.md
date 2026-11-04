@@ -241,3 +241,5 @@ for the public/private documentation boundary.
 3. Train and publish `PDX-Core-1B` out of band; wire `LlamaCppPlanner` in a
    future version.
 4. Low-RAM hot-swap runtime (M7).
+
+<!-- Publication App PR validation; no version change. -->
