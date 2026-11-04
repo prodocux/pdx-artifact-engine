@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import argparse
 import re
-import tomllib
 from pathlib import Path
 
+import tomllib
+from packaging.version import Version
 
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
@@ -50,12 +51,28 @@ def main() -> int:
     if args.check_source_version:
         expected = f"Source version in this branch: **`{source_version()}`**."
         if expected not in match.group(0):
-            raise SystemExit(f"README source version must match pyproject.toml: {expected}")
+            raise SystemExit(
+                f"README source version must match pyproject.toml: {expected}"
+            )
         return 0
     if not all((args.version, args.tag, args.commit)):
         parser.error("--version, --tag, and --commit are required when updating")
+    if (
+        args.tag != f"v{args.version}"
+        or re.fullmatch(r"[a-f0-9]{40}", args.commit) is None
+    ):
+        raise SystemExit("Release tag or commit identity is invalid")
+    current = re.search(
+        r"Latest verified PyPI release:.*?\[`([^`]+)`\]", match.group(0), re.DOTALL
+    )
+    if current and Version(args.version) < Version(current.group(1)):
+        raise SystemExit("Refusing to downgrade the verified PyPI release")
     replacement = status_block(args.version, args.tag, args.commit)
-    README.write_text(pattern.sub(replacement, text, count=1), encoding="utf-8", newline="\n")
+    README.write_text(
+        pattern.sub(lambda _: replacement, text, count=1),
+        encoding="utf-8",
+        newline="\n",
+    )
     return 0
 
 
