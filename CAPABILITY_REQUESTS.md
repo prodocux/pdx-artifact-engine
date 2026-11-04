@@ -215,6 +215,6 @@
   release require separate authorization.
 - Implementation: authorized on 2026-11-03; the workflow-v3 external-operation
   runtime candidate and fault-recovery tests are available for review. Existing
-  frozen contract bytes are unchanged. No implementation release is assigned.
+  frozen contract bytes are unchanged. The source release candidate is 0.3.0a13; it is not yet published.
 - Runtime acceptance: source sealing approved on 2026-11-04; release remains gated.
 - Shipped in: not shipped

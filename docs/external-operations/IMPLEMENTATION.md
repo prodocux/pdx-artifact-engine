@@ -1,7 +1,7 @@
 # External-operation implementation candidate
 
-Runtime behavior was accepted for source sealing on 2026-11-04. This does not
-assign an implementation release version or approve publication.
+Runtime behavior was accepted for source sealing on 2026-11-04. The source
+release candidate is 0.3.0a13; publication remains a separate verification gate.
 
 This unpublished candidate extends RuntimeWorkflowStore, using the same SQLite
 database, WAL and BEGIN IMMEDIATE boundary as the existing workflow and dispatch
@@ -77,4 +77,5 @@ They do not demonstrate any live provider, OAuth, webhook signature implementati
 or distributed exactly-once effects. A deployment must supply and qualify those
 adapters/verifiers; the core does not make a payment call by itself.
 
-No new version, commit, tag, push or publication is implied by this candidate.
+The published package remains the install baseline until the new candidate is
+verified on the public package index.
