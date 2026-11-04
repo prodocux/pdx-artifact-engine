@@ -1,12 +1,12 @@
-# External-operation implementation candidate
+# External-operation implementation
 
-Runtime behavior was accepted for source sealing on 2026-11-04. The source
-release candidate is 0.3.0a13; publication remains a separate verification gate.
+Available in `pdx-artifact-engine==0.3.0a13`. Public distribution bytes and
+clean installation have been verified.
 
-This unpublished candidate extends RuntimeWorkflowStore, using the same SQLite
+The implementation extends RuntimeWorkflowStore, using the same SQLite
 database, WAL and BEGIN IMMEDIATE boundary as the existing workflow and dispatch
 services. No frozen contract file has been changed. The document-freeze record
-continues to describe the historical freeze, not a released runtime version.
+continues to describe the historical contract freeze.
 
 The runtime implements the additive v3 parent contracts and packaged copies of
 the frozen schemas. V1/v2 jobs retain their handlers. A bound dispatch step
@@ -77,5 +77,4 @@ They do not demonstrate any live provider, OAuth, webhook signature implementati
 or distributed exactly-once effects. A deployment must supply and qualify those
 adapters/verifiers; the core does not make a payment call by itself.
 
-The published package remains the install baseline until the new candidate is
-verified on the public package index.
+Deployment qualification of provider adapters and verifiers remains separate.

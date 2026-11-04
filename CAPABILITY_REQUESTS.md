@@ -133,7 +133,7 @@
 - Implementation: signed-off candidate `a58663734dde245bfbb8506699c1d3d0e3cdc1a6`
 - Shipped in: not shipped
 
-## ER-003 [status: in-progress]
+## ER-003 [status: done]
 
 - Reporter: source-bound verification consumer
 - Date: 2026-10-31
@@ -215,6 +215,7 @@
   release require separate authorization.
 - Implementation: authorized on 2026-11-03; the workflow-v3 external-operation
   runtime candidate and fault-recovery tests are available for review. Existing
-  frozen contract bytes are unchanged. The source release candidate is 0.3.0a13; it is not yet published.
+  frozen contract bytes are unchanged. Published as `pdx-artifact-engine==0.3.0a13`; public distribution bytes and
+  clean installation were verified.
 - Runtime acceptance: source sealing approved on 2026-11-04; release remains gated.
-- Shipped in: not shipped
+- Shipped in: `pdx-artifact-engine==0.3.0a13`
