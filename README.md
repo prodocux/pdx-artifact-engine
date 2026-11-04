@@ -12,12 +12,12 @@ checksummed manifests.
 <!-- pypi-release-status:start -->
 Source version in this branch: **`0.3.0a13`**.
 
-Latest verified PyPI release: **[`0.3.0a12`](https://pypi.org/project/pdx-artifact-engine/0.3.0a12/)**,
-published from tag **[`v0.3.0a12`](https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a12)**
-at commit `72366116847087299c795aeef07fcf66d54bfb57`.
+Latest verified PyPI release: **[`0.3.0a13`](https://pypi.org/project/pdx-artifact-engine/0.3.0a13/)**,
+published from tag **[`v0.3.0a13`](https://github.com/prodocux/pdx-artifact-engine/releases/tag/v0.3.0a13)**
+at commit `c71c4be83a3440880faa640d7c24e24f9c31773f`.
 
 ```powershell
-python -m pip install "pdx-artifact-engine==0.3.0a12"
+python -m pip install "pdx-artifact-engine==0.3.0a13"
 ```
 <!-- pypi-release-status:end -->
 
