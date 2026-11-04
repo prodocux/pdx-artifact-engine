@@ -129,3 +129,10 @@ jobs:
           path: dist
       - name: Publish unchanged media distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  readme-closeout:
+    needs: publish-engine
+    uses: ./.github/workflows/readme-after-publish.yml
+    with:
+      tag: ${{ github.event.release.tag_name || inputs.tag }}
+    secrets: inherit
