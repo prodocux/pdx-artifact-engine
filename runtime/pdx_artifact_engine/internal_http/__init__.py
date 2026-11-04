@@ -5,9 +5,10 @@ from __future__ import annotations
 import json
 import os
 import re
+import secrets
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 from urllib.parse import urlparse
 
 from pdx_artifact_core import ContinuableExtractionError
@@ -16,10 +17,14 @@ from pdx_artifact_engine.continuable_extraction import (
     ContinuableExtractionService,
     ContinuableExtractionStore,
 )
+from pdx_artifact_engine.contracts.external_operations import (
+    validation as external_contract,
+)
 from pdx_artifact_engine.dynamic_dispatch import (
     DispatchToolRegistry,
     DynamicDispatchService,
 )
+from pdx_artifact_engine.external_operations import Principal
 from pdx_artifact_engine.internal_http.auth import (
     auth_profile_ok,
     authenticate_request,
@@ -71,6 +76,8 @@ class InternalJobHandler(BaseHTTPRequestHandler):
     workflow_service: RuntimeWorkflowService | None = None
     dispatch_service: DynamicDispatchService | None = None
     extraction_service: ContinuableExtractionService
+    external_service: Any = None
+    external_principal_bindings: ClassVar[dict[str, Principal]] = {}
 
     def log_message(self, format: str, *args: Any) -> None:
         # Never log request bodies; keep access lines minimal.
@@ -114,7 +121,12 @@ class InternalJobHandler(BaseHTTPRequestHandler):
                 message="request body shorter than Content-Length",
                 status=400,
             )
-        value = json.loads(raw.decode("utf-8"))
+        if 'external-operation' in urlparse(self.path).path:
+            value = external_contract.parse(raw)
+        else:
+            value = json.loads(raw.decode('utf-8'))
+            if isinstance(value, dict) and value.get('schema_version') == 'pdx_internal_runtime_provider_workflow_create_request_v3':
+                value = external_contract.parse(raw)
         if not isinstance(value, dict):
             raise BodyLimitError(
                 code="BODY_INVALID",
@@ -133,6 +145,71 @@ class InternalJobHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(payload)
 
+    def _external_principal(self):
+        header = self.headers.get("Authorization", "")
+        scheme, _, token = header.partition(" ")
+        if scheme.lower() == "bearer" and token:
+            for expected, principal in self.external_principal_bindings.items():
+                if secrets.compare_digest(token, expected):
+                    return principal
+        raise external_contract.Invalid("UNAUTHENTICATED")
+
+    def _external_route(self, method, path, body=None):
+        """Return False only when this path belongs to a different profile."""
+        registrations = {
+            '/internal/v1/external-operation-provider-profiles': 'provider_register',
+            '/internal/v1/external-operation-subjects': 'subject_register',
+            '/internal/v1/external-operation-authorizations': 'authorization_register',
+            '/internal/v1/external-operation-issuer-freshness': 'issuer_freshness',
+        }
+        revoke = re.fullmatch(r'/internal/v1/external-operation-authorizations/([^/]+)/revoke',path)
+        activate = re.fullmatch(r'/internal/v1/runtime-provider-workflows/([^/]+)/steps/([^/]+)/external-operation-activations',path)
+        operation = re.fullmatch(r'/internal/v1/external-operations/([^/]+)(?:/(reconcile|observations|receipts)(?:/([^/]+))?)?',path)
+        if path not in registrations and not revoke and not activate and not operation:
+            return False
+        request_id = body.get('request_id','invalid-request') if isinstance(body,dict) else 'read-request'
+        if not isinstance(request_id,str) or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._:-]{2,127}',request_id) is None:
+            request_id='invalid-request'
+        try:
+            principal=self._external_principal()
+            if self.external_service is None:
+                raise external_contract.Invalid('STORAGE_UNAVAILABLE')
+            service=self.external_service
+            if method=='POST' and path in registrations:
+                result=service.register(registrations[path],body,principal)
+                status=201 if result['created'] else 200
+                if registrations[path]=='issuer_freshness': status=200
+            elif method=='POST' and revoke:
+                external_contract.require(body.get('authorization_id')==revoke.group(1),'OPERATION_BINDING_MISMATCH')
+                result=service.register('authorization_revoke',body,principal);status=200
+            elif method=='POST' and activate:
+                external_contract.require(body.get('workflow_job_id')==activate.group(1) and body.get('workflow_step_id')==activate.group(2),'OPERATION_BINDING_MISMATCH')
+                result=service.activate(body,principal);status=201 if result['created'] else 200
+            elif operation:
+                op_id,action,record_id=operation.groups()
+                if method=='GET' and action is None:
+                    result=service.projection(op_id,principal);status=200
+                elif method=='GET' and action=='receipts' and record_id:
+                    result=service.receipt(op_id,record_id,principal);status=200
+                elif method=='POST' and action in ('reconcile','observations') and record_id is None:
+                    external_contract.require(body.get('operation_id')==op_id,'OPERATION_BINDING_MISMATCH')
+                    result=service.reconcile(body,principal) if action=='reconcile' else service.observe(body,principal)
+                    status=202 if action=='reconcile' and result['query_scheduled'] else 200 if action=='reconcile' else 201
+                else:
+                    raise external_contract.Invalid('RECORD_NOT_FOUND')
+            else:
+                raise external_contract.Invalid('RECORD_NOT_FOUND')
+            self._send(status,result)
+        except external_contract.Invalid as exc:
+            self._send_external_error(exc,request_id)
+        except __import__('sqlite3').Error:
+            self._send_external_error(external_contract.Invalid('STORAGE_UNAVAILABLE'),request_id)
+        return True
+
+    def _send_external_error(self,error,request_id):
+        statuses={'REQUEST_INVALID':400,'UNAUTHENTICATED':401,'AUTHORITY_FORBIDDEN':403,'RECORD_NOT_FOUND':404,'REQUEST_TOO_LARGE':413,'PROVIDER_PROFILE_UNSUPPORTED':422,'EVIDENCE_INVALID':422,'AUTHORITY_FRESHNESS_UNAVAILABLE':503,'STORAGE_UNAVAILABLE':503}
+        self._send(statuses.get(error.code,409),{'schema_version':'pdx_external_operation_error_draft_v1','request_id':request_id,'code':error.code,'message':error.code,'retryable':error.code in ('STORAGE_UNAVAILABLE','AUTHORITY_FRESHNESS_UNAVAILABLE')})
+
     def _auth_ok(self) -> bool:
         path = urlparse(self.path).path
         if path in {"/health", "/ready"}:
@@ -142,6 +219,17 @@ class InternalJobHandler(BaseHTTPRequestHandler):
             peer=self.client_address[0] if self.client_address else None,
         )
         if error is None:
+            match = re.match(r'/internal/v1/runtime-provider-workflows/([^/]+)',path)
+            if match and self.workflow_service is not None:
+                try:
+                    plan=self.workflow_service.get_plan(match.group(1))
+                    if plan.get('schema_version')=='pdx_runtime_provider_workflow_plan_v3':
+                        external_contract.require(self.external_service is not None,'STORAGE_UNAVAILABLE')
+                        self.external_service.authorize_parent(plan,self._external_principal(),'reader' if self.command=='GET' else 'controller')
+                except external_contract.Invalid as exc:
+                    self._send_external_error(exc,'invalid-request');return False
+                except RuntimeWorkflowError:
+                    pass  # The route owns not-found behavior.
             return True
         status = 503 if error.get("code") == "AUTH_MISCONFIGURED" else 401
         self._send(status, error)
@@ -209,6 +297,8 @@ class InternalJobHandler(BaseHTTPRequestHandler):
         if not self._auth_ok():
             return
         path = urlparse(self.path).path
+        if self._external_route('GET',path):
+            return
         if path == "/health":
             self._send(200, {"status": "ok", "service": "pdx-artifact-engine"})
             return
@@ -427,7 +517,13 @@ class InternalJobHandler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         try:
             body = self._read_json()
+        except external_contract.Invalid as exc:
+            self._send_external_error(exc,'invalid-request')
+            return
         except BodyLimitError as exc:
+            if 'external-operation' in path:
+                self._send_external_error(external_contract.Invalid('REQUEST_TOO_LARGE' if exc.status==413 else 'REQUEST_INVALID'),'invalid-request')
+                return
             self._send(exc.status, exc.as_error_document())
             return
         except (json.JSONDecodeError, UnicodeDecodeError):
@@ -445,6 +541,9 @@ class InternalJobHandler(BaseHTTPRequestHandler):
             )
             return
 
+        if self._external_route('POST',path,body):
+            return
+
         if path == "/internal/v1/jobs":
             try:
                 status, doc = self.service.create(body)
@@ -456,7 +555,14 @@ class InternalJobHandler(BaseHTTPRequestHandler):
 
         if path == "/internal/v1/runtime-provider-workflows":
             try:
+                if body.get('schema_version')=='pdx_internal_runtime_provider_workflow_create_request_v3':
+                    external_contract.shape('urn:pdx:draft:er003:parent:create-request:3',body)
+                    external_contract.require(self.external_service is not None,'STORAGE_UNAVAILABLE')
+                    self.external_service.authorize_parent(body.get('plan',{}),self._external_principal(),'controller')
                 status, doc = self._workflow().create(body)
+            except external_contract.Invalid as exc:
+                self._send_external_error(exc,body.get('request_id','invalid-request'))
+                return
             except RuntimeWorkflowError as exc:
                 self._send_workflow_error(exc)
                 return
@@ -695,6 +801,8 @@ def make_server(
     staging_root: Path,
     kernel: Any | None = None,
     dispatch_registry: DispatchToolRegistry | None = None,
+    external_service_factory: Any = None,
+    external_principal_bindings: dict[str, Principal] | None = None,
 ) -> ThreadingHTTPServer:
     store = JobStore(db_path)
     staging = StagingStore(staging_root)
@@ -724,6 +832,9 @@ def make_server(
         dispatch_service = DynamicDispatchService(
             workflow_service.store, registry=dispatch_registry
         )
+    external_service = None
+    if external_service_factory is not None and workflow_service is not None:
+        external_service = external_service_factory(workflow_service.store, dispatch_service)
 
     class BoundHandler(InternalJobHandler):
         pass
@@ -732,6 +843,8 @@ def make_server(
     BoundHandler.workflow_service = workflow_service
     BoundHandler.dispatch_service = dispatch_service
     BoundHandler.extraction_service = extraction_service
+    BoundHandler.external_service = external_service
+    BoundHandler.external_principal_bindings = dict(external_principal_bindings or {})
     return ThreadingHTTPServer((host, port), BoundHandler)
 
 

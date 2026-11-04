@@ -27,6 +27,7 @@ COUNTER_NAMES_V1 = (
 COUNTER_NAMES_V2 = COUNTER_NAMES_V1 + (
     "dispatch_attempts", "active_dispatches", "dispatch_runtime_seconds",
 )
+COUNTER_NAMES_V3 = COUNTER_NAMES_V2 + ("external_calls", "recovery_query_calls")
 
 
 class RuntimeWorkflowError(Exception):
@@ -124,6 +125,8 @@ class RuntimeWorkflowService:
         }
         if row["terminal_error_json"]:
             result["terminal_error"] = json.loads(row["terminal_error_json"])
+            if contract_version == 3:
+                result["terminal_error"]["schema_version"] = "pdx_runtime_provider_workflow_error_v3"
         return result
 
     def _budget_exhausted(
@@ -160,6 +163,9 @@ class RuntimeWorkflowService:
             "pdx_internal_runtime_provider_workflow_create_request_v2": (
                 "pdx_runtime_provider_workflow_create_request_v2.schema.json", 2
             ),
+            "pdx_internal_runtime_provider_workflow_create_request_v3": (
+                "parent-create_request-v3.draft.schema.json", 3
+            ),
         }
         if request_version not in request_schemas:
             raise RuntimeWorkflowError(
@@ -168,8 +174,18 @@ class RuntimeWorkflowService:
         request_schema, contract_version = request_schemas[request_version]
         self._validate(request_schema, body)
         plan = body["plan"]
+        if contract_version == 3:
+            if getattr(self.store, "external_operations", None) is None:
+                raise RuntimeWorkflowError("STORAGE_UNAVAILABLE", "external-operation profile is not configured", 503)
+            from pdx_artifact_engine.contracts.external_operations import (
+                validation as external,
+            )
+            try:
+                external.parent_plan(plan)
+            except external.Invalid as exc:
+                raise RuntimeWorkflowError(exc.code, exc.code, 400) from exc
         semantic_errors = validate_plan(
-            plan, _digest({key: value for key, value in plan.items() if key != "plan_digest"})
+            plan, (external.digest if contract_version == 3 else _digest)({key: value for key, value in plan.items() if key != "plan_digest"})
         )
         if semantic_errors:
             raise RuntimeWorkflowError(
@@ -179,7 +195,7 @@ class RuntimeWorkflowService:
         counters = {
             name: 0
             for name in (
-                COUNTER_NAMES_V2 if contract_version == 2 else COUNTER_NAMES_V1
+                COUNTER_NAMES_V3 if contract_version == 3 else COUNTER_NAMES_V2 if contract_version == 2 else COUNTER_NAMES_V1
             )
         }
         with self.store.transaction() as connection:
@@ -195,6 +211,8 @@ class RuntimeWorkflowService:
                 ):
                     raise RuntimeWorkflowError("IDEMPOTENCY_CONFLICT", "create binding differs", 409)
                 return 200, self._create_response(existing, body)
+            if contract_version == 3:
+                self.store.external_operations.validate_parent_bindings(connection, plan)
             connection.execute(
                 """INSERT INTO runtime_workflows(
                     workflow_job_id, idempotency_key, operation_digest,
@@ -212,7 +230,7 @@ class RuntimeWorkflowService:
                     (plan["workflow_job_id"], step["workflow_step_id"], step["step_kind"]),
                 )
             row = self._workflow(connection, plan["workflow_job_id"])
-            return 202, self._create_response(row, body)
+            return (201 if contract_version == 3 else 202), self._create_response(row, body)
 
     def _create_response(self, row: Any, body: dict[str, Any]) -> dict[str, Any]:
         return {
@@ -734,7 +752,7 @@ class RuntimeWorkflowService:
         document = {"edge_id": edge["edge_id"], "artifact": artifact, "artifact_identity_digest": identity_digest,
                     "producer_step_id": claim["workflow_step_id"], "producer_attempt_number": claim["attempt_number"],
                     "consumer_step_id": edge["consumer_step_id"], "recorded_once": True}
-        if workflow["contract_version"] == 2:
+        if workflow["contract_version"] >= 2:
             document["artifact_role"] = "check_report"
         try:
             connection.execute("INSERT INTO runtime_artifact_edges VALUES (?, ?, ?, ?, ?)",
@@ -818,11 +836,21 @@ class RuntimeWorkflowService:
         workflow = self._workflow(connection, workflow_job_id)
         if workflow["receipt_json"]:
             return
+        if workflow['contract_version'] == 3 and workflow['state'] in {'completed', 'completed_with_review'}:
+            external_service = getattr(self.store, 'external_operations', None)
+            if external_service is None:
+                raise RuntimeWorkflowError('STORAGE_UNAVAILABLE', 'external operation service unavailable', 503)
+            if not external_service.parent_completion_ready(connection, workflow_job_id):
+                error = {'schema_version': 'pdx_runtime_provider_workflow_error_v3',
+                         'code': 'EXTERNAL_OUTCOME_UNRESOLVED', 'message': 'external operation requires reconciliation',
+                         'retryable': False, 'reconcile_required': True}
+                connection.execute("UPDATE runtime_workflows SET state='blocked',terminal_error_json=? WHERE workflow_job_id=?", (_dump(error), workflow_job_id))
+                workflow = self._workflow(connection, workflow_job_id)
         steps = [json.loads(row[0]) for row in connection.execute(
             "SELECT terminal_record_json FROM runtime_workflow_claims WHERE workflow_job_id = ? AND terminal_record_json IS NOT NULL ORDER BY rowid",
             (workflow_job_id,),
         ).fetchall()]
-        if workflow["contract_version"] == 2:
+        if workflow["contract_version"] >= 2:
             steps.extend(
                 json.loads(row[0])
                 for row in connection.execute(
@@ -833,6 +861,14 @@ class RuntimeWorkflowService:
                     (workflow_job_id,),
                 ).fetchall()
             )
+        if workflow["contract_version"] == 3:
+            external_service = getattr(self.store, "external_operations", None)
+            if external_service is None:
+                raise RuntimeWorkflowError("STORAGE_UNAVAILABLE", "external operation service unavailable", 503)
+            steps.extend(external_service.parent_step_receipts(connection, workflow_job_id))
+            for step in steps:
+                if step["step_kind"] == "dispatch" and "receipt_profile" not in step:
+                    step["receipt_profile"] = "ordinary_dispatch"
         edges = [json.loads(row[0]) for row in connection.execute(
             "SELECT receipt_json FROM runtime_artifact_edges WHERE workflow_job_id = ? ORDER BY rowid", (workflow_job_id,)
         ).fetchall()]
@@ -843,4 +879,16 @@ class RuntimeWorkflowService:
                    "authority_records": [], "final_counters": json.loads(workflow["counters_json"]), "recorded_at": _now_iso(now_unix)}
         if workflow["terminal_error_json"]:
             receipt["terminal_error"] = json.loads(workflow["terminal_error_json"])
+            if workflow["contract_version"] == 3:
+                receipt["terminal_error"]["schema_version"] = "pdx_runtime_provider_workflow_error_v3"
+        if workflow["contract_version"] == 3:
+            from pdx_artifact_engine.contracts.external_operations.validation import (
+                Invalid,
+            )
+            try:
+                external_service.validate_parent_receipt(connection, receipt, json.loads(workflow['plan_json']))
+            except Invalid as exc:
+                raise RuntimeWorkflowError(exc.code, 'parent receipt evidence validation failed', 422) from exc
         connection.execute("UPDATE runtime_workflows SET receipt_json = ? WHERE workflow_job_id = ?", (_dump(receipt), workflow_job_id))
+        if workflow["contract_version"] == 3:
+            external_service.attach_parent_terminal(connection, workflow_job_id, external_service._cas(connection, receipt))

@@ -34,7 +34,7 @@ def validate_plan(plan: dict[str, Any], computed_digest: str) -> list[str]:
     for step_id in id_set:
         visit(step_id)
     kinds = {step["workflow_step_id"]: step["step_kind"] for step in steps}
-    is_v2 = plan.get("schema_version") == "pdx_runtime_provider_workflow_plan_v2"
+    is_v2 = plan.get("schema_version") in {"pdx_runtime_provider_workflow_plan_v2", "pdx_runtime_provider_workflow_plan_v3"}
     role_producers = {
         "patch": {"builder", "repair"}, "check_report": {"check"},
         "review": {"reviewer"}, "repair_output": {"repair"},
@@ -48,6 +48,8 @@ def validate_plan(plan: dict[str, Any], computed_digest: str) -> list[str]:
                 "dispatch_output": {"dispatch"},
             }
         )
+        if plan.get("schema_version") == "pdx_runtime_provider_workflow_plan_v3":
+            role_producers["external_operation_receipt"] = {"dispatch"}
     edge_ids = [edge["edge_id"] for edge in plan["artifact_edges"]]
     if len(edge_ids) != len(set(edge_ids)):
         errors.append("ARTIFACT_EDGE_ID_DUPLICATE")

@@ -22,6 +22,10 @@ def _schemas() -> dict[str, dict[str, Any]]:
 
 
 def validate(schema_name: str, value: dict[str, Any]) -> None:
+    if schema_name == "parent-create_request-v3.draft.schema.json":
+        from pdx_artifact_engine.contracts.external_operations.validation import shape
+        shape("urn:pdx:draft:er003:parent:create-request:3", value)
+        return
     schemas = _schemas()
     registry = Registry()
     for name, schema in schemas.items():

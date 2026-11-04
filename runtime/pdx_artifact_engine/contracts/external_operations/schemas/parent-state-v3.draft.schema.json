@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pdx:draft:er003:parent:state:3",
+  "title": "PDX runtime provider workflow state v3 external-operation draft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "workflow_job_id",
+    "task_id",
+    "run_id",
+    "plan_digest",
+    "state",
+    "counters",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "pdx_runtime_provider_workflow_state_v3"
+    },
+    "workflow_job_id": {
+      "$ref": "#/$defs/id"
+    },
+    "task_id": {
+      "$ref": "#/$defs/id"
+    },
+    "run_id": {
+      "$ref": "#/$defs/id"
+    },
+    "plan_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "state": {
+      "enum": [
+        "pending",
+        "running",
+        "awaiting_tool",
+        "awaiting_approval",
+        "completed",
+        "completed_with_review",
+        "failed",
+        "blocked",
+        "cancelled",
+        "timed_out"
+      ]
+    },
+    "counters": {
+      "$ref": "#/$defs/counters"
+    },
+    "terminal_error": {
+      "$ref": "urn:pdx:draft:er003:parent:error:3"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "failed",
+              "blocked",
+              "cancelled",
+              "timed_out"
+            ]
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "required": [
+          "terminal_error"
+        ],
+        "properties": {
+          "terminal_error": {
+            "$ref": "urn:pdx:draft:er003:parent:error:3"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "terminal_error": false
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider_attempts",
+        "check_attempts",
+        "dispatch_attempts",
+        "active_steps",
+        "active_dispatches",
+        "repair_iterations",
+        "total_runtime_seconds",
+        "dispatch_runtime_seconds",
+        "total_event_bytes",
+        "total_artifact_bytes",
+        "cross_step_artifact_edges",
+        "external_operations",
+        "external_calls",
+        "recovery_query_calls"
+      ],
+      "properties": {
+        "provider_attempts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "check_attempts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dispatch_attempts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "active_steps": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "active_dispatches": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repair_iterations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_runtime_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dispatch_runtime_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_event_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_artifact_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cross_step_artifact_edges": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "external_operations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "external_calls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "recovery_query_calls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      }
+    }
+  }
+}

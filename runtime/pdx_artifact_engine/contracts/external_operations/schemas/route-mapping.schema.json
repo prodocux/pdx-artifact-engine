@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pdx:contracts:engine:routes:1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version_authority",
+    "caller_header_selectable",
+    "routes",
+    "errors",
+    "schema_version"
+  ],
+  "properties": {
+    "version_authority": {
+      "const": "stored_workflow_contract_version"
+    },
+    "caller_header_selectable": {
+      "const": false
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operation",
+          "method",
+          "path",
+          "request_schema",
+          "success_schema",
+          "success_statuses",
+          "role",
+          "error_owner"
+        ],
+        "properties": {
+          "operation": {
+            "enum": [
+              "provider_register",
+              "subject_register",
+              "authorization_register",
+              "authorization_revoke",
+              "issuer_freshness",
+              "activation",
+              "projection",
+              "operation_reconcile",
+              "observation",
+              "operation_receipt",
+              "parent_create",
+              "parent_get_state",
+              "parent_get_plan",
+              "parent_cancel",
+              "parent_reconcile",
+              "parent_claim_provider",
+              "parent_renew_provider_lease",
+              "parent_update_provider",
+              "parent_claim_check",
+              "parent_renew_check_lease",
+              "parent_update_check",
+              "parent_get_receipt"
+            ]
+          },
+          "method": {
+            "enum": [
+              "GET",
+              "POST"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "request_schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "success_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "success_statuses": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 200,
+              "maximum": 299
+            },
+            "maxItems": 3
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "error_owner": {
+            "enum": [
+              "kernel",
+              "engine",
+              "parent"
+            ]
+          }
+        }
+      },
+      "maxItems": 22,
+      "minItems": 22
+    },
+    "errors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine"
+      ],
+      "properties": {
+        "engine": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "400",
+            "401",
+            "403",
+            "404",
+            "409",
+            "413",
+            "422",
+            "503"
+          ],
+          "properties": {
+            "400": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 64
+            },
+            "401": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 64
+            },
+            "403": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 64
+            },
+            "404": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 64
+            },
+            "409": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 64
+            },
+            "413": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 64
+            },
+            "422": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 64
+            },
+            "503": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 64
+            }
+          }
+        }
+      }
+    },
+    "schema_version": {
+      "const": "pdx_engine_contract_routes_v1"
+    }
+  }
+}

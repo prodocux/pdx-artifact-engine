@@ -1,0 +1,342 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pdx:draft:er003:core:1",
+  "title": "ER-003 core wire draft; not frozen or implemented",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/activationRequest"
+    },
+    {
+      "$ref": "#/$defs/observationRequest"
+    },
+    {
+      "$ref": "#/$defs/error"
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "maxLength": 40
+    },
+    "artifact": {
+      "$ref": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json#/$defs/opaqueArtifact"
+    },
+    "activationRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "request_id",
+        "authority_id",
+        "tenant_id",
+        "operation_subject_id",
+        "operation_digest",
+        "authorization_id",
+        "issuer_id",
+        "workflow_job_id",
+        "workflow_step_id",
+        "plan_digest",
+        "idempotency_key"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_external_operation_activation_request_draft_v1"
+        },
+        "request_id": {
+          "$ref": "#/$defs/id"
+        },
+        "authority_id": {
+          "$ref": "#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/id"
+        },
+        "operation_subject_id": {
+          "$ref": "#/$defs/id"
+        },
+        "operation_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "authorization_id": {
+          "$ref": "#/$defs/id"
+        },
+        "issuer_id": {
+          "$ref": "#/$defs/id"
+        },
+        "workflow_job_id": {
+          "$ref": "#/$defs/id"
+        },
+        "workflow_step_id": {
+          "$ref": "#/$defs/id"
+        },
+        "plan_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 256
+        }
+      }
+    },
+    "manualAttestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "attestation_artifact"
+      ],
+      "properties": {
+        "case_id": {
+          "$ref": "#/$defs/id"
+        },
+        "attestation_artifact": {
+          "$ref": "#/$defs/artifact"
+        },
+        "submitter_termination_artifact": {
+          "$ref": "#/$defs/artifact"
+        },
+        "definitive_nonexecution_artifact": {
+          "$ref": "#/$defs/artifact"
+        }
+      }
+    },
+    "observationRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "request_id",
+        "authority_id",
+        "tenant_id",
+        "operation_subject_id",
+        "operation_id",
+        "operation_digest",
+        "provider_profile_digest",
+        "account_alias",
+        "environment",
+        "provider_key_digest",
+        "provider_operation_id",
+        "observation_id",
+        "channel",
+        "outcome",
+        "observed_at",
+        "evidence_artifact"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_external_operation_observation_request_draft_v1"
+        },
+        "request_id": {
+          "$ref": "#/$defs/id"
+        },
+        "authority_id": {
+          "$ref": "#/$defs/id"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/id"
+        },
+        "operation_subject_id": {
+          "$ref": "#/$defs/id"
+        },
+        "operation_id": {
+          "$ref": "#/$defs/id"
+        },
+        "operation_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "provider_profile_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "account_alias": {
+          "$ref": "#/$defs/id"
+        },
+        "environment": {
+          "enum": [
+            "sandbox",
+            "production"
+          ]
+        },
+        "provider_key_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "provider_operation_id": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observation_id": {
+          "$ref": "#/$defs/id"
+        },
+        "channel": {
+          "enum": [
+            "query_adapter",
+            "manual_authority"
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "pending",
+            "unknown",
+            "confirmed_succeeded",
+            "confirmed_failed",
+            "confirmed_not_executed"
+          ]
+        },
+        "observed_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "evidence_artifact": {
+          "$ref": "#/$defs/artifact"
+        },
+        "manual_attestation": {
+          "$ref": "#/$defs/manualAttestation"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "channel": {
+                "const": "manual_authority"
+              }
+            },
+            "required": [
+              "channel"
+            ]
+          },
+          "then": {
+            "required": [
+              "manual_attestation"
+            ],
+            "properties": {
+              "manual_attestation": {
+                "$ref": "#/$defs/manualAttestation"
+              },
+              "outcome": {
+                "enum": [
+                  "confirmed_succeeded",
+                  "confirmed_failed",
+                  "confirmed_not_executed"
+                ]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "manual_attestation": false,
+              "outcome": {
+                "enum": [
+                  "pending",
+                  "unknown",
+                  "confirmed_succeeded",
+                  "confirmed_failed"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "confirmed_not_executed"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "channel": {
+                "const": "manual_authority"
+              },
+              "manual_attestation": {
+                "type": "object",
+                "required": [
+                  "submitter_termination_artifact",
+                  "definitive_nonexecution_artifact"
+                ],
+                "properties": {
+                  "submitter_termination_artifact": {
+                    "$ref": "#/$defs/artifact"
+                  },
+                  "definitive_nonexecution_artifact": {
+                    "$ref": "#/$defs/artifact"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "request_id",
+        "code",
+        "message",
+        "retryable"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "pdx_external_operation_error_draft_v1"
+        },
+        "request_id": {
+          "$ref": "#/$defs/id"
+        },
+        "code": {
+          "enum": [
+            "REQUEST_INVALID",
+            "UNAUTHENTICATED",
+            "AUTHORITY_FORBIDDEN",
+            "RECORD_NOT_FOUND",
+            "IDEMPOTENCY_CONFLICT",
+            "SUBJECT_ALREADY_BOUND",
+            "AUTHORIZATION_ALREADY_USED",
+            "OPERATION_BINDING_MISMATCH",
+            "PARENT_NOT_READY",
+            "AUTHORIZATION_EXPIRED",
+            "AUTHORIZATION_REVOKED",
+            "OBSERVATION_CONFLICT",
+            "STALE_EXECUTION_CLAIM",
+            "RESULT_ALREADY_CONFIRMED",
+            "RECOVERY_BUDGET_EXHAUSTED",
+            "REQUEST_TOO_LARGE",
+            "PROVIDER_PROFILE_UNSUPPORTED",
+            "EVIDENCE_INVALID",
+            "AUTHORITY_FRESHNESS_UNAVAILABLE",
+            "STORAGE_UNAVAILABLE"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "retryable": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -134,7 +134,7 @@ class DynamicDispatchService:
             "SELECT * FROM runtime_workflows WHERE workflow_job_id = ?",
             (workflow_job_id,),
         ).fetchone()
-        if workflow is None or workflow["contract_version"] != 2:
+        if workflow is None or workflow["contract_version"] not in (2, 3):
             raise RuntimeWorkflowError(
                 "DISPATCH_POLICY_MISMATCH", "v2 workflow not found", 404
             )
@@ -585,6 +585,10 @@ class DynamicDispatchService:
             workflow, step = self._workflow_and_dispatch_step(
                 connection, workflow_job_id, workflow_step_id
             )
+            if "external_operation_binding" in step:
+                raise RuntimeWorkflowError(
+                    "DISPATCH_POLICY_MISMATCH", "use governed external-operation activation", 409
+                )
             if workflow["state"] not in {"pending", "running"}:
                 raise RuntimeWorkflowError(
                     "DISPATCH_POLICY_MISMATCH", "workflow is terminal", 410

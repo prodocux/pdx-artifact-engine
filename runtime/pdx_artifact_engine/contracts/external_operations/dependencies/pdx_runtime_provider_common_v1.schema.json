@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodocux.dev/schemas/pdx/runtime-provider-workflow/common-v1.json",
+  "title": "PDX runtime provider workflow common definitions v1",
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "workspaceRef": {"type": "string", "maxLength": 512, "pattern": "^workspace://[a-zA-Z0-9_-]+/(?!(?:.*/)?\\.\\.(?:/|$))(?!(?:.*/)?\\.(?:/|$))[a-zA-Z0-9/_.-]+$"},
+    "artifactRef": {"type": "string", "maxLength": 1024, "pattern": "^artifact://[a-zA-Z0-9_-]+/(?!(?:.*/)?\\.\\.(?:/|$))(?!(?:.*/)?\\.(?:/|$))[a-zA-Z0-9/_.-]+$"},
+    "opaqueArtifact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "artifact_id", "uri", "sha256", "size_bytes", "media_type"],
+      "properties": {
+        "schema_version": {"const": "prodocux_opaque_artifact_v1"},
+        "artifact_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "uri": {"$ref": "#/$defs/artifactRef"},
+        "sha256": {"$ref": "#/$defs/digest"},
+        "size_bytes": {"type": "integer", "minimum": 0, "maximum": 104857600},
+        "media_type": {"type": "string", "minLength": 1, "maxLength": 128}
+      }
+    }
+  }
+}

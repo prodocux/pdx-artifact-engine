@@ -133,7 +133,7 @@
 - Implementation: signed-off candidate `a58663734dde245bfbb8506699c1d3d0e3cdc1a6`
 - Shipped in: not shipped
 
-## ER-003 [status: approved]
+## ER-003 [status: in-progress]
 
 - Reporter: source-bound verification consumer
 - Date: 2026-10-31
@@ -213,4 +213,8 @@
   and standalone checks are in `docs/external-operations/CONTRACT.md` and
   `docs/external-operations/contract-freeze.v1.json`. Runtime implementation and
   release require separate authorization.
+- Implementation: authorized on 2026-11-03; the workflow-v3 external-operation
+  runtime candidate and fault-recovery tests are available for review. Existing
+  frozen contract bytes are unchanged. No implementation release is assigned.
+- Runtime acceptance: source sealing approved on 2026-11-04; release remains gated.
 - Shipped in: not shipped
