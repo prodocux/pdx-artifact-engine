@@ -1,0 +1,103 @@
+name: Verified publication README PR
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing published release tag (no upload occurs)
+        required: true
+        type: string
+      verification_pr:
+        description: Open a harmless README-only App validation PR
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publication-readme-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  readme:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate release tag
+        run: |
+          python -c 'import os,re; assert re.fullmatch(r"v[0-9][A-Za-z0-9.]*",os.environ["RELEASE_TAG"])'
+          git rev-parse --verify "refs/tags/$RELEASE_TAG^{commit}"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          path: release-source
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Download approved release distributions
+        run: |
+          mkdir release-dist
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > release.json
+          gh release download "$RELEASE_TAG" --dir release-dist --pattern 'pdx_artifact_engine-*.whl' --pattern 'pdx_artifact_engine-*.tar.gz'
+      - name: Verify GitHub assets, public PyPI bytes and isolated installation
+        run: |
+          python -m pip install packaging
+          python scripts/verify_release_assets.py --tag "$RELEASE_TAG" --dist release-dist --release-json release.json --source release-source
+          python scripts/verify_published_release.py --tag "$RELEASE_TAG" --dist release-dist --release-json release.json --source release-source
+      - name: Prepare README change
+        env:
+          VERIFICATION_PR: ${{ inputs.verification_pr || false }}
+        run: |
+          version="${RELEASE_TAG#v}"
+          commit="$(git rev-list -n 1 "$RELEASE_TAG")"
+          python scripts/update_readme_after_publish.py --version "$version" --tag "$RELEASE_TAG" --commit "$commit"
+          if [ "$VERIFICATION_PR" = 'true' ]; then
+            printf '\n<!-- Publication App PR validation; no version change. -->\n' >> README.md
+          fi
+          git diff --name-only > "$RUNNER_TEMP/readme-changes.txt"
+          python -c 'import os,pathlib; names=pathlib.Path(os.environ["RUNNER_TEMP"],"readme-changes.txt").read_text().splitlines(); assert set(names)<= {"README.md"}'
+      - name: Mint repository-scoped App token
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.PDX_RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.PDX_RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
+      - name: Resolve App commit identity
+        id: identity
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+        run: |
+          bot_id="$(gh api "users/${APP_SLUG}[bot]" --jq .id)"
+          echo "author=${APP_SLUG}[bot] <${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com>" >> "$GITHUB_OUTPUT"
+      - name: Open or update README-only PR
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ steps.app.outputs.token }}
+          add-paths: README.md
+          author: ${{ steps.identity.outputs.author }}
+          committer: ${{ steps.identity.outputs.author }}
+          branch: automation/pypi-readme-${{ inputs.tag }}${{ inputs.verification_pr && '-validation' || '' }}
+          commit-message: "docs(readme): verify published ${{ inputs.tag }}"
+          title: "docs(readme): verify published ${{ inputs.tag }}"
+          body: |
+            GitHub distribution digests, public PyPI bytes and an isolated installation passed verification.
+            Only README.md is changed. Maintainer review and merge are required.
