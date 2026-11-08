@@ -80,21 +80,13 @@ jobs:
           repositories: ${{ github.event.repository.name }}
           permission-contents: write
           permission-pull-requests: write
-      - name: Resolve App commit identity
-        id: identity
-        env:
-          GH_TOKEN: ${{ steps.app.outputs.token }}
-          APP_SLUG: ${{ steps.app.outputs.app-slug }}
-        run: |
-          bot_id="$(gh api "users/${APP_SLUG}[bot]" --jq .id)"
-          echo "author=${APP_SLUG}[bot] <${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com>" >> "$GITHUB_OUTPUT"
       - name: Open or update README-only PR
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ steps.app.outputs.token }}
           add-paths: README.md
-          author: ${{ steps.identity.outputs.author }}
-          committer: ${{ steps.identity.outputs.author }}
+          author: ProDocuX Team <info@prodocux.com>
+          committer: ProDocuX Team <info@prodocux.com>
           branch: automation/pypi-readme-${{ inputs.tag }}${{ inputs.verification_pr && '-validation' || '' }}
           commit-message: "docs(readme): verify published ${{ inputs.tag }}"
           title: "docs(readme): verify published ${{ inputs.tag }}"

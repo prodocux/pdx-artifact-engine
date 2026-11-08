@@ -118,3 +118,12 @@ def test_workflow_gates_and_repository_scope():
         "uses: ./.github/workflows/readme-after-publish.yml"
         in (ROOT / ".github/workflows/release.yml").read_text()
     )
+
+
+def test_publication_uses_team_attribution_and_app_authentication():
+    flow = (ROOT / ".github/workflows/readme-after-publish.yml").read_text()
+    assert "author: ProDocuX Team <info@prodocux.com>" in flow
+    assert "committer: ProDocuX Team <info@prodocux.com>" in flow
+    assert "token: ${{ steps.app.outputs.token }}" in flow
+    assert "steps.identity.outputs.author" not in flow
+    assert "Resolve App commit identity" not in flow
