@@ -127,3 +127,13 @@ def test_publication_uses_team_attribution_and_app_authentication():
     assert "token: ${{ steps.app.outputs.token }}" in flow
     assert "steps.identity.outputs.author" not in flow
     assert "Resolve App commit identity" not in flow
+
+
+def test_release_verifies_app_actor_and_team_git_identity_before_publication():
+    flow = (ROOT / ".github/workflows/release.yml").read_text()
+    assert flow.index("Verify publication actor and Git attribution") < flow.index("pypa/gh-action-pypi-publish")
+    assert "APP_SLUG: ${{ steps.publication-app.outputs.app-slug }}" in flow
+    assert 'test "$GITHUB_ACTOR" = "$expected_actor"' in flow
+    assert 'test "$GITHUB_TRIGGERING_ACTOR" = "$expected_actor"' in flow
+    assert "%an <%ae>" in flow and "%cn <%ce>" in flow
+    assert "ProDocuX Team <info@prodocux.com>" in flow

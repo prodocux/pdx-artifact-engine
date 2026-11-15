@@ -24,15 +24,41 @@ jobs:
       publish_media: ${{ steps.media.outputs.publish_media }}
     env:
       RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
-      GH_TOKEN: ${{ github.token }}
     steps:
+      - name: Mint publication preflight App token
+        id: publication-app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.PDX_RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.PDX_RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: read
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
+          token: ${{ steps.publication-app.outputs.token }}
+          persist-credentials: false
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.RELEASE_TAG }}
+          token: ${{ steps.publication-app.outputs.token }}
+          persist-credentials: false
           path: release-source
+      - name: Verify publication actor and Git attribution
+        env:
+          GH_TOKEN: ${{ steps.publication-app.outputs.token }}
+          APP_SLUG: ${{ steps.publication-app.outputs.app-slug }}
+        run: |
+          set -euo pipefail
+          expected_actor="${APP_SLUG:?Missing App slug}[bot]"
+          bot="$(gh api "users/${expected_actor}" --jq '[.login, .type] | join("|")')"
+          test "$bot" = "$expected_actor|Bot"
+          test "$GITHUB_ACTOR" = "$expected_actor"
+          test "$GITHUB_TRIGGERING_ACTOR" = "$expected_actor"
+          team='ProDocuX Team <info@prodocux.com>'
+          test "$(git -C release-source show -s --format='%an <%ae>' HEAD)" = "$team"
+          test "$(git -C release-source show -s --format='%cn <%ce>' HEAD)" = "$team"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -47,6 +73,8 @@ jobs:
           cd ..
           ruff check scripts/verify_release_assets.py
       - name: Download approved coordinated release assets
+        env:
+          GH_TOKEN: ${{ steps.publication-app.outputs.token }}
         run: |
           mkdir release-dist
           gh release download "$RELEASE_TAG" --dir release-dist \
